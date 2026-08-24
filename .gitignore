@@ -1,0 +1,49 @@
+# --- OS -----------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# --- Editors ------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Office temp / lock files -------------------------------------
+~$*.doc*
+~$*.xls*
+~$*.ppt*
+.~lock.*#
+
+# --- Design tool caches -------------------------------------------
+*.sketch.lock
+.figma/
+
+# --- Node / prototype ---------------------------------------------
+node_modules/
+dist/
+build/
+.env
+.env.local
+npm-debug.log*
+yarn-error.log*
+
+# --- Python -------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# --- Sensitive research material ----------------------------------
+# Signed consent forms and raw identifiable recordings must NOT be
+# committed. Store them in the team's UQ drive and reference here.
+docs/research/interviews/consent-forms/
+docs/research/interviews/raw-recordings/
+*.identifiable.*
