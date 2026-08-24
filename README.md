@@ -4,7 +4,7 @@
 
 **Encouraging social interaction through nostalgia and reminiscence**
 
-`Team NO_PARKING(!)` · DECO3500 / DECO7660 — Social & Mobile Computing · The University of Queensland · Semester 2, 2026
+`Team NO_PARKING(!)` · DECO3500 — Social & Mobile Computing · The University of Queensland · Semester 2, 2026
 
 ![Status](https://img.shields.io/badge/status-in%20progress-F48A56?style=flat-square)
 ![Course](https://img.shields.io/badge/course-DECO3500%20%2F%207660-2B2420?style=flat-square)
