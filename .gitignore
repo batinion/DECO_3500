@@ -34,6 +34,12 @@ build/
 .env.local
 npm-debug.log*
 yarn-error.log*
+.expo/
+
+# --- Launch Sequence runtime data ----------------------------------
+# Submitted answers/photos/drawings from live testing sessions — not source.
+prototype/src/server/submissions/*
+!prototype/src/server/submissions/.gitkeep
 
 # --- Python -------------------------------------------------------
 __pycache__/
