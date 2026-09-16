@@ -61,9 +61,44 @@
       <div id="reveal-grid"></div>
     </div>
 
+    <div id="epilogue-overlay" class="hidden phase-wander">
+      <div id="epilogue-stars"></div>
+      <div class="epilogue-galaxy galaxy-1"></div>
+      <div class="epilogue-galaxy galaxy-2"></div>
+      <div class="epilogue-galaxy galaxy-3"></div>
+
+      <div id="epilogue-earth-wrap">
+        <div id="epilogue-earth">🌍</div>
+        <div id="epilogue-earth-hint">Click Earth to reopen the capsule</div>
+      </div>
+
+      <div id="epilogue-rocket">
+        <div class="rocket-body">
+          <div class="rocket-window"></div>
+        </div>
+        <div class="rocket-fin fin-left"></div>
+        <div class="rocket-fin fin-right"></div>
+      </div>
+
+      <div id="epilogue-text-cooking" class="epilogue-text">
+        <div>Cooking the space!</div>
+      </div>
+      <div id="epilogue-text-years" class="epilogue-text">
+        <div class="clock-icon">🕐</div>
+        <div>3 years have passed</div>
+      </div>
+      <div id="epilogue-puzzle-status" class="epilogue-text">Puzzle sent to your crew's devices — solve it together and upload the answer.</div>
+    </div>
+
+    <div id="capsule-overlay" class="hidden">
+      <h2>THE CAPSULE IS OPEN</h2>
+      <div id="capsule-grid"></div>
+    </div>
+
     <footer id="dev-bar">
       <span class="dev-label">DEV</span>
       <button id="btn-simulate">Simulate remaining participants</button>
+      <button id="btn-skip-reveal">Skip to reveal</button>
       <button id="btn-reset">New Session</button>
     </footer>
   </div>

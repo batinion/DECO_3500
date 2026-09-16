@@ -8,18 +8,22 @@ import { colors } from "./src/lib/theme";
 
 import JoinScreen from "./src/screens/JoinScreen";
 import WaitingRoomScreen from "./src/screens/WaitingRoomScreen";
-import QuestionsScreen from "./src/screens/QuestionsScreen";
+import SubmissionScreen from "./src/screens/SubmissionScreen";
 import SubmittedWaitingScreen from "./src/screens/SubmittedWaitingScreen";
 import LaunchScreen from "./src/screens/LaunchScreen";
 import YourColorsScreen from "./src/screens/YourColorsScreen";
+import PuzzleScreen from "./src/screens/PuzzleScreen";
+import CapsuleNoticeScreen from "./src/screens/CapsuleNoticeScreen";
 
 function screenForAck(ack) {
+  if (ack.phase === "unlocked") return "capsule-notice";
+  if (ack.phase === "puzzle") return "puzzle";
   if (ack.status === "submitted") {
     if (ack.phase === "revealed" && ack.colors) return "colors";
     if (ack.phase === "launching") return "launch";
     return "submitted";
   }
-  if (ack.phase === "answering" && ack.questions) return "questions";
+  if (ack.phase === "answering") return "submission";
   return "waiting";
 }
 
@@ -32,8 +36,9 @@ export default function App() {
   const [code, setCode] = useState(null);
   const [participantId, setParticipantId] = useState(null);
   const [participants, setParticipants] = useState([]);
-  const [questions, setQuestions] = useState(null);
   const [missionColors, setMissionColors] = useState(null);
+  const [puzzleUrl, setPuzzleUrl] = useState(null);
+  const [puzzleAnswer, setPuzzleAnswer] = useState(null);
 
   const listenersBoundFor = useRef(null);
 
@@ -41,25 +46,27 @@ export default function App() {
     clearSessionInfo();
     setScreen("join");
     setParticipantId(null);
-    setQuestions(null);
     setMissionColors(null);
+    setPuzzleUrl(null);
+    setPuzzleAnswer(null);
     setParticipants([]);
   }, []);
 
   const bindListeners = useCallback(
     (socket) => {
       socket.off("roster_update");
-      socket.off("questions_released");
       socket.off("engine_ignite");
       socket.off("launch_sequence_start");
       socket.off("mission_colors");
+      socket.off("puzzle_started");
+      socket.off("puzzle_answer_submitted");
       socket.off("session_reset");
 
-      socket.on("roster_update", (s) => setParticipants(s.participants || []));
-
-      socket.on("questions_released", ({ questions: qs }) => {
-        setQuestions(qs);
-        setScreen((prev) => (prev === "waiting" ? "questions" : prev));
+      socket.on("roster_update", (s) => {
+        setParticipants(s.participants || []);
+        if (s.phase === "answering") {
+          setScreen((prev) => (prev === "waiting" ? "submission" : prev));
+        }
       });
 
       socket.on("launch_sequence_start", () => setScreen("launch"));
@@ -67,6 +74,16 @@ export default function App() {
       socket.on("mission_colors", ({ colors: mc }) => {
         setMissionColors(mc);
         setScreen("colors");
+      });
+
+      socket.on("puzzle_started", ({ puzzleUrl: url }) => {
+        setPuzzleUrl(url);
+        setScreen("puzzle");
+      });
+
+      socket.on("puzzle_answer_submitted", (answer) => {
+        setPuzzleAnswer(answer);
+        setScreen("capsule-notice");
       });
 
       socket.on("session_reset", () => resetToJoin());
@@ -96,8 +113,9 @@ export default function App() {
         setServerUrl(url);
         setCode(saved.code);
         setParticipantId(ack.participantId);
-        setQuestions(ack.questions || null);
         setMissionColors(ack.colors || null);
+        setPuzzleUrl(ack.puzzleUrl || null);
+        setPuzzleAnswer(ack.puzzleAnswer || null);
         setScreen(screenForAck(ack));
       } catch (e) {
         // Server unreachable on resume — fall back to the join screen silently.
@@ -124,8 +142,9 @@ export default function App() {
       setServerUrl(url);
       setCode(joinCode);
       setParticipantId(ack.participantId);
-      setQuestions(ack.questions || null);
       setMissionColors(ack.colors || null);
+      setPuzzleUrl(ack.puzzleUrl || null);
+      setPuzzleAnswer(ack.puzzleAnswer || null);
       setScreen(screenForAck(ack));
     } catch (e) {
       setError(e.message || "Could not connect. Check the IP, port and code.");
@@ -134,8 +153,8 @@ export default function App() {
     }
   }
 
-  async function handleSubmitAnswers(answers) {
-    const ack = await emitWithAck("submit_answers", { participantId, answers });
+  async function handleSubmit(submission) {
+    const ack = await emitWithAck("submit_answers", { participantId, ...submission });
     if (ack.error) throw new Error(ack.error);
     setScreen("submitted");
   }
@@ -146,18 +165,32 @@ export default function App() {
       <View style={styles.container}>
         {screen === "join" && <JoinScreen onJoin={handleJoin} joining={joining} error={error} />}
         {screen === "waiting" && <WaitingRoomScreen participants={participants} selfId={participantId} />}
-        {screen === "questions" && questions && (
-          <QuestionsScreen
-            questions={questions}
+        {screen === "submission" && (
+          <SubmissionScreen
             code={code}
             participantId={participantId}
             serverUrl={serverUrl}
-            onSubmit={handleSubmitAnswers}
+            participants={participants}
+            selfId={participantId}
+            onSubmit={handleSubmit}
           />
         )}
         {screen === "submitted" && <SubmittedWaitingScreen participants={participants} selfId={participantId} />}
         {screen === "launch" && <LaunchScreen />}
         {screen === "colors" && <YourColorsScreen colors={missionColors} />}
+        {screen === "puzzle" && (
+          <PuzzleScreen
+            puzzleUrl={puzzleUrl}
+            code={code}
+            participantId={participantId}
+            serverUrl={serverUrl}
+            onAnswerUploaded={(fileUrl) => {
+              setPuzzleAnswer({ participantId, fileUrl });
+              setScreen("capsule-notice");
+            }}
+          />
+        )}
+        {screen === "capsule-notice" && <CapsuleNoticeScreen uploaderName={puzzleAnswer?.name} />}
       </View>
     </SafeAreaView>
   );

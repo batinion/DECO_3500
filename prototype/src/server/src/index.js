@@ -13,6 +13,7 @@ const session = require("./session");
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 const SUBMISSIONS_DIR = path.join(__dirname, "..", "submissions");
+const PUZZLE_URL = "https://miro.com/app/board/uXjVJnJSoGU=/";
 
 fs.mkdirSync(SUBMISSIONS_DIR, { recursive: true });
 
@@ -81,11 +82,51 @@ app.post("/api/upload-drawing", (req, res) => {
   res.json({ fileUrl: `/uploads/${relPath}` });
 });
 
+// The single team-wide puzzle answer file — any one participant's upload counts for the group.
+const puzzleStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const { code } = req.body;
+    if (!code) return cb(new Error("Missing code"));
+    const dir = path.join(SUBMISSIONS_DIR, code, "puzzle-answer");
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const { participantId } = req.body;
+    const ext = path.extname(file.originalname) || "";
+    cb(null, `${participantId || "answer"}-${Date.now()}${ext}`);
+  },
+});
+const puzzleUpload = multer({ storage: puzzleStorage, limits: { fileSize: 25 * 1024 * 1024 } });
+
+app.post(
+  "/api/upload-puzzle-answer",
+  (req, res, next) => {
+    if (session.getSession().puzzleAnswer) {
+      return res.status(409).json({ error: "The puzzle answer has already been uploaded." });
+    }
+    next();
+  },
+  puzzleUpload.single("file"),
+  (req, res) => {
+    const { participantId } = req.body;
+    const relPath = path.relative(SUBMISSIONS_DIR, req.file.path).split(path.sep).join("/");
+    const result = session.recordPuzzleAnswer(participantId, `/uploads/${relPath}`);
+    if (result.error) return res.status(409).json({ error: result.error });
+
+    io.emit("puzzle_answer_submitted", result.puzzleAnswer);
+    io.emit("capsule_opened", { participants: session.buildCapsuleSummary() });
+    broadcastRoster();
+    res.json({ fileUrl: `/uploads/${relPath}` });
+  }
+);
+
 app.get("/api/session-info", async (req, res) => {
   const s = session.publicSession();
   const joinPayload = JSON.stringify({ ip: LAN_IP, port: PORT, code: s.code });
   const qrDataUrl = await QRCode.toDataURL(joinPayload, { margin: 1, width: 320 });
-  res.json({ ...s, ip: LAN_IP, port: PORT, qrDataUrl });
+  const capsule = s.phase === "unlocked" ? session.buildCapsuleSummary() : null;
+  res.json({ ...s, ip: LAN_IP, port: PORT, qrDataUrl, puzzleUrl: PUZZLE_URL, capsule });
 });
 
 // ---- Real-time layer --------------------------------------------------------
@@ -102,14 +143,6 @@ async function broadcastSessionInfo() {
   const joinPayload = JSON.stringify({ ip: LAN_IP, port: PORT, code: s.code });
   const qrDataUrl = await QRCode.toDataURL(joinPayload, { margin: 1, width: 320 });
   io.emit("session_reset", { ...s, ip: LAN_IP, port: PORT, qrDataUrl });
-}
-
-function sendQuestionsToJoinedSockets() {
-  session.getSession().participants.forEach((p) => {
-    if (p.socketId && p.questions) {
-      io.to(p.socketId).emit("questions_released", { questions: p.questions });
-    }
-  });
 }
 
 async function runLaunchAndReveal() {
@@ -154,8 +187,9 @@ io.on("connection", (socket) => {
           name: existing.name,
           phase: current.phase,
           status: existing.status,
-          questions: existing.questions || null,
           colors: existing.colors || null,
+          puzzleUrl: PUZZLE_URL,
+          puzzleAnswer: current.puzzleAnswer,
         });
       }
     }
@@ -168,7 +202,6 @@ io.on("connection", (socket) => {
     socket.data.participantId = participant.id;
 
     broadcastRoster();
-    sendQuestionsToJoinedSockets();
 
     reply({
       participantId: participant.id,
@@ -176,14 +209,15 @@ io.on("connection", (socket) => {
       name: participant.name,
       phase: session.getSession().phase,
       status: participant.status,
-      questions: participant.questions || null,
       colors: participant.colors || null,
+      puzzleUrl: PUZZLE_URL,
+      puzzleAnswer: session.getSession().puzzleAnswer,
     });
   });
 
-  socket.on("submit_answers", ({ participantId, answers } = {}, ack) => {
+  socket.on("submit_answers", ({ participantId, blanks, drawing, uploadedImages } = {}, ack) => {
     const reply = (payload) => typeof ack === "function" && ack(payload);
-    const result = session.recordSubmission(participantId, answers || []);
+    const result = session.recordSubmission(participantId, { blanks, drawing, uploadedImages });
     if (result.error) return reply({ error: result.error });
 
     const p = result.participant;
@@ -192,7 +226,11 @@ io.on("connection", (socket) => {
     const dir = participantDir(session.getSession().code, p.id);
     fs.writeFileSync(
       path.join(dir, "answers.json"),
-      JSON.stringify({ participant: { id: p.id, name: p.name }, answers: p.answers }, null, 2)
+      JSON.stringify(
+        { participant: { id: p.id, name: p.name }, blanks: p.blanks, drawing: p.drawing, uploadedImages: p.uploadedImages },
+        null,
+        2
+      )
     );
 
     io.emit("engine_ignite", { engineSlot: p.engineSlot, participantId: p.id, name: p.name });
@@ -207,7 +245,6 @@ io.on("connection", (socket) => {
   socket.on("simulate_remaining", () => {
     session.simulateRemaining();
     broadcastRoster();
-    sendQuestionsToJoinedSockets();
 
     // Ignite engines for every simulated participant that just auto-submitted.
     session
@@ -221,6 +258,24 @@ io.on("connection", (socket) => {
     if (session.allSubmitted()) {
       runLaunchAndReveal();
     }
+  });
+
+  socket.on("skip_to_reveal", () => {
+    const { newlySubmitted } = session.skipToCapsuleReveal();
+
+    newlySubmitted.forEach((p) => {
+      io.emit("engine_ignite", { engineSlot: p.engineSlot, participantId: p.id, name: p.name });
+    });
+    broadcastRoster();
+
+    io.emit("capsule_opened", { participants: session.buildCapsuleSummary() });
+  });
+
+  socket.on("start_puzzle", () => {
+    const result = session.startPuzzle();
+    if (result.error) return;
+    io.emit("puzzle_started", { puzzleUrl: PUZZLE_URL });
+    broadcastRoster();
   });
 
   socket.on("session_reset", () => {

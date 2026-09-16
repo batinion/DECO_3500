@@ -1,9 +1,12 @@
 # Launch Sequence — Group Submission Ritual
 
 A working local-network prototype of the "submission + sealing" phase of the digital
-time-capsule concept: 4 friends join a session, each answers 6–7 questions about the
-course they just finished, and once everyone's submitted, a shared "Mission Control"
-screen plays a launch animation and reveals everyone's randomly-assigned mission colors.
+time-capsule concept: 4 friends join a session, each fills in a star field of
+fill-in-the-blank prompts about the course they just finished (plus an optional
+sketch/photo), and once everyone's submitted, a shared "Mission Control" screen plays
+a launch animation and reveals everyone's randomly-assigned mission colors. Some time
+later, clicking through unlocks a short puzzle-and-reopen epilogue that reveals
+everyone's original answers back on Mission Control.
 
 ## What's here
 
@@ -49,10 +52,16 @@ Once the app is open, each participant:
 1. Scans the Mission Control join QR (or types in the IP/port/code shown there) and
    enters their name.
 2. Waits in the waiting room until all 4 have joined.
-3. Answers 7 questions (4 general + 3 about each of the other 3 friends by name).
-4. Submits — their engine lights up on Mission Control and on every phone.
-5. Once all 4 have submitted, everyone sees the launch animation and their own
+3. Taps stars in a star field to fill in prompts (text blanks, some naming another
+   participant via a dropdown) — collect at least 3 of the 7 to continue; the rest
+   are optional. One star is always a free-write field with no template.
+4. Optionally sketches something and/or adds a photo on page 2, then submits.
+5. Submits — their engine lights up on Mission Control and on every phone.
+6. Once all 4 have submitted, everyone sees the launch animation and their own
    2 assigned "mission key" colors.
+7. Later, clicking the Earth on Mission Control's epilogue starts a puzzle (a Miro
+   board link) — any one participant uploads the answer from their phone, which
+   reopens the capsule and shows everyone's original answers on Mission Control.
 
 ### Solo / dev testing
 
@@ -75,12 +84,11 @@ You don't need 4 people to test the full flow:
   server restarts. Submitted answers/photos/drawings are written to
   `server/submissions/<session-code>/<participant-id>/` as they come in, so real
   answers survive a server restart even though the live session doesn't.
-- The freehand drawing question exports as PNG using `react-native-svg`'s
+- The freehand sketch on page 2 exports as PNG using `react-native-svg`'s
   `toDataURL` — this works in Expo Go and in `expo start --web`'s browser preview
   in modern browsers. If it's ever unsupported in a given preview environment, the
-  app shows a clear message rather than crashing; other question types are
-  unaffected.
-- Out of scope for this build: accounts, cloud sync, multi-session support, and the
-  capsule concept's later phases (sealing countdown, reunion notification, the
-  color-unlock ritual). The 2 assigned colors are stored as structured data
-  (`{ name, hex }` pairs) so a future unlock mechanic can reuse them.
+  app shows a clear message rather than crashing; nothing else is affected.
+- The fill-in-the-blank prompt bank lives in `app/src/lib/prompts.js` — edit it to
+  change what prompts get offered. 6 are randomly selected per session, plus the
+  always-present free-write star (7 total).
+- Out of scope for this build: accounts, cloud sync, and multi-session support.
