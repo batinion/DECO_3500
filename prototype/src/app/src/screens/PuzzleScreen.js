@@ -6,7 +6,7 @@ import PrimaryButton from "../components/PrimaryButton";
 import { colors, spacing, type } from "../lib/theme";
 import { uploadPuzzleAnswer } from "../lib/api";
 
-export default function PuzzleScreen({ puzzleUrl, code, participantId, serverUrl, onAnswerUploaded }) {
+export default function PuzzleScreen({ puzzleUrl, code, participantId, serverUrl, missionColors, onAnswerUploaded }) {
   const [busy, setBusy] = useState(false);
   const [previewUri, setPreviewUri] = useState(null);
 
@@ -51,6 +51,20 @@ export default function PuzzleScreen({ puzzleUrl, code, participantId, serverUrl
         Work it out together as a crew, then have just one of you upload the answer below.
       </Text>
 
+      {missionColors?.length ? (
+        <View style={styles.colorsRow}>
+          <Text style={styles.colorsLabel}>Your mission key</Text>
+          <View style={styles.swatchRow}>
+            {missionColors.map((c) => (
+              <View key={c.hex} style={styles.swatchWrap}>
+                <View style={[styles.swatch, { backgroundColor: c.hex }]} />
+                <Text style={styles.swatchName}>{c.name}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      ) : null}
+
       <Pressable style={styles.linkBox} onPress={() => Linking.openURL(puzzleUrl)}>
         <Text style={styles.linkText}>Click here to solve the puzzle</Text>
         <Text style={styles.linkUrl}>{puzzleUrl}</Text>
@@ -89,6 +103,22 @@ const styles = StyleSheet.create({
   },
   linkText: { color: colors.accent, fontWeight: "700", fontSize: 16 },
   linkUrl: { color: colors.muted, fontSize: 12, marginTop: 4 },
+  colorsRow: {
+    marginTop: spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.panel,
+    borderRadius: 12,
+    padding: spacing.md,
+  },
+  colorsLabel: { color: colors.muted, fontSize: 12, flexShrink: 1 },
+  swatchRow: { flexDirection: "row", gap: spacing.sm },
+  swatchWrap: { alignItems: "center" },
+  swatch: { width: 32, height: 32, borderRadius: 8, borderWidth: 1, borderColor: "rgba(255,255,255,0.2)" },
+  swatchName: { color: colors.muted, fontSize: 10, marginTop: 3 },
   preview: { width: "100%", height: 180, borderRadius: 12, backgroundColor: colors.panel, marginBottom: spacing.sm },
   row: { flexDirection: "row", gap: spacing.sm },
 });

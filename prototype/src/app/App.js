@@ -184,6 +184,7 @@ export default function App() {
             code={code}
             participantId={participantId}
             serverUrl={serverUrl}
+            missionColors={missionColors}
             onAnswerUploaded={(fileUrl) => {
               setPuzzleAnswer({ participantId, fileUrl });
               setScreen("capsule-notice");
