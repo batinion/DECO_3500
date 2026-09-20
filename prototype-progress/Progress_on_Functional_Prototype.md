@@ -1,6 +1,6 @@
 # Progress on the Functional Prototype
 
-**Section owner:** [your name]
+**Section owner:** Dong
 **For:** Week 9 Stand-up
 **Focus:** Progress so far, what we learned from testing, and where we're headed
 
@@ -32,7 +32,7 @@ We ran **one round of user testing** on this version.
 - Testers were **confused about why the coloring puzzle** was the unlock mechanic — the connection between "coloring a photo together" and "unlocking a memory" didn't land clearly.
 
 ### Tutor feedback
-- The **reveal moment needed to be more interactive.** Currently, all memory prompts appear at once — a passive moment rather than something the group actively engages with.
+- The **reveal moment needed to be more interactive.** Currently, all memory prompts appear at once, a passive moment rather than something the group actively engages with.
 
 ---
 
@@ -48,8 +48,8 @@ Based on this feedback, we're moving the reveal toward a **flash-card guessing g
 ### Why this is a stronger direction
 - Turns the reveal from something people *watch* into something people *actively play*
 - Keeps the group engaged with each individual memory instead of skimming past it
-- Still supports our core "collaborative reconstruction" idea — the group works together to figure out *who* a memory belongs to, rather than just viewing it
-- Aligns with research from our course readings: Olsson et al.'s review of collocated social interaction technologies identifies "engaging people in collective activity" as a stronger, more effective design approach than passive "increasing awareness" — which is what the static reveal was doing
+- Still supports our core "collaborative reconstruction" idea, the group works together to figure out *who* a memory belongs to, rather than just viewing it
+- Aligns with research from our course readings: Olsson et al.'s review of collocated social interaction technologies identifies "engaging people in collective activity" as a stronger, more effective design approach than passive "increasing awareness", which is what the static reveal was doing
 
 ---
 
