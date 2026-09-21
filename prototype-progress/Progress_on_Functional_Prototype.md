@@ -31,7 +31,7 @@ We ran **one round of user testing** on this version.
 ## 2. What We Learned From Testing
 
 ### User testing feedback
-- Testers were **confused about why the coloring puzzle** was the unlock mechanic — the connection between "coloring a photo together" and "unlocking a memory" didn't land clearly.
+- Testers were **confused about why the coloring puzzle** was the unlock mechanic, the connection between "coloring a photo together" and "unlocking a memory" didn't land clearly.
 
 ### Tutor feedback
 - The **reveal moment needed to be more interactive.** Currently, all memory prompts appear at once, a passive moment rather than something the group actively engages with.
