@@ -1,7 +1,9 @@
 # Progress on the Functional Prototype
 
 **Section owner:** Dong
+
 **For:** Week 9 Stand-up
+
 **Focus:** Progress so far, what we learned from testing, and where we're headed
 
 ---
