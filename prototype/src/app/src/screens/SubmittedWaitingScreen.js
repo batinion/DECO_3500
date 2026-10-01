@@ -1,23 +1,20 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text } from "react-native";
+import CrewPanel from "../components/CrewPanel";
 import RosterList from "../components/RosterList";
-import { colors, spacing, type } from "../lib/theme";
+import { spacing, type } from "../lib/theme";
 
+/** Compact crew-progress panel over the live scene — mirrors Mission Control's crew HUD. */
 export default function SubmittedWaitingScreen({ participants, selfId }) {
   const submittedCount = (participants || []).filter((p) => p.status === "submitted").length;
-  const total = 4;
   return (
-    <View style={styles.wrap}>
-      <Text style={type.title}>SUBMITTED ✓</Text>
-      <Text style={type.muted}>
-        {submittedCount} of {total} crew members have submitted. Your engine is lit — hang tight for the rest of the crew.
-      </Text>
-      <View style={{ height: spacing.lg }} />
-      <RosterList participants={participants} selfId={selfId} />
-    </View>
+    <CrewPanel>
+      <View>
+        <Text style={type.heading}>SUBMITTED ✓</Text>
+        <Text style={[type.muted, { marginTop: spacing.xs }]}>{submittedCount} of 4 submitted — waiting on the rest of the crew</Text>
+        <View style={{ height: spacing.md }} />
+        <RosterList participants={participants} selfId={selfId} />
+      </View>
+    </CrewPanel>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg, padding: spacing.lg, paddingTop: spacing.xl },
-});

@@ -4,106 +4,35 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Mission Control — Launch Sequence</title>
+<link rel="stylesheet" href="/scene/scene.css" />
 <link rel="stylesheet" href="/style.css" />
 </head>
-<body>
-  <div id="stars"></div>
+<body data-role="mc">
+  <div id="scene-root"></div>
 
-  <div id="app">
-    <header id="top-bar">
-      <h1>LAUNCH SEQUENCE</h1>
-      <div id="phase-pill" class="pill">WAITING FOR CREW</div>
-    </header>
+  <!-- Mission Control chrome, layered over the shared scene -->
+  <header id="top-bar">
+    <h1>LAUNCH SEQUENCE</h1>
+    <div id="phase-pill" class="pill">WAITING FOR CREW</div>
+  </header>
 
-    <main id="main">
-      <section id="join-panel">
-        <div id="qr-wrap">
-          <img id="qr-image" alt="Join QR code" />
-        </div>
-        <div id="join-details">
-          <div class="label">JOIN CODE</div>
-          <div id="join-code">------</div>
-          <div class="label">OR ENTER MANUALLY</div>
-          <div id="join-manual">
-            <div>IP: <span id="join-ip">-</span></div>
-            <div>Port: <span id="join-port">-</span></div>
-          </div>
-        </div>
-      </section>
+  <section id="crew-hud">
+    <div class="hud-slot" data-slot="1"><div class="slot-num">1</div><div class="slot-name">Waiting to join…</div><div class="slot-status">—</div></div>
+    <div class="hud-slot" data-slot="2"><div class="slot-num">2</div><div class="slot-name">Waiting to join…</div><div class="slot-status">—</div></div>
+    <div class="hud-slot" data-slot="3"><div class="slot-num">3</div><div class="slot-name">Waiting to join…</div><div class="slot-status">—</div></div>
+    <div class="hud-slot" data-slot="4"><div class="slot-num">4</div><div class="slot-name">Waiting to join…</div><div class="slot-status">—</div></div>
+  </section>
 
-      <section id="rocket-stage">
-        <div id="starfield-flight"></div>
-        <div id="rocket">
-          <div class="rocket-body">
-            <div class="rocket-window"></div>
-          </div>
-          <div class="rocket-fin fin-left"></div>
-          <div class="rocket-fin fin-right"></div>
-          <div id="engines">
-            <div class="engine" data-slot="1"><div class="flame"></div></div>
-            <div class="engine" data-slot="2"><div class="flame"></div></div>
-            <div class="engine" data-slot="3"><div class="flame"></div></div>
-            <div class="engine" data-slot="4"><div class="flame"></div></div>
-          </div>
-        </div>
-      </section>
-
-      <section id="roster-panel">
-        <div class="roster-slot" data-slot="1"><div class="slot-num">1</div><div class="slot-name">Waiting to join…</div><div class="slot-status">—</div></div>
-        <div class="roster-slot" data-slot="2"><div class="slot-num">2</div><div class="slot-name">Waiting to join…</div><div class="slot-status">—</div></div>
-        <div class="roster-slot" data-slot="3"><div class="slot-num">3</div><div class="slot-name">Waiting to join…</div><div class="slot-status">—</div></div>
-        <div class="roster-slot" data-slot="4"><div class="slot-num">4</div><div class="slot-name">Waiting to join…</div><div class="slot-status">—</div></div>
-      </section>
-    </main>
-
-    <div id="reveal-overlay" class="hidden">
-      <h2>MISSION KEYS ASSIGNED</h2>
-      <div id="reveal-grid"></div>
-    </div>
-
-    <div id="epilogue-overlay" class="hidden phase-wander">
-      <div id="epilogue-stars"></div>
-      <div class="epilogue-galaxy galaxy-1"></div>
-      <div class="epilogue-galaxy galaxy-2"></div>
-      <div class="epilogue-galaxy galaxy-3"></div>
-
-      <div id="epilogue-earth-wrap">
-        <div id="epilogue-earth">🌍</div>
-        <div id="epilogue-earth-hint">Click Earth to reopen the capsule</div>
-      </div>
-
-      <div id="epilogue-rocket">
-        <div class="rocket-body">
-          <div class="rocket-window"></div>
-        </div>
-        <div class="rocket-fin fin-left"></div>
-        <div class="rocket-fin fin-right"></div>
-      </div>
-
-      <div id="epilogue-text-cooking" class="epilogue-text">
-        <div>Cooking the space!</div>
-      </div>
-      <div id="epilogue-text-years" class="epilogue-text">
-        <div class="clock-icon">🕐</div>
-        <div>3 years have passed</div>
-      </div>
-      <div id="epilogue-puzzle-status" class="epilogue-text">Puzzle sent to your crew's devices — solve it together and upload the answer.</div>
-    </div>
-
-    <div id="capsule-overlay" class="hidden">
-      <h2>THE CAPSULE IS OPEN</h2>
-      <div id="capsule-grid"></div>
-    </div>
-
-    <footer id="dev-bar">
-      <span class="dev-label">DEV</span>
-      <button id="btn-simulate">Simulate remaining participants</button>
-      <button id="btn-skip-reveal">Skip to reveal</button>
-      <button id="btn-reset">New Session</button>
-    </footer>
-  </div>
+  <footer id="dev-bar">
+    <span class="dev-label">DEV</span>
+    <button id="btn-simulate-joins">Simulate joins</button>
+    <button id="btn-simulate-submissions">Simulate submissions</button>
+    <button id="btn-skip-reveal">Skip to reveal</button>
+    <button id="btn-reset">New Session</button>
+  </footer>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/scene/scene.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>

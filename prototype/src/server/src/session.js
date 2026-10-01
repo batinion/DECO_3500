@@ -5,12 +5,16 @@ const makeCode = customAlphabet("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 6);
 
 const MAX_PARTICIPANTS = 4;
 const FAKE_NAMES = ["Sam", "Jordan", "Riley", "Casey"];
+const PHASES = ["joining", "launching", "cruising", "arrived", "timejump", "earth", "puzzle", "revealed"];
 
 function freshSession() {
   return {
     code: makeCode(),
     createdAt: Date.now(),
-    phase: "waiting", // waiting -> answering -> launching -> revealed -> puzzle -> unlocked
+    phase: "joining", // see PHASES — the server owns the scene state, every screen mirrors it
+    phaseStartedAt: Date.now(), // server ms; scenes derive animation progress from this
+    timeJumpStep: 0, // 0 leaving the moon -> 1 "cooking the space" -> 2 "3 years have passed"
+    stepStartedAt: Date.now(),
     participants: [], // { id, name, engineSlot, status, socketId, isSimulated, blanks, drawing, uploadedImages, colors }
     puzzleAnswer: null, // { participantId, name, fileUrl, uploadedAt } once someone uploads
   };
@@ -25,6 +29,23 @@ function getSession() {
 function resetSession() {
   session = freshSession();
   return session;
+}
+
+function setPhase(phase) {
+  session.phase = phase;
+  session.phaseStartedAt = Date.now();
+  session.timeJumpStep = 0;
+  session.stepStartedAt = session.phaseStartedAt;
+}
+
+function setTimeJumpStep(step) {
+  session.timeJumpStep = step;
+  session.stepStartedAt = Date.now();
+}
+
+/** True once the session has reached `phase` or any later one. */
+function atLeast(phase) {
+  return PHASES.indexOf(session.phase) >= PHASES.indexOf(phase);
 }
 
 function publicParticipant(p) {
@@ -50,18 +71,6 @@ function findParticipant(participantId) {
   return session.participants.find((p) => p.id === participantId);
 }
 
-// The fill-in-the-blank prompt bank and selection now live entirely client-side (/app);
-// the server no longer needs to know the prompt set, only when to open the answering phase.
-function maybeOpenAnswering() {
-  if (session.phase !== "waiting") return;
-  if (session.participants.length < MAX_PARTICIPANTS) return;
-
-  session.phase = "answering";
-  session.participants.forEach((p) => {
-    p.status = "answering";
-  });
-}
-
 function addParticipant(name) {
   if (session.participants.length >= MAX_PARTICIPANTS) {
     return { error: "Session is full (4/4 already joined)." };
@@ -70,7 +79,7 @@ function addParticipant(name) {
     id: nanoid(),
     name: String(name).trim().slice(0, 40) || "Anonymous",
     engineSlot: session.participants.length + 1,
-    status: "waiting",
+    status: "answering", // joined = engine lit; becomes "submitted" once their Memory Stars are in
     socketId: null,
     isSimulated: false,
     blanks: [],
@@ -79,7 +88,6 @@ function addParticipant(name) {
     colors: null,
   };
   session.participants.push(participant);
-  maybeOpenAnswering();
   return { participant };
 }
 
@@ -98,6 +106,7 @@ function detachSocket(socketId) {
 function recordSubmission(participantId, submission) {
   const p = findParticipant(participantId);
   if (!p) return { error: "Unknown participant." };
+  if (session.phase !== "cruising") return { error: "Memory Stars aren't open yet.", participant: p };
   if (p.status === "submitted") return { error: "Already submitted.", participant: p };
 
   const blanks = Array.isArray(submission?.blanks) ? submission.blanks : [];
@@ -117,12 +126,7 @@ function allSubmitted() {
   );
 }
 
-function beginLaunch() {
-  session.phase = "launching";
-}
-
 function revealColors() {
-  session.phase = "revealed";
   const used = [];
   session.participants.forEach((p) => {
     const dealt = dealColors(2, used);
@@ -138,8 +142,8 @@ function revealColors() {
 }
 
 function startPuzzle() {
-  if (session.phase !== "revealed") return { error: "Puzzle can only start after colors are revealed." };
-  session.phase = "puzzle";
+  if (session.phase !== "earth") return { error: "Puzzle can only start once the rocket reaches Earth." };
+  setPhase("puzzle");
   return { session };
 }
 
@@ -148,7 +152,7 @@ function recordPuzzleAnswer(participantId, fileUrl) {
   const p = findParticipant(participantId);
   if (!p) return { error: "Unknown participant." };
   session.puzzleAnswer = { participantId, name: p.name, fileUrl, uploadedAt: Date.now() };
-  session.phase = "unlocked";
+  setPhase("revealed");
   return { puzzleAnswer: session.puzzleAnswer };
 }
 
@@ -169,49 +173,39 @@ function buildCapsuleSummary() {
   }));
 }
 
-function simulateRemaining() {
-  const added = [];
-  let fakeIdx = 0;
-  while (session.participants.length < MAX_PARTICIPANTS) {
-    const name = FAKE_NAMES[fakeIdx++ % FAKE_NAMES.length];
-    const { participant } = addParticipant(name);
-    participant.isSimulated = true;
-    added.push(participant);
-  }
-  // Any simulated participant that isn't submitted yet gets canned blanks.
-  const simulated = session.participants.filter(
-    (p) => p.isSimulated && p.status !== "submitted"
-  );
-  simulated.forEach((p) => {
-    p.blanks = cannedBlanks();
-    p.drawing = null;
-    p.uploadedImages = [];
-    p.status = "submitted";
-  });
-  return { added, simulated };
+/** Dev-only: add one fake crew member (lights the next engine). Returns null if the session is full. */
+function addSimulatedParticipant() {
+  if (session.participants.length >= MAX_PARTICIPANTS) return null;
+  const taken = session.participants.map((p) => p.name);
+  const name = FAKE_NAMES.find((n) => !taken.includes(n)) || `Crew ${session.participants.length + 1}`;
+  const { participant } = addParticipant(name);
+  participant.isSimulated = true;
+  return participant;
+}
+
+function submitSimulated(p) {
+  p.blanks = cannedBlanks();
+  p.drawing = null;
+  p.uploadedImages = [];
+  p.status = "submitted";
+}
+
+function pendingSimulated() {
+  return session.participants.filter((p) => p.isSimulated && p.status !== "submitted");
 }
 
 /**
- * Dev-only: jump straight to the final capsule-reveal cards screen. Fills any empty
- * slots, force-submits every participant who hasn't submitted yet (real participants
+ * Dev-only: jump straight to the final capsule-reveal. Fills any empty slots,
+ * force-submits every participant who hasn't submitted yet (real participants
  * included) with canned blanks, deals colors, and fakes the puzzle answer — so none of
  * it waits on input from anyone's device, including solving/uploading the puzzle.
  */
 function skipToCapsuleReveal() {
-  let fakeIdx = 0;
-  while (session.participants.length < MAX_PARTICIPANTS) {
-    const name = FAKE_NAMES[fakeIdx++ % FAKE_NAMES.length];
-    const { participant } = addParticipant(name);
-    participant.isSimulated = true;
-  }
+  const added = [];
+  while (session.participants.length < MAX_PARTICIPANTS) added.push(addSimulatedParticipant());
 
   const newlySubmitted = session.participants.filter((p) => p.status !== "submitted");
-  newlySubmitted.forEach((p) => {
-    p.blanks = cannedBlanks();
-    p.drawing = null;
-    p.uploadedImages = [];
-    p.status = "submitted";
-  });
+  newlySubmitted.forEach(submitSimulated);
 
   if (!session.participants.every((p) => p.colors)) {
     revealColors();
@@ -226,9 +220,9 @@ function skipToCapsuleReveal() {
       uploadedAt: Date.now(),
     };
   }
-  session.phase = "unlocked";
+  setPhase("revealed");
 
-  return { newlySubmitted };
+  return { added, newlySubmitted };
 }
 
 function cannedBlanks() {
@@ -266,11 +260,16 @@ module.exports = {
   detachSocket,
   recordSubmission,
   allSubmitted,
-  beginLaunch,
   revealColors,
   startPuzzle,
   recordPuzzleAnswer,
   buildCapsuleSummary,
-  simulateRemaining,
+  addSimulatedParticipant,
+  submitSimulated,
+  pendingSimulated,
   skipToCapsuleReveal,
+  PHASES,
+  setPhase,
+  setTimeJumpStep,
+  atLeast,
 };

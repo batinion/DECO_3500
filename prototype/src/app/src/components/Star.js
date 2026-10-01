@@ -40,6 +40,10 @@ export default function Star({ visual, collected, label, onPress }) {
     };
   }, [collected]);
 
+  const size = Math.max(10, Math.round(visual.size * 0.75)); // glow makes them read bigger
+  const disc = (d) => ({ width: d, height: d, borderRadius: d / 2, left: (size - d) / 2, top: (size - d) / 2 });
+  const spike = (w, h) => ({ width: w, height: h, borderRadius: 1, left: (size - w) / 2, top: (size - h) / 2, backgroundColor: "rgba(255, 224, 150, 0.7)" });
+
   return (
     <Pressable
       onPress={onPress}
@@ -48,22 +52,23 @@ export default function Star({ visual, collected, label, onPress }) {
       style={[styles.wrap, { left: visual.left, top: visual.top }]}
       hitSlop={16}
     >
-      <Animated.View
-        style={[
-          styles.star,
-          {
-            width: visual.size,
-            height: visual.size,
-            borderRadius: visual.size / 2,
-            backgroundColor: visual.hue,
-            transform: [{ scale }],
-            opacity: collected ? 0.35 : glow,
-            shadowColor: visual.hue,
-            borderWidth: collected ? 2 : 0,
-            borderColor: "#ffffff",
-          },
-        ]}
-      />
+      <Animated.View style={{ width: size, height: size, transform: [{ scale }], opacity: collected ? 0.4 : glow }}>
+        {/* soft golden halo: two translucent discs behind the core */}
+        <View style={[styles.layer, disc(size * 3.4), { backgroundColor: "rgba(255, 196, 77, 0.10)" }]} />
+        <View style={[styles.layer, disc(size * 2.1), { backgroundColor: "rgba(255, 200, 90, 0.22)" }]} />
+        {/* sparkle cross */}
+        <View style={[styles.layer, spike(size * 3, 1.5)]} />
+        <View style={[styles.layer, spike(1.5, size * 3)]} />
+        {/* bright warm core */}
+        <View
+          style={[
+            styles.layer,
+            disc(size),
+            styles.core,
+            collected && { borderWidth: 2, borderColor: "#ffffff" },
+          ]}
+        />
+      </Animated.View>
 
       {hovered && !!label && !collected && (
         <View style={styles.tooltip} pointerEvents="none">
@@ -78,11 +83,14 @@ export default function Star({ visual, collected, label, onPress }) {
 
 const styles = StyleSheet.create({
   wrap: { position: "absolute" },
-  star: {
-    shadowOpacity: 0.9,
-    shadowRadius: 8,
+  layer: { position: "absolute" },
+  core: {
+    backgroundColor: "#fff3c4",
+    shadowColor: "#ffb84c",
+    shadowOpacity: 1,
+    shadowRadius: 12,
     shadowOffset: { width: 0, height: 0 },
-    elevation: 6,
+    elevation: 8,
   },
   tooltip: {
     position: "absolute",

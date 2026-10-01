@@ -3,12 +3,13 @@ import { View, Text, StyleSheet } from "react-native";
 import { colors, type } from "../lib/theme";
 
 const STATUS_LABEL = {
-  waiting: "waiting",
-  answering: "answering",
+  waiting: "joined",
+  answering: "writing",
   submitted: "submitted ✓",
 };
 
-export default function RosterList({ participants, selfId }) {
+// joinedLabel: before the Memory Stars open, "joined" is the honest status for everyone.
+export default function RosterList({ participants, selfId, joinedLabel }) {
   const slots = [1, 2, 3, 4];
   const bySlot = {};
   (participants || []).forEach((p) => (bySlot[p.engineSlot] = p));
@@ -18,7 +19,7 @@ export default function RosterList({ participants, selfId }) {
       {slots.map((slot) => {
         const p = bySlot[slot];
         return (
-          <View key={slot} style={[styles.row, p?.status === "submitted" && styles.rowLit]}>
+          <View key={slot} style={[styles.row, (joinedLabel ? p : p?.status === "submitted") && styles.rowLit]}>
             <View style={[styles.badge, p && styles.badgeFilled]}>
               <Text style={styles.badgeText}>{slot}</Text>
             </View>
@@ -26,7 +27,7 @@ export default function RosterList({ participants, selfId }) {
               {p ? p.name : "Waiting to join…"}
               {p && p.id === selfId ? " (you)" : ""}
             </Text>
-            {p ? <Text style={styles.status}>{STATUS_LABEL[p.status] || p.status}</Text> : null}
+            {p ? <Text style={styles.status}>{joinedLabel ? "engine lit" : STATUS_LABEL[p.status] || p.status}</Text> : null}
           </View>
         );
       })}

@@ -119,7 +119,7 @@ export default function DrawUploadPage({
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg, padding: spacing.lg, paddingTop: spacing.xl },
+  wrap: { flex: 1, padding: spacing.lg, paddingTop: spacing.xl },
   row: { flexDirection: "row", gap: spacing.sm },
   gallery: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
   thumbWrap: { alignItems: "center" },

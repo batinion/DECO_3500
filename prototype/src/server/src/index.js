@@ -12,6 +12,7 @@ const { nanoid } = require("nanoid");
 const session = require("./session");
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
+const PUBLIC_DIR = path.join(__dirname, "..", "public");
 const SUBMISSIONS_DIR = path.join(__dirname, "..", "submissions");
 const PUZZLE_URL = "https://miro.com/app/board/uXjVJnJSoGU=/";
 
@@ -20,7 +21,10 @@ fs.mkdirSync(SUBMISSIONS_DIR, { recursive: true });
 const app = express();
 app.use(cors()); // client devices connect from a different origin (LAN IP:port, or expo web's own port)
 app.use(express.json({ limit: "15mb" })); // base64 drawing PNGs go through JSON
-app.use(express.static(path.join(__dirname, "..", "public")));
+// Registered before express.static: public/scene/ is also a directory (the scene module's
+// assets), and static would otherwise redirect "/scene" to "/scene/" and 404.
+app.get("/scene", (req, res) => res.sendFile(path.join(PUBLIC_DIR, "scene.html")));
+app.use(express.static(PUBLIC_DIR));
 app.use("/uploads", express.static(SUBMISSIONS_DIR));
 
 function getLanIp() {
@@ -114,58 +118,137 @@ app.post(
     const result = session.recordPuzzleAnswer(participantId, `/uploads/${relPath}`);
     if (result.error) return res.status(409).json({ error: result.error });
 
-    io.emit("puzzle_answer_submitted", result.puzzleAnswer);
-    io.emit("capsule_opened", { participants: session.buildCapsuleSummary() });
-    broadcastRoster();
+    broadcastScene();
     res.json({ fileUrl: `/uploads/${relPath}` });
   }
 );
 
-app.get("/api/session-info", async (req, res) => {
-  const s = session.publicSession();
-  const joinPayload = JSON.stringify({ ip: LAN_IP, port: PORT, code: s.code });
-  const qrDataUrl = await QRCode.toDataURL(joinPayload, { margin: 1, width: 320 });
-  const capsule = s.phase === "unlocked" ? session.buildCapsuleSummary() : null;
-  res.json({ ...s, ip: LAN_IP, port: PORT, qrDataUrl, puzzleUrl: PUZZLE_URL, capsule });
-});
+// ---- Scene state ------------------------------------------------------------
+// The server owns the scene. Every screen (Mission Control + each participant's
+// background scene + the participant app itself) renders from this one snapshot.
+
+// Server-driven phase lengths. Scenes animate from elapsed time since phaseStartedAt.
+const TIMING = {
+  launchMs: 8000, // liftoff -> clears atmosphere -> space; then Memory Stars open
+  arriveMs: 4500, // rocket reaches the moon; colour reveal appears after this
+  revealMs: 4000, // colour reveal hold before the time jump
+};
+
+let qrDataUrl = null;
+async function refreshQr() {
+  const joinPayload = JSON.stringify({ ip: LAN_IP, port: PORT, code: session.getSession().code });
+  qrDataUrl = await QRCode.toDataURL(joinPayload, { margin: 1, width: 320 });
+}
+
+function buildSceneState() {
+  const s = session.getSession();
+  const participants = s.participants.map(session.publicParticipant);
+  return {
+    code: s.code,
+    phase: s.phase,
+    phaseStartedAt: s.phaseStartedAt,
+    timeJumpStep: s.timeJumpStep,
+    stepStartedAt: s.stepStartedAt,
+    serverNow: Date.now(),
+    timing: TIMING,
+    participants,
+    litEngines: participants.map((p) => p.engineSlot),
+    submittedCount: participants.filter((p) => p.status === "submitted").length,
+    reveal: session.atLeast("arrived")
+      ? s.participants.map((p) => ({ id: p.id, name: p.name, engineSlot: p.engineSlot, colors: p.colors }))
+      : null,
+    capsule: s.phase === "revealed" ? session.buildCapsuleSummary() : null,
+    puzzleUrl: PUZZLE_URL,
+    puzzleAnswer: s.puzzleAnswer,
+    join: { ip: LAN_IP, port: PORT, code: s.code, qrDataUrl },
+  };
+}
+
+function broadcastScene() {
+  io.emit("scene_state", buildSceneState());
+}
 
 // ---- Real-time layer --------------------------------------------------------
 
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
-function broadcastRoster() {
-  io.emit("roster_update", session.publicSession());
+// Phase timers (launch -> cruise, arrival -> time jump, ...). Cleared on reset/skip.
+let timers = [];
+function later(ms, fn) {
+  timers.push(setTimeout(fn, ms));
+}
+function clearTimers() {
+  timers.forEach(clearTimeout);
+  timers = [];
 }
 
-async function broadcastSessionInfo() {
-  const s = session.publicSession();
-  const joinPayload = JSON.stringify({ ip: LAN_IP, port: PORT, code: s.code });
-  const qrDataUrl = await QRCode.toDataURL(joinPayload, { margin: 1, width: 320 });
-  io.emit("session_reset", { ...s, ip: LAN_IP, port: PORT, qrDataUrl });
-}
-
-async function runLaunchAndReveal() {
-  session.beginLaunch();
-  broadcastRoster();
+function startLaunch() {
+  session.setPhase("launching");
   io.emit("launch_sequence_start", {});
+  broadcastScene();
+  later(TIMING.launchMs, () => {
+    if (session.getSession().phase !== "launching") return;
+    session.setPhase("cruising");
+    broadcastScene();
+  });
+}
 
-  // Give the launch animation a moment to play before the color reveal.
-  setTimeout(() => {
-    const summary = session.revealColors();
-    summary.forEach((p) => {
-      if (p && session.findParticipant(p.id)?.socketId) {
-        io.to(session.findParticipant(p.id).socketId).emit("mission_colors", {
-          colors: p.colors,
-        });
-      }
-    });
-    io.emit("mission_colors_summary", { participants: summary });
-    broadcastRoster();
-  }, 4000);
+function emitMissionColors() {
+  session.getSession().participants.forEach((p) => {
+    if (p.socketId && p.colors) io.to(p.socketId).emit("mission_colors", { colors: p.colors });
+  });
+}
+
+function startArrival() {
+  session.setPhase("arrived");
+  session.revealColors();
+  emitMissionColors();
+  broadcastScene();
+  later(TIMING.arriveMs + TIMING.revealMs, () => {
+    if (session.getSession().phase !== "arrived") return;
+    // The colour reveal ends as "Cooking the space!" comes up: no separate lead-in step.
+    session.setPhase("timejump");
+    session.setTimeJumpStep(1);
+    broadcastScene();
+  });
+}
+
+/** A new engine just lit: tell everyone, and launch if that was the 4th. */
+function afterJoin(p) {
+  io.emit("engine_ignite", { engineSlot: p.engineSlot, participantId: p.id, name: p.name });
+  const s = session.getSession();
+  if (s.phase === "joining" && s.participants.length === session.MAX_PARTICIPANTS) {
+    startLaunch();
+  } else {
+    broadcastScene();
+  }
+}
+
+function afterSubmit() {
+  if (session.getSession().phase === "cruising" && session.allSubmitted()) {
+    startArrival();
+  } else {
+    broadcastScene();
+  }
+}
+
+function joinReply(p) {
+  return { participantId: p.id, engineSlot: p.engineSlot, name: p.name };
 }
 
 io.on("connection", (socket) => {
+  // Only Mission Control may drive the scene; scene/participant sockets are view-only.
+  const isMc = socket.handshake.query?.role === "mc";
+  const controller = (fn) => (...args) => {
+    if (isMc) fn(...args);
+  };
+
+  // Snapshot on connect/reconnect so a reloaded screen lands on the correct scene state.
+  socket.emit("scene_state", buildSceneState());
+
+  socket.on("time_sync", (ack) => typeof ack === "function" && ack(Date.now()));
+
   socket.on("join_session", ({ code, name, participantId } = {}, ack) => {
     const reply = (payload) => typeof ack === "function" && ack(payload);
     const current = session.getSession();
@@ -174,24 +257,19 @@ io.on("connection", (socket) => {
       return reply({ error: "That code doesn't match the current session." });
     }
 
-    // Reconnect flow: same participantId as before.
+    // Reconnect flow: same participantId as before. The engine stays lit even while disconnected.
     if (participantId) {
       const existing = session.findParticipant(participantId);
       if (existing) {
         session.attachSocket(participantId, socket.id);
         socket.data.participantId = participantId;
-        broadcastRoster();
-        return reply({
-          participantId: existing.id,
-          engineSlot: existing.engineSlot,
-          name: existing.name,
-          phase: current.phase,
-          status: existing.status,
-          colors: existing.colors || null,
-          puzzleUrl: PUZZLE_URL,
-          puzzleAnswer: current.puzzleAnswer,
-        });
+        if (existing.colors) socket.emit("mission_colors", { colors: existing.colors });
+        return reply(joinReply(existing));
       }
+    }
+
+    if (current.phase !== "joining") {
+      return reply({ error: "This crew has already launched." });
     }
 
     const result = session.addParticipant(name);
@@ -201,18 +279,8 @@ io.on("connection", (socket) => {
     session.attachSocket(participant.id, socket.id);
     socket.data.participantId = participant.id;
 
-    broadcastRoster();
-
-    reply({
-      participantId: participant.id,
-      engineSlot: participant.engineSlot,
-      name: participant.name,
-      phase: session.getSession().phase,
-      status: participant.status,
-      colors: participant.colors || null,
-      puzzleUrl: PUZZLE_URL,
-      puzzleAnswer: session.getSession().puzzleAnswer,
-    });
+    reply(joinReply(participant));
+    afterJoin(participant); // joining = ignition
   });
 
   socket.on("submit_answers", ({ participantId, blanks, drawing, uploadedImages } = {}, ack) => {
@@ -233,72 +301,104 @@ io.on("connection", (socket) => {
       )
     );
 
-    io.emit("engine_ignite", { engineSlot: p.engineSlot, participantId: p.id, name: p.name });
-    broadcastRoster();
     reply({ ok: true });
-
-    if (session.allSubmitted()) {
-      runLaunchAndReveal();
-    }
+    afterSubmit();
   });
 
-  socket.on("simulate_remaining", () => {
-    session.simulateRemaining();
-    broadcastRoster();
+  // ---- Mission Control controls ----
 
-    // Ignite engines for every simulated participant that just auto-submitted.
-    session
-      .getSession()
-      .participants.filter((p) => p.isSimulated && p.status === "submitted")
-      .forEach((p) => {
-        io.emit("engine_ignite", { engineSlot: p.engineSlot, participantId: p.id, name: p.name });
+  // Click-to-advance through the time jump (step 1 -> 2 -> Earth). Step 0 is timed.
+  socket.on(
+    "advance_scene",
+    controller(() => {
+      const s = session.getSession();
+      if (s.phase !== "timejump" || s.timeJumpStep < 1) return;
+      if (s.timeJumpStep === 1) session.setTimeJumpStep(2);
+      else session.setPhase("earth");
+      broadcastScene();
+    })
+  );
+
+  socket.on(
+    "start_puzzle",
+    controller(() => {
+      if (session.startPuzzle().error) return;
+      broadcastScene();
+    })
+  );
+
+  // Dev: staggered fake joins (each lights an engine; the 4th triggers the launch).
+  socket.on(
+    "simulate_joins",
+    controller(() => {
+      const missing = session.MAX_PARTICIPANTS - session.getSession().participants.length;
+      for (let i = 0; i < missing; i++) {
+        later(300 + i * 900, () => {
+          if (session.getSession().phase !== "joining") return;
+          const p = session.addSimulatedParticipant();
+          if (p) afterJoin(p);
+        });
+      }
+    })
+  );
+
+  // Dev: staggered fake submissions from the simulated crew (real participants write their own).
+  socket.on(
+    "simulate_submissions",
+    controller(() => {
+      if (session.getSession().phase !== "cruising") return;
+      session.pendingSimulated().forEach((p, i) => {
+        later(300 + i * 800, () => {
+          if (session.getSession().phase !== "cruising" || p.status === "submitted") return;
+          session.submitSimulated(p);
+          afterSubmit();
+        });
       });
+    })
+  );
 
-    broadcastRoster();
-    if (session.allSubmitted()) {
-      runLaunchAndReveal();
-    }
-  });
+  socket.on(
+    "skip_to_reveal",
+    controller(() => {
+      clearTimers();
+      const { added, newlySubmitted } = session.skipToCapsuleReveal();
+      [...added, ...newlySubmitted].forEach((p) =>
+        io.emit("engine_ignite", { engineSlot: p.engineSlot, participantId: p.id, name: p.name })
+      );
+      emitMissionColors();
+      broadcastScene();
+    })
+  );
 
-  socket.on("skip_to_reveal", () => {
-    const { newlySubmitted } = session.skipToCapsuleReveal();
-
-    newlySubmitted.forEach((p) => {
-      io.emit("engine_ignite", { engineSlot: p.engineSlot, participantId: p.id, name: p.name });
-    });
-    broadcastRoster();
-
-    io.emit("capsule_opened", { participants: session.buildCapsuleSummary() });
-  });
-
-  socket.on("start_puzzle", () => {
-    const result = session.startPuzzle();
-    if (result.error) return;
-    io.emit("puzzle_started", { puzzleUrl: PUZZLE_URL });
-    broadcastRoster();
-  });
-
-  socket.on("session_reset", () => {
-    session.resetSession();
-    broadcastSessionInfo();
-  });
+  socket.on(
+    "session_reset",
+    controller(async () => {
+      clearTimers();
+      session.resetSession();
+      await refreshQr();
+      io.emit("session_reset", {});
+      broadcastScene();
+    })
+  );
 
   socket.on("disconnect", () => {
     session.detachSocket(socket.id);
-    broadcastRoster();
   });
 });
 
-httpServer.listen(PORT, "0.0.0.0", () => {
-  const s = session.getSession();
-  console.log("");
-  console.log("========================================");
-  console.log("  LAUNCH SEQUENCE — Mission Control server");
-  console.log("========================================");
-  console.log(`  Mission Control page: http://${LAN_IP}:${PORT}`);
-  console.log(`  LAN IP:  ${LAN_IP}`);
-  console.log(`  Port:    ${PORT}`);
-  console.log(`  Join code: ${s.code}`);
-  console.log("========================================");
-  console.log("");
-});
+refreshQr().then(() =>
+  httpServer.listen(PORT, "0.0.0.0", () => {
+    const s = session.getSession();
+    console.log("");
+    console.log("========================================");
+    console.log("  LAUNCH SEQUENCE — Mission Control server");
+    console.log("========================================");
+    console.log(`  Mission Control page: http://${LAN_IP}:${PORT}`);
+    console.log(`  Participant scene:    http://${LAN_IP}:${PORT}/scene?role=participant`);
+    console.log(`  LAN IP:  ${LAN_IP}`);
+    console.log(`  Port:    ${PORT}`);
+    console.log(`  Join code: ${s.code}`);
+    console.log("========================================");
+    console.log("");
+  })
+);

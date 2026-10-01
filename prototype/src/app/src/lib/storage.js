@@ -29,3 +29,16 @@ export async function loadAnswerDraft(code, participantId) {
 export async function clearAnswerDraft(code, participantId) {
   await AsyncStorage.removeItem(draftKey(code, participantId));
 }
+
+// Last Mission Control address used — lets the live scene load behind the login panel
+// on the next launch, before the user has joined anything.
+const SERVER_KEY = "launch-sequence:last-server";
+
+export async function saveLastServer(server) {
+  await AsyncStorage.setItem(SERVER_KEY, JSON.stringify(server));
+}
+
+export async function loadLastServer() {
+  const raw = await AsyncStorage.getItem(SERVER_KEY);
+  return raw ? JSON.parse(raw) : null;
+}

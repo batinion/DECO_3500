@@ -92,7 +92,7 @@ export default function PuzzleScreen({ puzzleUrl, code, participantId, serverUrl
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg, padding: spacing.lg, paddingTop: spacing.xl },
+  wrap: { flex: 1, padding: spacing.lg, paddingTop: spacing.xl },
   linkBox: {
     marginTop: spacing.lg,
     borderWidth: 1,

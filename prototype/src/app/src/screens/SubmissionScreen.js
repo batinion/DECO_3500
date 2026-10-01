@@ -27,7 +27,8 @@ export default function SubmissionScreen({ code, participantId, serverUrl, parti
   // Load a persisted draft (same star selection + progress) or pick fresh prompts.
   useEffect(() => {
     (async () => {
-      const draft = await loadAnswerDraft(code, participantId);
+      // A storage failure must never leave the Memory Stars screen blank.
+      const draft = await loadAnswerDraft(code, participantId).catch(() => null);
       if (draft?.stars?.length) {
         setStars(draft.stars);
         setCollected(draft.collected || {});

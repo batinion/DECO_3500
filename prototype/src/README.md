@@ -11,14 +11,46 @@ everyone's original answers back on Mission Control.
 ## What's here
 
 ```
-/server   Node.js + Express + Socket.IO. Serves the Mission Control web page (the
-          "5th laptop" display) and coordinates all real-time state.
-/app      Expo (React Native) app. What each of the 4 participants runs on their
-          own device via Expo Go, or in a browser via `expo start --web`.
+/server   Node.js + Express + Socket.IO. Owns all session/scene state and serves:
+            /                          Mission Control (big screen): scene + QR/join code,
+                                       crew HUD, dev controls. Interactive.
+            /scene?role=participant    The same scene, view-only (no dev controls,
+                                       pointer-events: none). Embedded by the app.
+            /scene/scene.js|css        The shared scene module (one source of truth).
+/app      Expo (React Native) app. What each participant runs on their own device via
+          Expo Go, or in a browser via `expo start --web`.
 ```
 
 No database, no cloud services, no auth beyond the join code. Everything is local
 network only — the server and every participant device must be on the same Wi-Fi.
+
+## The shared live scene
+
+Mission Control's scene is the shared world every participant sees. It is **not**
+reimplemented in React Native: the app embeds `/scene?role=participant` full-bleed behind
+all of its UI (`<iframe>` on web, `react-native-webview` on native — works in Expo Go).
+
+* The server owns the scene state (phase, `phaseStartedAt`, lit engines, submission count,
+  time-jump step, colours, capsule) and sends a `scene_state` snapshot on connect/reconnect
+  and on every phase change.
+* Every screen derives its animation from *elapsed time since `phaseStartedAt`* on a
+  server-synced clock (ping on connect), so screens stay in step and a reloaded screen
+  lands at the right point instead of replaying the launch.
+* Mission Control is the only controller. Controller events (`advance_scene`,
+  `start_puzzle`, `simulate_*`, `skip_to_reveal`, `session_reset`) are only accepted from
+  sockets that connected with `role=mc`.
+
+Phase machine: `joining → launching → cruising → arrived → timejump → earth → puzzle → revealed`
+
+| Phase | What happens |
+|---|---|
+| joining | Rocket on the pad, moon in the sky. Each join lights that engine (`engine_ignite`) on every screen. |
+| launching | 4th join → liftoff, clears the atmosphere, heads for the moon (~8 s, `launch_sequence_start`). |
+| cruising | Memory Stars open on every participant over the live scene (rocket flying through a streaming starfield). The moon draws closer with each submission. |
+| arrived | All 4 submitted → rocket reaches/orbits the moon; colours assigned and revealed on Mission Control. |
+| timejump | Leaving the moon → "Cooking the space!" → "3 years have passed". Click on Mission Control to advance each step. |
+| earth | Rocket reaches Earth; click Earth on Mission Control to send the puzzle. |
+| puzzle / revealed | Any one participant uploads the answer → capsule opens on Mission Control. |
 
 ## Running it
 
@@ -31,55 +63,70 @@ npm run dev
 ```
 
 This prints the LAN IP, port (default `4000`), and a join code to the terminal, and
-also serves the **Mission Control** page — open the printed URL
-(`http://<your-lan-ip>:4000`) full-screen in a browser on that laptop.
+serves **Mission Control** — open `http://<your-lan-ip>:4000` full-screen on that laptop.
 
 ### 2. Start the participant app
 
 ```bash
 cd app
-npx expo install # first time only, if versions drift
+npx expo install # first time only; installs react-native-webview and other deps
 npx expo start
 ```
 
-This prints an **Expo dev QR code** — scan that with the Expo Go app to load the
-JavaScript bundle onto your phone. **This is a different QR code from the in-app
-session join code shown on Mission Control** — don't mix them up. Alternatively,
-press `w` in the Expo CLI (or run `npx expo start --web`) to open the app in a
-laptop browser for the real 4-person session.
+This prints an **Expo dev QR code** — scan that with Expo Go. **This is a different QR
+code from the join code shown on Mission Control** — don't mix them up. Alternatively
+press `w` (or run `npx expo start --web`) to open the app in a laptop browser.
 
-Once the app is open, each participant:
-1. Scans the Mission Control join QR (or types in the IP/port/code shown there) and
-   enters their name.
-2. Waits in the waiting room until all 4 have joined.
-3. Taps stars in a star field to fill in prompts (text blanks, some naming another
-   participant via a dropdown) — collect at least 3 of the 7 to continue; the rest
-   are optional. One star is always a free-write field with no template.
-4. Optionally sketches something and/or adds a photo on page 2, then submits.
-5. Submits — their engine lights up on Mission Control and on every phone.
-6. Once all 4 have submitted, everyone sees the launch animation and their own
-   2 assigned "mission key" colors.
-7. Later, clicking the Earth on Mission Control's epilogue starts a puzzle (a Miro
-   board link) — any one participant uploads the answer from their phone, which
-   reopens the capsule and shows everyone's original answers on Mission Control.
+`react-native-webview` is the one new native dependency (it renders the scene on phones);
+it is included in Expo Go, so no dev build is needed.
+
+**Where the scene comes from before login.** The scene needs Mission Control's address
+before the participant has entered their name. The app resolves it in this order:
+1. `?server=ip:port` in the page URL (web), e.g. `http://localhost:8081/?server=192.168.0.10:4000`
+2. the last address used (AsyncStorage)
+3. otherwise a static starfield, and the live scene loads as soon as a valid IP/port is
+   typed or scanned.
+
+### The participant flow
+
+1. **Landing:** the whole screen is the live Mission Control scene. A compact panel (bottom-right
+   corner, or a bottom sheet on narrow phones) has the join form: scan the QR or type
+   name / code / IP / port.
+2. **Join = ignition:** your engine lights on Mission Control and every participant screen.
+   The panel reads "Engine N lit — waiting on X more crew".
+3. **4th join → launch** to the moon, in sync on every screen.
+4. **Memory Stars** appear over the cruising rocket. Tap stars to fill in prompts (collect at
+   least 3), optionally sketch / add a photo, then submit. A "2 of 4 submitted" chip shows
+   crew progress; Mission Control shows it as a crew HUD.
+5. **All submitted →** arrival at the moon, your 2 mission colours, time jump, Earth —
+   all mirrored on your screen, advanced only from Mission Control.
+6. Click Earth on Mission Control → puzzle (Miro link). Any one participant uploads the
+   answer → the capsule opens on Mission Control.
 
 ### Solo / dev testing
 
 You don't need 4 people to test the full flow:
 
 1. Start the server and open Mission Control in a browser.
-2. Start the Expo app and load it in Expo Go on your phone (or `expo start --web`).
-3. Join with your real name.
-4. Click **"Simulate remaining participants"** on Mission Control — this fills the
-   other 3 slots with fake names and canned answers, so you only need to answer and
-   submit your own to trigger the full ignition → launch → reveal sequence.
-5. Click **"New Session"** on Mission Control to reset everything and get a fresh
-   join code, so you can re-run the flow as many times as you like.
+2. Load the app in a laptop browser and/or Expo Go and join with your real name — your
+   engine lights on all screens.
+3. **Simulate joins** (dev bar) — staggered fake joins light the other engines; the 4th
+   triggers the launch on every screen.
+4. When Memory Stars open, answer and submit your own, then **Simulate submissions** —
+   the simulated crew submits (real participants always write their own), which triggers
+   arrival, colours, and the time jump.
+5. Click through the time jump on Mission Control, then click Earth.
+6. **Skip to reveal** force-submits everyone and jumps to the opened capsule.
+   **New Session** resets everything (new join code) and broadcasts to every scene.
 
 ## Notes
 
 - Both devices/laptops must be on the same Wi-Fi network — no VPN that isolates
   local traffic.
+- A participant who disconnects keeps their engine lit; reloading mid-session returns them to
+  the correct scene state (no launch replay).
+- The scene renders on one `requestAnimationFrame` loop, with fewer background stars and a
+  30 fps cap on the participant view, and pauses while the page/tab is hidden.
 - Session state (who's joined, engine status) is in-memory only and resets if the
   server restarts. Submitted answers/photos/drawings are written to
   `server/submissions/<session-code>/<participant-id>/` as they come in, so real

@@ -111,7 +111,7 @@ export default function StarFieldPage({ stars, participants, collected, onCollec
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg, padding: spacing.lg, paddingTop: spacing.xl },
+  wrap: { flex: 1, padding: spacing.lg, paddingTop: spacing.xl },
   field: { flex: 1, marginTop: spacing.md, marginBottom: spacing.md },
   footer: { gap: spacing.sm },
 });
