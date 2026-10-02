@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Mission Briefing — Launch Sequence</title>
+<style>
+  :root {
+    --bg: #05060f; --panel: #161a2e; --border: #2a2f4a; --text: #eef0ff; --muted: #8890b5;
+    --accent: #4cc9f0; --pink: #ff6ec7; --lit: #ffb84c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+  #stage { position: fixed; inset: 0; overflow: hidden; background: radial-gradient(ellipse at 50% 120%, #1b2350 0%, #0a0d22 45%, var(--bg) 80%); }
+  #sky { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* ---------- ground + rocket ---------- */
+  #ground { position: absolute; left: 0; right: 0; top: 66%; bottom: 0; background: linear-gradient(180deg, #161b3a, #0b0e22); border-top: 2px solid #2a3060; transition: transform 2.5s cubic-bezier(.5,0,.9,.5), opacity 2s; }
+  #pad { position: absolute; left: 50%; top: -6px; width: 150px; height: 14px; transform: translateX(-50%); background: #2a2f4a; border-radius: 3px; }
+  #rocket-wrap { position: absolute; left: 50%; top: 66%; width: 0; height: 0; z-index: 5; }
+  #rocket { position: absolute; left: -35px; top: -186px; width: 70px; height: 180px; transform-origin: 35px 90px; }
+  .body { position: absolute; left: 0; top: 0; width: 70px; height: 160px; background: linear-gradient(180deg, #eef0ff, #c7cbf5); border: 2px solid #444a72; border-radius: 35px 35px 12px 12px; }
+  .window { position: absolute; left: 19px; top: 26px; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); border: 3px solid #1c2038; }
+  .fin { position: absolute; width: 34px; height: 54px; background: var(--pink); top: 92px; }
+  .fin.l { left: -22px; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+  .fin.r { right: -22px; clip-path: polygon(0 0, 100% 100%, 0 100%); }
+  #cargo { position: absolute; left: 26px; top: 72px; width: 14px; height: 62px; border-radius: 7px; background: rgba(42,47,74,.35); border: 2px solid #444a72; overflow: hidden; }
+  #cargo-fill { position: absolute; left: 0; right: 0; bottom: 0; height: 0%; background: linear-gradient(0deg, var(--lit), #fff3c4); box-shadow: 0 0 10px var(--lit); transition: height .8s ease; }
+  #lock { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%) scale(2.4); font-size: 34px; opacity: 0; transition: transform .35s cubic-bezier(.3,1.6,.6,1), opacity .25s; filter: drop-shadow(0 0 12px rgba(255,184,76,.8)); }
+  #lock.on { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  .engines { position: absolute; left: -20px; top: 154px; width: 110px; display: flex; justify-content: center; gap: 10px; }
+  .engine { position: relative; width: 20px; height: 26px; background: #2a2f4a; border: 2px solid #444a72; border-top: none; border-radius: 0 0 10px 10px; display: flex; justify-content: center; transition: box-shadow .3s, border-color .3s; }
+  .flame { position: absolute; top: 100%; width: 10px; height: 0; opacity: 0; border-radius: 0 0 8px 8px; background: linear-gradient(180deg, #fff6c8, var(--lit), transparent); transform-origin: top; transition: height .35s, opacity .35s, width .35s; }
+  .engine.lit { border-color: var(--lit); box-shadow: 0 0 16px 2px var(--lit); }
+  .engine.lit .flame { height: 34px; opacity: 1; animation: flicker .12s infinite alternate; }
+  .boost .engine.lit .flame { height: 110px; width: 14px; }
+  @keyframes flicker { from { transform: scaleY(1); } to { transform: scaleY(.8); } }
+  .shake { animation: shake .06s infinite; }
+  @keyframes shake { 0% { transform: translate(1px,0); } 50% { transform: translate(-1px,1px); } 100% { transform: translate(0,-1px); } }
+
+  /* ---------- characters by the rocket ---------- */
+  #padcrew { position: absolute; left: 50%; top: 66%; width: 0; height: 0; z-index: 6; }
+  .pc { position: absolute; width: 50px; height: 50px; bottom: 0; transform-origin: 50% 100%; opacity: 0; transform: translateY(-80px) scale(.4); transition: transform .6s cubic-bezier(.3,1.6,.5,1), opacity .3s; }
+  .pc.in { opacity: 1; transform: none; }
+  .pc .bob { width: 100%; height: 100%; animation: pcbob 2.2s ease-in-out infinite; }
+  .pc svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.5)); }
+  @keyframes pcbob { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-4px) rotate(2deg); } }
+  .pc.hop .bob { animation: pchop .9s cubic-bezier(.3,1.4,.5,1); }
+  @keyframes pchop { 20% { transform: translateY(2px) scale(1.08,.9); } 45% { transform: translateY(-26px) rotate(-8deg); } 70% { transform: translateY(-6px) rotate(4deg); } }
+  .pc.board { transition: transform 1s cubic-bezier(.6,0,.8,.4), opacity 1s; opacity: 0 !important; }
+  @media (min-width: 700px) { .pc { width: 62px; height: 62px; } }
+
+  /* ---------- crew chips ---------- */
+  #crew { position: absolute; left: 50%; top: 70%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 6; }
+  .chip { display: flex; align-items: center; gap: 6px; padding: 6px 10px 6px 6px; border-radius: 999px; background: rgba(22,26,46,.92); border: 1px solid var(--border); font-size: 13px; font-weight: 600; opacity: 0; transform: translateY(14px) scale(.9); transition: all .4s cubic-bezier(.3,1.4,.6,1); white-space: nowrap; }
+  .chip .ph { width: 24px; height: 24px; display: grid; place-items: center; }
+  .chip .ph svg { width: 100%; height: 100%; }
+  .chip.in { opacity: 1; transform: none; }
+  .chip.ready { border-color: var(--lit); }
+
+  .chip .tick { color: var(--lit); display: none; }
+  .chip.ready .tick { display: inline; }
+
+  /* ---------- memory card ---------- */
+  #card { position: absolute; left: 50%; top: 13%; width: min(340px, 86vw); transform: translateX(-50%) translateY(-10px); opacity: 0; z-index: 8; background: rgba(22,26,46,.94); border: 1px solid rgba(255,255,255,.18); border-radius: 18px; padding: 14px 16px; box-shadow: 0 18px 40px rgba(0,0,0,.45); transition: opacity .35s, transform .35s; }
+  #card.in { opacity: 1; transform: translateX(-50%); }
+  #card .lbl { font-size: 10px; letter-spacing: 1.5px; color: var(--muted); display: flex; justify-content: space-between; }
+  #card .lbl b { color: var(--lit); font-weight: 800; }
+  #card .sent { margin-top: 8px; font-size: 18px; font-weight: 700; line-height: 1.45; }
+  #card .who { color: var(--accent); border: 1px solid var(--accent); border-radius: 7px; padding: 0 6px; }
+  #card .blank { border-bottom: 2px solid var(--accent); padding: 0 2px; min-width: 60px; display: inline-block; }
+  #card .btn { margin-top: 12px; text-align: center; background: var(--lit); color: #0a0c18; font-weight: 800; border-radius: 10px; padding: 9px; font-size: 14px; transition: transform .15s; }
+  #card .btn.press { transform: scale(.94); }
+  .orb { position: absolute; width: 18px; height: 18px; border-radius: 50%; z-index: 9; pointer-events: none; background: radial-gradient(circle, #fff3c4 0%, var(--lit) 45%, rgba(255,184,76,0) 72%); box-shadow: 0 0 22px 8px rgba(255,184,76,.55); }
+
+  /* ---------- toast ---------- */
+  #toast { position: absolute; left: 50%; top: 14%; transform: translate(-50%, -20px); opacity: 0; z-index: 8; background: rgba(16,19,35,.96); border: 1px solid var(--lit); border-radius: 999px; padding: 10px 18px; font-size: 15px; white-space: nowrap; transition: all .4s cubic-bezier(.3,1.4,.6,1); }
+  #toast.in { opacity: 1; transform: translate(-50%, 0); }
+  #toast { display: flex; align-items: center; gap: 8px; padding: 5px 16px 5px 6px; }
+  .tface { width: 34px; height: 34px; display: inline-block; }
+  .tface svg { width: 100%; height: 100%; }
+
+  /* ---------- big text ---------- */
+  #big { position: absolute; left: 0; right: 0; top: 30%; text-align: center; font-size: 96px; font-weight: 900; color: var(--lit); text-shadow: 0 0 40px rgba(255,184,76,.7); opacity: 0; z-index: 7; pointer-events: none; }
+  #years { position: absolute; left: 0; right: 0; top: 11%; text-align: center; font-size: 30px; font-weight: 800; letter-spacing: 2px; opacity: 0; transition: opacity .8s; z-index: 7; }
+  #years.in { opacity: 1; }
+  #earth { position: absolute; left: 50%; top: 58%; transform: translate(-50%,-50%) scale(.2); font-size: 150px; line-height: 1; opacity: 0; transition: transform 2.2s cubic-bezier(.2,.8,.2,1), opacity 1.2s; filter: drop-shadow(0 0 50px rgba(76,201,240,.5)); z-index: 2; }
+  #earth.in { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+
+  /* ---------- opened capsule ---------- */
+  #capsule { position: absolute; left: 50%; top: 12%; width: min(360px, 90vw); transform: translateX(-50%); z-index: 8; display: grid; gap: 8px; }
+  .mem { background: rgba(16,19,35,.95); border: 1px solid var(--border); border-left: 4px solid var(--lit); border-radius: 12px; padding: 10px 12px; font-size: 14px; line-height: 1.4; opacity: 0; transform: translateY(20px) scale(.96); transition: all .45s cubic-bezier(.3,1.3,.6,1); }
+  .mem small { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
+  .mem.in { opacity: 1; transform: none; }
+
+  /* ---------- caption ---------- */
+  #caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 22px calc(26px + env(safe-area-inset-bottom)); z-index: 10; text-align: center; background: linear-gradient(180deg, rgba(5,6,15,0) 0%, rgba(5,6,15,.85) 35%, rgba(5,6,15,.95) 100%); }
+  #step { font-size: 11px; letter-spacing: 2px; color: var(--lit); font-weight: 800; }
+  #title { font-size: clamp(22px, 5.6vw, 34px); font-weight: 800; margin-top: 6px; line-height: 1.2; }
+  #sub { font-size: clamp(14px, 3.6vw, 17px); color: #c3c8e6; margin-top: 8px; line-height: 1.45; max-width: 560px; margin-left: auto; margin-right: auto; }
+  .fade { animation: fadeUp .5s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- chrome ---------- */
+  #progress { position: absolute; left: 14px; right: 14px; top: calc(12px + env(safe-area-inset-top)); display: flex; gap: 5px; z-index: 20; }
+  #progress i { flex: 1; height: 3px; border-radius: 3px; background: rgba(255,255,255,.18); overflow: hidden; position: relative; }
+  #progress i b { position: absolute; inset: 0; width: 0%; background: var(--lit); }
+  #controls { position: absolute; right: 12px; top: calc(24px + env(safe-area-inset-top)); display: flex; gap: 8px; z-index: 20; }
+  .ctl { background: rgba(22,26,46,.85); color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  /* ---------- start / end cards ---------- */
+  .overlay { position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 28px; background: radial-gradient(ellipse at 50% 40%, rgba(27,35,80,.85), rgba(5,6,15,.97) 70%); }
+  .overlay.hidden { display: none; }
+  .kicker { font-size: 12px; letter-spacing: 3px; color: var(--lit); font-weight: 800; }
+  .overlay h1 { font-size: clamp(28px, 7vw, 44px); margin-top: 10px; line-height: 1.15; }
+  .overlay p { color: #c3c8e6; margin-top: 10px; font-size: 16px; max-width: 420px; line-height: 1.5; }
+  .big-btn { margin-top: 26px; background: var(--lit); color: #0a0c18; border: none; border-radius: 16px; padding: 16px 30px; font-size: 18px; font-weight: 800; cursor: pointer; box-shadow: 0 0 30px rgba(255,184,76,.45); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+  .text-btn { margin-top: 14px; background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; text-decoration: underline; }
+  .mini-rocket { font-size: 54px; animation: bob 2.4s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-10px) rotate(-8deg); } }
+  .recap { margin-top: 18px; display: grid; gap: 8px; text-align: left; max-width: 360px; }
+  .recap div { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: var(--text); }
+  .recap span { flex: none; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,184,76,.18); color: var(--lit); font-weight: 800; font-size: 12px; display: grid; place-items: center; }
+
+  @media (min-width: 700px) {
+    #crew { gap: 14px; }
+    .chip { font-size: 15px; padding: 8px 14px 8px 8px; }
+    .chip .ph { width: 26px; height: 26px; }
+    #rocket-wrap { transform: scale(1.25); }
+    #card { top: 5%; }
+  }
+  @media (max-width: 440px) {
+    #crew { gap: 5px; }
+    .chip { font-size: 12px; gap: 4px; padding: 4px 8px 4px 4px; }
+    .chip .ph { width: 20px; height: 20px; font-size: 11px; }
+  }
+  @media (max-height: 640px) { #card { top: 8%; } #rocket-wrap { transform: scale(.85); } }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="sky"></canvas>
+  <div id="earth">🌍</div>
+  <div id="ground"><div id="pad"></div></div>
+  <div id="rocket-wrap">
+    <div id="rocket">
+      <div class="fin l"></div><div class="fin r"></div>
+      <div class="body"><div class="window"></div><div id="cargo"><div id="cargo-fill"></div></div></div>
+      <div class="engines">
+        <div class="engine"><div class="flame"></div></div><div class="engine"><div class="flame"></div></div>
+        <div class="engine"><div class="flame"></div></div><div class="engine"><div class="flame"></div></div>
+      </div>
+      <div id="lock">🔒</div>
+    </div>
+  </div>
+  <div id="padcrew"></div>
+  <div id="crew"></div>
+  <div id="card"></div>
+  <div id="toast"></div>
+  <div id="big"></div>
+  <div id="years">⏳ 3 years later…</div>
+  <div id="capsule"></div>
+
+  <div id="caption"><div id="step"></div><div id="title"></div><div id="sub"></div></div>
+  <div id="progress"></div>
+  <div id="controls">
+    <button class="ctl" id="mute">🔊</button>
+    <button class="ctl" id="skip">Skip ›</button>
+  </div>
+
+  <div class="overlay" id="start">
+    <div class="mini-rocket">🚀</div>
+    <div class="kicker" style="margin-top:14px">MISSION BRIEFING · 40 SEC</div>
+    <h1>How your crew's<br/>time capsule works</h1>
+    <p>Turn your sound on 🔊 — it's a short launch.</p>
+    <button class="big-btn" id="play">▶ Start briefing</button>
+    <button class="text-btn" id="skip-start">Skip, I know how it works</button>
+  </div>
+
+  <div class="overlay hidden" id="end">
+    <div class="kicker">YOUR MISSION</div>
+    <h1>Ready, crew?</h1>
+    <div class="recap">
+      <div><span>1</span>Start a crew, or join with your group's code.</div>
+      <div><span>2</span>All semester, add memories about your crewmates.</div>
+      <div><span>3</span>When everyone taps <b>&nbsp;Ready&nbsp;</b>, the rocket launches.</div>
+      <div><span>4</span>Years later, open the capsule together.</div>
+    </div>
+    <button class="big-btn" id="go">Let's go 🚀</button>
+    <button class="text-btn" id="again">Watch again</button>
+  </div>
+</div>
+
+<script src="/avatars.js"></script>
+<script src="/sfx.js"></script>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const SFX = window.LaunchSFX;
+  const sleepers = new Set();
+  let runId = 0;
+
+  // ---------- sleep that can be cancelled when skipping ----------
+  function sleep(ms) {
+    const id = runId;
+    return new Promise((res, rej) => {
+      const t = setTimeout(() => { sleepers.delete(t); id === runId ? res() : rej("cancel"); }, ms);
+      sleepers.add(t);
+    });
+  }
+  function cancelAll() { runId++; sleepers.forEach(clearTimeout); sleepers.clear(); }
+
+  // ---------- starfield ----------
+  const cv = $("sky"), cx = cv.getContext("2d");
+  let W, H, warp = 0;
+  const stars = Array.from({ length: 160 }, () => ({ x: Math.random(), y: Math.random(), z: Math.random() * 0.8 + 0.2, t: Math.random() * 6 }));
+  function resize() { const d = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; cx.setTransform(d, 0, 0, d, 0, 0); }
+  addEventListener("resize", resize); resize();
+  let last = performance.now();
+  (function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    cx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.y += warp * s.z * dt * 1.4;
+      if (s.y > 1) { s.y = 0; s.x = Math.random(); }
+      const a = (0.35 + 0.5 * s.z) * (0.75 + 0.25 * Math.sin(now / 700 + s.t));
+      cx.strokeStyle = cx.fillStyle = `rgba(255,255,255,${a.toFixed(3)})`;
+      const len = warp * s.z * 60;
+      if (len > 2) { cx.lineWidth = s.z * 1.6; cx.beginPath(); cx.moveTo(s.x * W, s.y * H); cx.lineTo(s.x * W, s.y * H - len); cx.stroke(); }
+      else cx.fillRect(s.x * W, s.y * H, s.z * 1.8, s.z * 1.8);
+    }
+    requestAnimationFrame(frame);
+  })(last);
+  function warpTo(target, ms) {
+    const from = warp, t0 = performance.now();
+    (function step(n) { const u = Math.min(1, (n - t0) / ms); warp = from + (target - from) * u; if (u < 1) requestAnimationFrame(step); })(t0);
+  }
+
+  // ---------- helpers ----------
+  const engines = [...document.querySelectorAll(".engine")];
+  const rocket = $("rocket"), wrap = $("rocket-wrap");
+  const AV = window.LaunchAvatars;
+  const face = (id, expr) => (AV ? AV.avatarSvg(id, { expr, size: 100 }) : "");
+  const CREW = [["orbit", "Noah"], ["comet", "Ruben"], ["blaze", "Ed"], ["nova", "You"]];
+  $("crew").innerHTML = CREW.map(([a, n]) => `<div class="chip"><div class="ph">${face(a)}</div>${n}<span class="tick">✓</span></div>`).join("");
+  const chips = [...document.querySelectorAll(".chip")];
+  // characters stand either side of the rocket: Noah, Ruben on the left; Ed, You on the right
+  const PC_X = [-140, -88, 88, 140];
+  $("padcrew").innerHTML = CREW.map(([a], i) => `<div class="pc" style="left:${PC_X[i] - 25}px"><div class="bob">${face(a)}</div></div>`).join("");
+  const pcs = [...document.querySelectorAll(".pc")];
+  function setFace(i, expr) { pcs[i].querySelector(".bob").innerHTML = face(CREW[i][0], expr); }
+  function hop(i) { pcs[i].classList.remove("hop"); void pcs[i].offsetWidth; pcs[i].classList.add("hop"); }
+
+  function caption(step, title, sub) {
+    const c = $("caption");
+    $("step").textContent = step; $("title").textContent = title; $("sub").textContent = sub || "";
+    c.classList.remove("fade"); void c.offsetWidth; c.classList.add("fade");
+  }
+
+  const SCENES = [crewScene, memoryScene, sealedScene, launchScene, homeScene, openScene];
+  const DURATIONS = [6500, 9800, 5000, 7700, 4900, 5000];
+  $("progress").innerHTML = SCENES.map(() => "<i><b></b></i>").join("");
+  const bars = [...document.querySelectorAll("#progress b")];
+  function progress(i) {
+    bars.forEach((b, j) => { b.style.transition = "none"; b.style.width = j < i ? "100%" : "0%"; });
+    const b = bars[i]; if (!b) return;
+    void b.offsetWidth; b.style.transition = `width ${DURATIONS[i]}ms linear`; b.style.width = "100%";
+  }
+
+  function reset() {
+    engines.forEach((e) => e.classList.remove("lit"));
+    chips.forEach((c) => c.classList.remove("in", "ready"));
+    pcs.forEach((p, i) => { p.classList.remove("in", "hop", "board"); p.style.transform = ""; setFace(i, "default"); });
+    rocket.classList.remove("boost", "shake");
+    rocket.style.transition = "none"; rocket.style.transform = "";
+    wrap.style.transition = "none"; wrap.style.top = ""; wrap.style.left = "";
+    $("ground").style.transform = ""; $("ground").style.opacity = "";
+    $("cargo-fill").style.height = "0%";
+    $("lock").classList.remove("on");
+    ["card", "toast", "years", "earth"].forEach((id) => $(id).classList.remove("in"));
+    $("capsule").innerHTML = ""; $("big").style.opacity = 0;
+    document.querySelectorAll(".orb").forEach((o) => o.remove());
+    warp = 0;
+  }
+
+  // ---------- scene 1: crew joins ----------
+  async function crewScene() {
+    caption("STEP 1 · FORM YOUR CREW", "Your DECO group gets one rocket.", "Each of you joins on your own phone, picks an astronaut, and lights an engine.");
+    SFX.play("radio");
+    await sleep(1400);
+    for (let i = 0; i < 4; i++) {
+      chips[i].classList.add("in"); pcs[i].classList.add("in"); engines[i].classList.add("lit"); SFX.play("ignite");
+      await sleep(1000);
+    }
+    await sleep(1000);
+  }
+
+  // ---------- scene 2: memories over the semester ----------
+  const EXAMPLES = [
+    ["WEEK 3", "Noah", "'s Merlo order is ", "a large oat flat white", ", no exceptions."],
+    ["WEEK 7", "Ruben", " defended our idea in crit by saying ", "“users don't read, they scan”", "."],
+    ["WEEK 12", "Ed", " the night before the deadline was ", "asleep on the beanbag", "."],
+  ];
+  async function memoryScene() {
+    caption("STEP 2 · ALL SEMESTER", "Drop in memories about each other.", "Tap a star, pick a crewmate, finish the sentence. Whenever something happens — not all in one go.");
+    const WRITER = [3, 0, 1], SUBJECT = [0, 1, 2];
+    for (let k = 0; k < EXAMPLES.length; k++) {
+      const [week, who, mid, fill, end] = EXAMPLES[k];
+      const card = $("card");
+      card.innerHTML = `<div class="lbl"><span>MEMORY STAR</span><b>${week}</b></div>
+        <div class="sent"><span class="who">${who}</span>${mid}<span class="blank" id="typed"></span>${end}</div>
+        <div class="btn" id="drop">Drop in capsule</div>`;
+      card.classList.add("in");
+      await sleep(450);
+      const typed = $("typed"), speed = k === 0 ? 55 : 32;
+      for (let i = 1; i <= fill.length; i++) { typed.textContent = fill.slice(0, i); if (i % 2) SFX.play("type"); await sleep(speed); }
+      await sleep(350);
+      $("drop").classList.add("press"); await sleep(140); $("drop").classList.remove("press");
+      hop(WRITER[k]); setFace(WRITER[k], "yay"); setFace(SUBJECT[k], "wow");
+      // the memory becomes a glowing orb and flies into the rocket
+      const r = card.getBoundingClientRect(), t = rocket.getBoundingClientRect();
+      card.classList.remove("in");
+      const orb = document.createElement("div"); orb.className = "orb"; $("stage").appendChild(orb);
+      const sx = r.left + r.width / 2, sy = r.top + r.height / 2, ex = t.left + t.width / 2, ey = t.top + t.height * 0.45;
+      orb.animate([{ transform: `translate(${sx - 9}px, ${sy - 9}px) scale(2.2)` }, { transform: `translate(${(sx + ex) / 2 + 60}px, ${(sy + ey) / 2 - 20}px) scale(1.4)` }, { transform: `translate(${ex - 9}px, ${ey - 9}px) scale(.6)` }], { duration: 850, easing: "cubic-bezier(.5,0,.3,1)", fill: "forwards" });
+      await sleep(820);
+      orb.remove(); SFX.play("chime");
+      setTimeout(((w, sj) => () => { setFace(w, "default"); setFace(sj, "default"); })(WRITER[k], SUBJECT[k]), 900);
+      $("cargo-fill").style.height = `${(k + 1) * 30}%`;
+      await sleep(k === EXAMPLES.length - 1 ? 700 : 500);
+    }
+  }
+
+  // ---------- scene 3: sealed ----------
+  async function sealedScene() {
+    caption("STEP 3 · IT STAYS SEALED", "Nobody can read them yet.", "You'll only see that someone added one — never what it says.");
+    await sleep(500);
+    $("lock").classList.add("on"); SFX.play("lock");
+    await sleep(1300);
+    $("toast").innerHTML = `<span class="tface">${face("blaze", "yay")}</span>Ed dropped a memory about you 👀 <b style="color:var(--lit)">✦</b>`;
+    $("toast").classList.add("in"); SFX.play("toast"); setFace(3, "wow"); hop(2);
+    await sleep(2600);
+    $("toast").classList.remove("in"); setFace(3, "default");
+    await sleep(500);
+  }
+
+  // ---------- scene 4: everyone ready → launch ----------
+  async function launchScene() {
+    caption("STEP 4 · END OF SEMESTER", "Everyone taps “Ready” — liftoff!", "When the whole crew is ready, the rocket launches by itself.");
+    $("lock").classList.remove("on");
+    for (let i = 0; i < 4; i++) { chips[i].classList.add("ready"); setFace(i, "yay"); hop(i); SFX.play("ready"); await sleep(320); }
+    await sleep(300);
+    chips.forEach((c) => c.classList.remove("in"));
+    // everyone climbs aboard
+    pcs.forEach((p, i) => { p.classList.add("board"); p.style.transform = `translate(${-PC_X[i]}px, -120px) scale(.15)`; });
+    const big = $("big");
+    for (const n of ["3", "2", "1"]) {
+      big.textContent = n; SFX.play("countdown");
+      big.animate([{ opacity: 0, transform: "scale(1.6)" }, { opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(.8)" }], { duration: 750, easing: "ease-out" });
+      await sleep(780);
+    }
+    SFX.play("countdown", { final: true }); SFX.play("liftoff");
+    rocket.classList.add("boost", "shake");
+    await sleep(900);
+    rocket.classList.remove("shake");
+    rocket.style.transition = "transform 3.2s cubic-bezier(.6,0,.8,.4)";
+    rocket.style.transform = `translateY(-${innerHeight * 1.25}px)`;
+    $("ground").style.transform = "translateY(60vh)"; $("ground").style.opacity = "0";
+    warpTo(2.5, 2200);
+    await sleep(2800);
+  }
+
+  // ---------- scene 5: years pass, it comes home ----------
+  async function homeScene() {
+    caption("STEP 5 · YEARS LATER", "Your rocket comes home.", "The app lets you know — get the crew together, in person or on a call.");
+    $("years").classList.add("in"); SFX.play("whoosh");
+    warpTo(0.15, 2500);
+    await sleep(1200);
+    $("earth").classList.add("in");
+    rocket.classList.remove("boost");
+    rocket.style.transition = "none";
+    rocket.style.transform = `translateY(-${innerHeight}px) rotate(180deg) scale(.6)`;
+    void rocket.offsetWidth;
+    rocket.style.transition = "transform 2.4s cubic-bezier(.2,.8,.3,1)";
+    rocket.style.transform = `translateY(-${innerHeight * 0.17}px) rotate(180deg) scale(.5)`;
+    SFX.play("whoosh");
+    await sleep(2800);
+    SFX.play("radio");
+    await sleep(800);
+  }
+
+  // ---------- scene 6: open it together ----------
+  async function openScene() {
+    caption("STEP 6 · OPEN IT TOGETHER", "…and you all read it, week by week.", "Everything your crew remembered about each other, all at once.");
+    $("years").classList.remove("in");
+    $("earth").style.opacity = ".25";
+    rocket.style.transition = "opacity .6s"; rocket.style.opacity = "0";
+    SFX.play("fanfare");
+    const mems = [
+      ["Noah's Merlo order is a large oat flat white, no exceptions.", "Week 3 · from you"],
+      ["Shirish kept the Miro board alive at 1am.", "Week 6 · from Ed, about you"],
+      ["Ruben defended our idea in crit: “users don't read, they scan”.", "Week 7 · from Noah"],
+    ];
+    $("capsule").innerHTML = mems.map(([t, s]) => `<div class="mem">${t}<small>${s}</small></div>`).join("");
+    const els = [...document.querySelectorAll(".mem")];
+    for (const el of els) { await sleep(450); el.classList.add("in"); SFX.play("chime"); }
+    await sleep(3500);
+    $("earth").style.opacity = ""; rocket.style.opacity = "";
+  }
+
+  // ---------- running ----------
+  let playing = false;
+  async function run(from = 0) {
+    cancelAll(); reset(); playing = true;
+    $("start").classList.add("hidden"); $("end").classList.add("hidden");
+    SFX.unlock(); SFX.hum(true);
+    const id = runId;
+    try {
+      for (let i = from; i < SCENES.length; i++) { progress(i); await SCENES[i](); }
+      if (id === runId) finish();
+    } catch (e) { /* cancelled */ }
+  }
+  function finish() {
+    cancelAll(); playing = false; SFX.hum(false);
+    bars.forEach((b) => { b.style.transition = "none"; b.style.width = "100%"; });
+    $("end").classList.remove("hidden");
+  }
+  function done() {
+    SFX.hum(false);
+    try { localStorage.setItem("launch-sequence:intro-seen", "1"); } catch (e) {}
+    const msg = JSON.stringify({ type: "intro-done" });
+    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(msg);
+    else if (window.parent !== window) window.parent.postMessage(msg, "*");
+    else location.href = "/";
+  }
+
+  $("play").onclick = () => run(0);
+  $("again").onclick = () => run(0);
+  $("go").onclick = done;
+  $("skip-start").onclick = done;
+  $("skip").onclick = () => (playing ? finish() : done());
+  $("mute").onclick = () => { SFX.unlock(); SFX.setMuted(!SFX.muted); $("mute").textContent = SFX.muted ? "🔇" : "🔊"; };
+  const qs = new URLSearchParams(location.search);
+  if (qs.get("autoplay") === "1") run(Number(qs.get("scene") || 0));
+})();
+</script>
+</body>
+</html>
