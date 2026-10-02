@@ -1,0 +1,48 @@
+{
+  "participant": {
+    "id": "a81rNFLwJODPYd-VHzDX7",
+    "name": "Dong"
+  },
+  "blanks": [
+    {
+      "promptId": "p3",
+      "filledText": [
+        "beard",
+        "smelly everyday"
+      ],
+      "aboutParticipantId": "9_aeg3g3YlIgSfA5f4yia",
+      "promptText": "Sam's beard is so smelly everyday!",
+      "blankedPrompt": "___'s beard is so smelly everyday!"
+    },
+    {
+      "promptId": "p7",
+      "filledText": [
+        "farting in my face"
+      ],
+      "aboutParticipantId": "9_aeg3g3YlIgSfA5f4yia",
+      "promptText": "Nobody could get Sam to stop farting in my face.",
+      "blankedPrompt": "Nobody could get ___ to stop farting in my face."
+    },
+    {
+      "promptId": "p10",
+      "filledText": [
+        "Highway to hell",
+        "it is literally hell"
+      ],
+      "aboutParticipantId": null,
+      "promptText": "If our group had a theme song it'd be \"Highway to hell\" because it is literally hell.",
+      "blankedPrompt": null
+    },
+    {
+      "promptId": "p11",
+      "filledText": [
+        "he smells like he didn't wipe his ass"
+      ],
+      "aboutParticipantId": "b6yJAC1ty3SDvUw6QW0ya",
+      "promptText": "I never told Jordan this but he smells like he didn't wipe his ass.",
+      "blankedPrompt": "I never told ___ this but he smells like he didn't wipe his ass."
+    }
+  ],
+  "drawing": "/uploads/ADUPFK/a81rNFLwJODPYd-VHzDX7/drawing-1790981798574.png",
+  "uploadedImages": []
+}

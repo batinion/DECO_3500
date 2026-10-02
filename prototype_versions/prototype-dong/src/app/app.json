@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Capsule",
+    "slug": "launch-sequence-capsule",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Capsule uses the camera to scan the Mission Control join code and to take photos for your submission.",
+        "NSPhotoLibraryUsageDescription": "Capsule needs photo library access so you can add a photo to your submission."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#05060f",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Capsule uses the camera to scan the Mission Control join code and to take photos for your submission."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Capsule needs photo library access so you can add a photo to your submission."
+        }
+      ]
+    ]
+  }
+}

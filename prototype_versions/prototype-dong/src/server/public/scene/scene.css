@@ -1,0 +1,223 @@
+/* Launch Sequence — shared live scene. Used by Mission Control and the participant background. */
+* { box-sizing: border-box; }
+
+:root {
+  --bg: #05060f;
+  --panel: #10132399;
+  --border: #2a2f4a;
+  --text: #eef0ff;
+  --muted: #8890b5;
+  --accent: #4cc9f0;
+  --accent-2: #ff6ec7;
+  --lit: #ffb84c;
+}
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+}
+
+#scene-root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 120%, #0b1030 0%, #05060f 70%);
+}
+
+#scene-root.role-participant { pointer-events: none; user-select: none; }
+#scene-root.advance-ready { cursor: pointer; }
+
+#sky { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+
+/* Dusk-blue haze near the pad; burns off as the rocket climbs out of the atmosphere. */
+#atmo {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(to top, #2a4a8a 0%, #14224a 38%, rgba(20,34,74,0) 85%);
+}
+
+/* ---- Moon ---- */
+#moon {
+  position: absolute; left: 0; top: 0; z-index: 4;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f4f5ff 0%, #c9cbdf 45%, #8c90ad 100%);
+  box-shadow: 0 0 60px 8px rgba(190, 200, 255, 0.28), inset -22px -18px 40px rgba(20, 24, 60, 0.45);
+  will-change: transform;
+}
+.crater { position: absolute; border-radius: 50%; background: rgba(60, 66, 100, 0.28); box-shadow: inset 3px 3px 6px rgba(0,0,0,0.25); }
+.c1 { width: 44px; height: 44px; left: 40px; top: 52px; }
+.c2 { width: 26px; height: 26px; left: 118px; top: 34px; }
+.c3 { width: 56px; height: 56px; left: 104px; top: 108px; }
+.c4 { width: 18px; height: 18px; left: 60px; top: 136px; }
+
+/* ---- Ground / pad ---- */
+#ground {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; will-change: transform;
+  background: linear-gradient(#141a35, #080a18 60%);
+  border-top: 2px solid #2a2f4a;
+}
+#ground.gone { display: none; }
+#pad {
+  position: absolute; top: -2px; height: 10px; transform: translateX(-50%);
+  background: #3a4066; border-radius: 4px 4px 0 0;
+}
+
+/* ---- Earth ---- */
+#earth-wrap {
+  position: absolute; right: 10%; bottom: 12%; z-index: 2; opacity: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.role-participant #earth-wrap { right: 8%; bottom: auto; top: 14%; }
+#earth { font-size: 110px; line-height: 1; filter: drop-shadow(0 0 50px rgba(76,201,240,0.45)); }
+.role-participant #earth { font-size: 72px; }
+#earth-wrap.clickable #earth { cursor: pointer; pointer-events: auto; animation: earth-pulse 2s ease-in-out infinite; }
+@keyframes earth-pulse {
+  0%, 100% { filter: drop-shadow(0 0 50px rgba(76,201,240,0.45)); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 70px rgba(76,201,240,0.75)); transform: scale(1.05); }
+}
+#earth-hint { font-size: 13px; letter-spacing: 1px; color: var(--muted); opacity: 0; transition: opacity 0.5s ease; white-space: nowrap; }
+#earth-wrap.clickable #earth-hint { opacity: 1; }
+.role-participant #earth-hint { display: none; }
+
+/* ---- Rocket ---- */
+#rocket {
+  position: absolute; left: 0; top: 0; z-index: 5;
+  width: 70px; height: 180px; transform-origin: 35px 90px;
+  display: flex; flex-direction: column; align-items: center;
+  will-change: transform;
+}
+.rocket-body {
+  width: 70px; height: 160px; flex: none;
+  background: linear-gradient(180deg, #e9ecff, #c7cbf5);
+  border-radius: 35px 35px 12px 12px; border: 2px solid #444a72;
+  position: relative; display: flex; align-items: center; justify-content: center;
+}
+.rocket-window { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); border: 3px solid #1c2038; }
+.rocket-fin { position: absolute; width: 34px; height: 54px; background: var(--accent-2); bottom: 34px; }
+.fin-left { left: -22px; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+.fin-right { right: -22px; clip-path: polygon(0 0, 100% 100%, 0 100%); }
+
+#engines { display: flex; gap: 10px; margin-top: -6px; flex: none; }
+.engine {
+  width: 20px; height: 26px; background: #2a2f4a;
+  border-radius: 0 0 10px 10px; border: 2px solid #444a72; border-top: none;
+  position: relative; display: flex; justify-content: center;
+}
+.engine .flame {
+  position: absolute; top: 100%; width: 10px; height: 0;
+  background: linear-gradient(180deg, #fff6c8, var(--lit), transparent);
+  border-radius: 0 0 8px 8px; opacity: 0; transform-origin: top;
+  transition: height 0.4s ease, opacity 0.4s ease;
+}
+.engine.lit { border-color: var(--lit); box-shadow: 0 0 16px 2px var(--lit); }
+.engine.lit .flame { height: 38px; opacity: 1; animation: flicker 0.15s infinite alternate; }
+.boost .engine.lit .flame { height: 84px; width: 12px; }
+@keyframes flicker { from { transform: scaleY(1); } to { transform: scaleY(0.82); } }
+
+/* ---- Join panel (QR + code). Shown on Mission Control always, participant screens while joining. ---- */
+#join-panel {
+  position: absolute; top: 76px; left: 32px; z-index: 7; width: 230px;
+  display: none; /* join QR/code: only until everyone has joined */ flex-direction: column; align-items: center; gap: 4px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 16px;
+  backdrop-filter: blur(6px);
+}
+#qr-image { width: 150px; height: 150px; background: #fff; border-radius: 8px; padding: 6px; }
+.label { font-size: 11px; letter-spacing: 2px; color: var(--muted); margin-top: 8px; }
+#join-code { font-size: 30px; font-weight: 800; letter-spacing: 6px; color: var(--lit); }
+#join-manual { font-size: 12px; color: var(--muted); }
+.joining #join-panel { display: flex; }
+.role-participant #join-panel { top: 12px; left: 12px; width: 150px; padding: 10px; }
+.role-participant #qr-image { width: 90px; height: 90px; }
+.role-participant #join-code { font-size: 20px; letter-spacing: 4px; }
+@media (max-width: 640px) { .role-participant #join-panel { display: none !important; } }
+
+/* ---- Time-jump captions ---- */
+.scene-text {
+  position: absolute; left: 50%; top: 22%; z-index: 8; pointer-events: none; text-align: center;
+  transform: translate(-50%, -50%) scale(0.85); opacity: 0;
+  transition: opacity 0.6s ease, transform 0.6s ease; width: max-content; max-width: 90vw;
+}
+.scene-text.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+#txt-cooking { font-size: 40px; font-weight: 800; letter-spacing: 2px; color: var(--lit); text-shadow: 0 0 26px rgba(255,184,76,0.55); }
+#txt-years { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 22px; letter-spacing: 1px; }
+.clock-icon { font-size: 46px; animation: clock-spin 2.4s linear infinite; }
+@keyframes clock-spin { to { transform: rotate(360deg); } }
+#txt-puzzle { top: auto; bottom: 14%; max-width: 480px; font-size: 16px; color: var(--accent); }
+.scene-text.show#txt-puzzle { transform: translate(-50%, 0) scale(1); }
+#txt-advance { top: auto; bottom: 8%; font-size: 12px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; display: none; }
+.role-mc.advance-ready #txt-advance { display: block; opacity: 0.8; transform: translate(-50%, 0); }
+.role-participant .scene-text { font-size: 0.7em; }
+.role-participant #txt-cooking { font-size: 26px; }
+/* ---- Colour reveal, Guess Who + capsule (Mission Control only — a shared, colocated
+   moment; participant phones just show the live scene behind a dimming scrim while
+   the crew plays/discusses together looking at this screen) ---- */
+#reveal-overlay {
+  position: absolute; inset: 0; z-index: 9; background: rgba(5,6,15,0.88);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+  transition: opacity 0.6s ease;
+}
+#reveal-overlay.hidden, #puzzle-overlay.hidden, #capsule-overlay.hidden { opacity: 0; pointer-events: none; }
+.role-participant #reveal-overlay, .role-participant #puzzle-overlay, .role-participant #capsule-overlay { display: none; }
+#reveal-overlay h2 { letter-spacing: 4px; color: var(--lit); }
+#reveal-grid { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; max-width: 900px; }
+.reveal-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; text-align: center; min-width: 160px; }
+.reveal-card .name { font-weight: 700; margin-bottom: 10px; }
+.reveal-swatches { display: flex; gap: 8px; justify-content: center; }
+.reveal-swatch { width: 44px; height: 44px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); }
+.reveal-swatch-label { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+/* ---- Guess Who (puzzle phase): one memory card at a time, revealed and discussed
+   together before moving on — replaces the old external-link-and-upload puzzle. ---- */
+#puzzle-overlay {
+  position: absolute; inset: 0; z-index: 9; background: rgba(5,6,15,0.9);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  transition: opacity 0.6s ease; padding: 24px; text-align: center;
+}
+#puzzle-overlay h2 { letter-spacing: 4px; color: var(--lit); margin: 0; }
+#puzzle-progress { font-size: 13px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+#puzzle-card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 18px;
+  padding: 36px 44px; max-width: 640px; min-width: 320px; display: flex; flex-direction: column; gap: 16px;
+}
+#puzzle-prompt { font-size: 26px; font-weight: 700; line-height: 1.4; color: var(--text); }
+#puzzle-answer { font-size: 20px; font-weight: 700; color: var(--accent); }
+#puzzle-answer.hidden, #puzzle-discussion.hidden { display: none; }
+#puzzle-discussion { font-size: 15px; color: var(--muted); font-style: italic; }
+#puzzle-actions { display: flex; gap: 14px; }
+#puzzle-actions button {
+  background: var(--panel); border: 1px solid var(--border); color: var(--text);
+  padding: 12px 26px; border-radius: 10px; font-size: 15px; letter-spacing: 1px; cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+#puzzle-actions button:hover { border-color: var(--accent); color: var(--accent); }
+#puzzle-actions button.hidden { display: none; }
+#btn-next-card { border-color: var(--lit); color: var(--lit); }
+#btn-next-card:hover { background: var(--lit); color: #1c2038; }
+
+#capsule-overlay {
+  position: absolute; inset: 0; z-index: 10; background: rgba(5,6,15,0.97);
+  overflow-y: auto; padding: 40px 32px; transition: opacity 0.6s ease;
+}
+#capsule-overlay h2 { text-align: center; letter-spacing: 4px; color: var(--lit); margin-top: 0; }
+#capsule-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; max-width: 1400px; margin: 24px auto 0; }
+.capsule-card {
+  position: relative; display: flex; flex-direction: column; width: 320px; min-height: 520px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px;
+  transition: transform 0.28s cubic-bezier(.2,.8,.2,1), box-shadow 0.28s ease, border-color 0.28s ease;
+}
+.capsule-card:hover { transform: translateY(-8px) scale(1.04); border-color: var(--accent); box-shadow: 0 20px 44px rgba(0,0,0,0.5); z-index: 2; }
+.capsule-name { font-weight: 700; font-size: 17px; margin-bottom: 4px; }
+.capsule-colors { display: flex; gap: 6px; margin-bottom: 14px; }
+.capsule-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); }
+.capsule-entry { margin-bottom: 14px; }
+.capsule-prompt { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.capsule-value { font-size: 14px; color: var(--text); white-space: pre-wrap; }
+.capsule-media-section { margin-top: auto; padding-top: 16px; }
+.capsule-media-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.capsule-media { display: flex; flex-wrap: wrap; gap: 10px; }
+.capsule-media img { width: calc(50% - 5px); min-height: 120px; border-radius: 10px; object-fit: cover; }
+.capsule-media-empty { min-height: 150px; display: flex; align-items: center; justify-content: center; border: 1px dashed var(--border); border-radius: 10px; color: var(--muted); font-size: 13px; }
