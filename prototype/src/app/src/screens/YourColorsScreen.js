@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { colors, spacing, type } from "../lib/theme";
+import { BLACK, GREEN, colors, spacing, type } from "../lib/theme";
 
 export default function YourColorsScreen({ colors: mission }) {
   return (
@@ -25,7 +25,7 @@ export default function YourColorsScreen({ colors: mission }) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, padding: spacing.lg, alignItems: "center", justifyContent: "center", gap: spacing.sm },
+  wrap: { flex: 1, padding: spacing.lg, backgroundColor: BLACK, borderColor: GREEN, borderWidth: 2, margin: spacing.md, alignItems: "center", justifyContent: "center", gap: spacing.sm },
   swatchRow: { flexDirection: "row", gap: spacing.lg, marginTop: spacing.xl },
   card: { alignItems: "center", gap: spacing.xs },
   swatch: { width: 96, height: 96, borderRadius: 20, borderWidth: 2, borderColor: "rgba(255,255,255,0.2)" },

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Modal, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
-import { BlurView } from "expo-blur";
-import PrimaryButton from "./PrimaryButton";
 import FriendPicker from "./FriendPicker";
-import { colors, spacing, type } from "../lib/theme";
+import { spacing } from "../lib/theme";
+import { GREEN, DIM, WHITE, BLACK, MONO } from "./TerminalPanel";
 import { parseTemplate, templateHasName, templateBlankCount } from "../lib/prompts";
 
 export default function PromptSheet({ visible, star, participants, initialValue, onCollect, onClose }) {
@@ -45,8 +44,8 @@ export default function PromptSheet({ visible, star, participants, initialValue,
           style={styles.sheetWrap}
           pointerEvents="box-none"
         >
-        <BlurView intensity={55} tint="dark" style={styles.sheet}>
-          <Text style={type.label}>{isFree ? "WRITE ANYTHING" : "FILL IN THE BLANK"}</Text>
+        <View style={styles.sheet}>
+          <Text style={styles.title}>C:\LAUNCH_SEQUENCE&gt; {isFree ? "WRITE_ANYTHING" : "FILL_IN_THE_BLANK"}</Text>
 
           <View style={styles.body}>
             {isFree ? (
@@ -54,7 +53,8 @@ export default function PromptSheet({ visible, star, participants, initialValue,
                 style={styles.freeInput}
                 multiline
                 placeholder="Write anything you want to add…"
-                placeholderTextColor={colors.muted}
+                placeholderTextColor={DIM}
+                selectionColor={GREEN}
                 value={filledText[0] || ""}
                 onChangeText={(v) => setBlank(0, v)}
                 autoFocus
@@ -88,7 +88,7 @@ export default function PromptSheet({ visible, star, participants, initialValue,
 
             {isFree && (
               <View style={styles.freeFriendRow}>
-                <Text style={type.muted}>Optionally, about: </Text>
+                <Text style={styles.hint}>Optionally, about: </Text>
                 <FriendPicker
                   participants={participants}
                   value={aboutParticipantId}
@@ -101,13 +101,17 @@ export default function PromptSheet({ visible, star, participants, initialValue,
 
           <View style={styles.actions}>
             <View style={{ flex: 1 }}>
-              <PrimaryButton title="Back to stars" variant="dark" onPress={onClose} />
+              <Pressable style={styles.btn} onPress={onClose}>
+                <Text style={styles.btnText}>[ &lt; BACK ]</Text>
+              </Pressable>
             </View>
             <View style={{ flex: 1 }}>
-              <PrimaryButton title="Add" onPress={handleCollect} />
+              <Pressable style={[styles.btn, styles.btnPrimary]} onPress={handleCollect}>
+                <Text style={[styles.btnText, { color: WHITE }]}>[ ADD &gt; ]</Text>
+              </Pressable>
             </View>
           </View>
-        </BlurView>
+        </View>
         </KeyboardAvoidingView>
       </View>
     </Modal>
@@ -116,25 +120,22 @@ export default function PromptSheet({ visible, star, participants, initialValue,
 
 const styles = StyleSheet.create({
   modalRoot: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.md },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.5)" },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.6)" },
   sheetWrap: { width: "100%", maxWidth: 480, alignItems: "center", justifyContent: "center" },
   sheet: {
     width: "100%",
-    minHeight: 380,
-    overflow: "hidden",
-    backgroundColor: "rgba(22, 26, 46, 0.38)",
-    borderRadius: 24,
-    padding: spacing.xl,
-    paddingBottom: spacing.xl,
+    minHeight: 340,
+    backgroundColor: BLACK,
+    padding: spacing.lg,
     maxHeight: "92%",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.22)",
-    shadowColor: "#000",
-    shadowOpacity: 0.35,
-    shadowRadius: 30,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 12,
+    borderWidth: 2,
+    borderColor: GREEN,
   },
+  title: { fontFamily: MONO, color: WHITE, fontSize: 13, fontWeight: "700" },
+  hint: { fontFamily: MONO, color: GREEN, fontSize: 13 },
+  btn: { borderWidth: 1, borderColor: GREEN, paddingVertical: 11, alignItems: "center", backgroundColor: BLACK },
+  btnPrimary: { backgroundColor: "#04210d" },
+  btnText: { fontFamily: MONO, color: GREEN, fontSize: 14, fontWeight: "700", letterSpacing: 2 },
   body: {
     flexGrow: 1,
     position: "relative",
@@ -147,14 +148,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: spacing.md,
   },
-  sentenceText: { ...type.heading, lineHeight: 30 },
+  sentenceText: { fontFamily: MONO, color: GREEN, fontSize: 17, fontWeight: "700", lineHeight: 30 },
   blankInput: {
     minWidth: 120,
     minHeight: 40,
     borderBottomWidth: 2,
-    borderBottomColor: colors.accent,
-    color: colors.text,
-    fontSize: 18,
+    borderBottomColor: GREEN,
+    backgroundColor: "#04210d",
+    color: WHITE,
+    fontFamily: MONO,
+    fontSize: 16,
     fontWeight: "700",
     paddingHorizontal: 4,
     paddingVertical: 4,
@@ -163,10 +166,11 @@ const styles = StyleSheet.create({
   freeInput: {
     minHeight: 180,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    color: colors.text,
-    borderRadius: 10,
+    borderColor: GREEN,
+    backgroundColor: BLACK,
+    color: WHITE,
+    fontFamily: MONO,
+    borderRadius: 0,
     padding: 12,
     marginTop: spacing.md,
     textAlignVertical: "top",

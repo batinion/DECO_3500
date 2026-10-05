@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Image, Pressable, Alert } from "rea
 import * as ImagePicker from "expo-image-picker";
 import DrawingCanvas from "../components/DrawingCanvas";
 import PrimaryButton from "../components/PrimaryButton";
-import { colors, spacing, type } from "../lib/theme";
+import { BLACK, GREEN, colors, spacing, type } from "../lib/theme";
 import { uploadDrawing, uploadPhoto } from "../lib/api";
 
 export default function DrawUploadPage({
@@ -119,11 +119,11 @@ export default function DrawUploadPage({
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, padding: spacing.lg, paddingTop: spacing.xl },
+  wrap: { flex: 1, padding: spacing.lg, backgroundColor: BLACK, borderColor: GREEN, borderWidth: 2, margin: spacing.md },
   row: { flexDirection: "row", gap: spacing.sm },
   gallery: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
   thumbWrap: { alignItems: "center" },
-  thumb: { width: 80, height: 80, borderRadius: 10, backgroundColor: colors.panel },
+  thumb: { width: 80, height: 80, borderRadius: 0, backgroundColor: colors.panel },
   removeLabel: { color: colors.danger, fontSize: 11, marginTop: 4 },
   nav: { flexDirection: "row", gap: spacing.sm, paddingTop: spacing.sm },
 });

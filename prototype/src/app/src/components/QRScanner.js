@@ -67,7 +67,7 @@ export default function QRScanner({ onScanned, onCancel }) {
 
 const styles = StyleSheet.create({
   center: { alignItems: "center", justifyContent: "center", gap: 12, padding: 20 },
-  cameraWrap: { height: 320, borderRadius: 16, overflow: "hidden", backgroundColor: "#000" },
+  cameraWrap: { height: 320, borderRadius: 0, overflow: "hidden", backgroundColor: "#000" },
   frame: {
     position: "absolute",
     top: "20%",
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     bottom: "20%",
     borderWidth: 2,
     borderColor: colors.accent,
-    borderRadius: 12,
+    borderRadius: 0,
   },
   cancelBtn: {
     position: "absolute",
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.6)",
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 0,
   },
   linkBtn: { paddingVertical: 6 },
 });

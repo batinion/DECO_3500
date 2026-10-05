@@ -42,7 +42,6 @@ export default function Star({ visual, collected, label, onPress }) {
 
   const size = Math.max(10, Math.round(visual.size * 0.75)); // glow makes them read bigger
   const disc = (d) => ({ width: d, height: d, borderRadius: d / 2, left: (size - d) / 2, top: (size - d) / 2 });
-  const spike = (w, h) => ({ width: w, height: h, borderRadius: 1, left: (size - w) / 2, top: (size - h) / 2, backgroundColor: "rgba(255, 224, 150, 0.7)" });
 
   return (
     <Pressable
@@ -56,9 +55,6 @@ export default function Star({ visual, collected, label, onPress }) {
         {/* soft golden halo: two translucent discs behind the core */}
         <View style={[styles.layer, disc(size * 3.4), { backgroundColor: "rgba(255, 196, 77, 0.10)" }]} />
         <View style={[styles.layer, disc(size * 2.1), { backgroundColor: "rgba(255, 200, 90, 0.22)" }]} />
-        {/* sparkle cross */}
-        <View style={[styles.layer, spike(size * 3, 1.5)]} />
-        <View style={[styles.layer, spike(1.5, size * 3)]} />
         {/* bright warm core */}
         <View
           style={[

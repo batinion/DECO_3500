@@ -5,7 +5,7 @@ const makeCode = customAlphabet("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 6);
 
 const MAX_PARTICIPANTS = 4;
 const FAKE_NAMES = ["Sam", "Jordan", "Riley", "Casey"];
-const PHASES = ["joining", "launching", "cruising", "arrived", "timejump", "earth", "puzzle", "revealed"];
+const PHASES = ["joining", "countdown", "launching", "cruising", "arrived", "timejump", "earth", "puzzle", "revealed"];
 
 function freshSession() {
   return {

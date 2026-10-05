@@ -258,7 +258,7 @@
       x: lerp(a.x, b.x, p), y: lerp(a.y, b.y, p), s: lerp(a.s, b.s, p), r: lerp(a.r, b.r, p), behind: b.behind,
     });
 
-    if (phase === "joining") {
+    if (phase === "joining" || phase === "countdown") {
       rk = padPose();
       warp = 0; atmo = 1;
     } else if (phase === "launching") {

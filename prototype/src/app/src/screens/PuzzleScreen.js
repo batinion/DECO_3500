@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, Linking, Alert, Image } from "react-
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import PrimaryButton from "../components/PrimaryButton";
-import { colors, spacing, type } from "../lib/theme";
+import { BLACK, GREEN, colors, spacing, type } from "../lib/theme";
 import { uploadPuzzleAnswer } from "../lib/api";
 
 export default function PuzzleScreen({ puzzleUrl, code, participantId, serverUrl, missionColors, onAnswerUploaded }) {
@@ -92,13 +92,13 @@ export default function PuzzleScreen({ puzzleUrl, code, participantId, serverUrl
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, padding: spacing.lg, paddingTop: spacing.xl },
+  wrap: { flex: 1, padding: spacing.lg, backgroundColor: BLACK, borderColor: GREEN, borderWidth: 2, margin: spacing.md },
   linkBox: {
     marginTop: spacing.lg,
     borderWidth: 1,
     borderColor: colors.accent,
     backgroundColor: colors.panel,
-    borderRadius: 12,
+    borderRadius: 0,
     padding: spacing.md,
   },
   linkText: { color: colors.accent, fontWeight: "700", fontSize: 16 },
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.panel,
-    borderRadius: 12,
+    borderRadius: 0,
     padding: spacing.md,
   },
   colorsLabel: { color: colors.muted, fontSize: 12, flexShrink: 1 },
@@ -119,6 +119,6 @@ const styles = StyleSheet.create({
   swatchWrap: { alignItems: "center" },
   swatch: { width: 32, height: 32, borderRadius: 8, borderWidth: 1, borderColor: "rgba(255,255,255,0.2)" },
   swatchName: { color: colors.muted, fontSize: 10, marginTop: 3 },
-  preview: { width: "100%", height: 180, borderRadius: 12, backgroundColor: colors.panel, marginBottom: spacing.sm },
+  preview: { width: "100%", height: 180, borderRadius: 0, backgroundColor: colors.panel, marginBottom: spacing.sm },
   row: { flexDirection: "row", gap: spacing.sm },
 });

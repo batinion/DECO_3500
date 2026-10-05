@@ -9,6 +9,7 @@ import { colors } from "./src/lib/theme";
 
 import SceneBackground from "./src/components/SceneBackground";
 import CrewPanel from "./src/components/CrewPanel";
+import TerminalPanel, { TerminalFrame } from "./src/components/TerminalPanel";
 import JoinScreen from "./src/screens/JoinScreen";
 import SubmissionScreen from "./src/screens/SubmissionScreen";
 import SubmittedWaitingScreen from "./src/screens/SubmittedWaitingScreen";
@@ -30,6 +31,7 @@ function deriveScreen(joined, scene, selfId) {
   if (!me) return "waiting"; // joined, snapshot with us in it not here yet
   switch (scene.phase) {
     case "joining":
+    case "countdown":
     case "launching":
       return "waiting";
     case "cruising":
@@ -164,6 +166,20 @@ export default function App() {
     // The screen flips to "submitted" when the next scene_state shows our status.
   }
 
+  // 5 -> 1 while the server is in its "countdown" phase (server clock, so it matches Mission Control).
+  const [countdown, setCountdown] = useState(null);
+  useEffect(() => {
+    if (scene?.phase !== "countdown") return setCountdown(null);
+    const offset = scene.serverNow - Date.now();
+    const tick = () => {
+      const left = Math.ceil((scene.timing.countdownMs - (Date.now() + offset - scene.phaseStartedAt)) / 1000);
+      setCountdown(Math.min(Math.max(left, 1), Math.ceil(scene.timing.countdownMs / 1000)));
+    };
+    tick();
+    const t = setInterval(tick, 200);
+    return () => clearInterval(t);
+  }, [scene?.phase, scene?.phaseStartedAt]);
+
   const screen = deriveScreen(joined, scene, participantId);
   const participants = scene?.participants || [];
   const myColors = scene?.reveal?.find((p) => p.id === participantId)?.colors || null;
@@ -180,9 +196,9 @@ export default function App() {
 
       <SafeAreaView style={styles.safe}>
         {screen === "join" && (
-          <CrewPanel>
+          <TerminalFrame>
             <JoinScreen onJoin={handleJoin} joining={joining} error={error} initialServer={initialServer} onServerChange={handleServerChange} />
-          </CrewPanel>
+          </TerminalFrame>
         )}
         {/* No panel after sign-in: the scene itself shows your lit engine. The form returns on a new session. */}
         {screen === "submission" && (
@@ -192,6 +208,7 @@ export default function App() {
             serverUrl={serverUrl}
             participants={participants}
             selfId={participantId}
+            phase={scene?.phase}
             onSubmit={handleSubmit}
           />
         )}
@@ -209,10 +226,14 @@ export default function App() {
         )}
         {screen === "capsule-notice" && <CapsuleScreen capsule={scene?.capsule} serverUrl={serverUrl} selfId={participantId} />}
 
-        {screen === "submission" && (
-          <View style={styles.chip} pointerEvents="none">
-            <Text style={styles.chipText}>{submittedCount} of 4 submitted</Text>
-          </View>
+        {screen === "waiting" && (
+          <TerminalPanel
+            participants={participants}
+            selfId={participantId}
+            phase={scene?.phase}
+            countdown={countdown}
+            instructions={["You're in - your engine is lit.", "Wait for the rest of the crew.", "Memory Stars open when all are aboard."]}
+          />
         )}
       </SafeAreaView>
     </View>

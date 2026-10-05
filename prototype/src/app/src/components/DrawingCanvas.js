@@ -79,7 +79,7 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_props, ref) {
 const styles = StyleSheet.create({
   wrap: {
     height: 260,
-    borderRadius: 12,
+    borderRadius: 0,
     backgroundColor: "#f5f6fb",
     borderWidth: 1,
     borderColor: colors.border,

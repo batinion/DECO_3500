@@ -4,12 +4,17 @@ import DrawUploadPage from "./DrawUploadPage";
 import { PROMPT_BANK, renderFilledTemplate } from "../lib/prompts";
 import { saveAnswerDraft, loadAnswerDraft, clearAnswerDraft } from "../lib/storage";
 
+// Five "write anything" stars (the original plus four more); StarFieldPage scatters every star randomly.
+const FREE_STAR_COUNT = 5;
+const freeStars = () =>
+  Array.from({ length: FREE_STAR_COUNT }, (_, i) => ({ id: i === 0 ? "free_text" : `free_text_${i + 1}`, kind: "free" }));
+
 /**
  * Owns the whole "Fill the Blanks" -> "Draw + Upload" -> Submit flow. Keeps its own
  * local state (mirroring the old QuestionsScreen's pattern) and only reports upward
  * once, via onSubmit, with the final Submission payload.
  */
-export default function SubmissionScreen({ code, participantId, serverUrl, participants, selfId, onSubmit }) {
+export default function SubmissionScreen({ code, participantId, serverUrl, participants, selfId, phase, onSubmit }) {
   const [ready, setReady] = useState(false);
   const [stars, setStars] = useState([]);
   const [page, setPage] = useState("starfield");
@@ -30,7 +35,9 @@ export default function SubmissionScreen({ code, participantId, serverUrl, parti
       // A storage failure must never leave the Memory Stars screen blank.
       const draft = await loadAnswerDraft(code, participantId).catch(() => null);
       if (draft?.stars?.length) {
-        setStars(draft.stars);
+        // Older drafts predate the extra write-anything stars: top them up.
+        const have = new Set(draft.stars.map((s) => s.id));
+        setStars([...draft.stars, ...freeStars().filter((s) => !have.has(s.id))]);
         setCollected(draft.collected || {});
         setDrawingFileUrl(draft.drawingFileUrl || null);
         setUploadedImages(draft.uploadedImages || []);
@@ -38,7 +45,7 @@ export default function SubmissionScreen({ code, participantId, serverUrl, parti
       } else {
         // Every prompt in the bank shows up as a star, every session — no random subset.
         const all = PROMPT_BANK.map((p) => ({ id: p.id, kind: "prompt", template: p.template }));
-        setStars([...all, { id: "free_text", kind: "free" }]);
+        setStars([...all, ...freeStars()]);
       }
       loadedFor.current = participantId;
       setReady(true);
@@ -92,6 +99,9 @@ export default function SubmissionScreen({ code, participantId, serverUrl, parti
       <StarFieldPage
         stars={stars}
         participants={otherParticipants}
+        allParticipants={participants}
+        selfId={selfId}
+        phase={phase}
         collected={collected}
         onCollect={handleCollect}
         onContinue={() => setPage("drawupload")}

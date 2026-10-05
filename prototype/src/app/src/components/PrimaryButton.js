@@ -1,41 +1,35 @@
 import React from "react";
 import { Pressable, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { colors } from "../lib/theme";
+import { GREEN, DIM, WHITE, BLACK, MONO } from "../lib/theme";
 
+/** Terminal-style button: "[ TITLE ]". primary = filled green-dark + white text; ghost/dark = outline. */
 export default function PrimaryButton({ title, onPress, disabled, loading, variant = "primary" }) {
-  const isGhost = variant === "ghost";
-  const isDark = variant === "dark";
+  const primary = variant === "primary";
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
       style={({ pressed }) => [
         styles.base,
-        isGhost ? styles.ghost : isDark ? styles.dark : styles.primary,
+        primary ? styles.primary : styles.ghost,
         (disabled || loading) && styles.disabled,
         pressed && !disabled && !loading && styles.pressed,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={isGhost ? colors.accent : isDark ? "#fff" : "#0a0c18"} />
+        <ActivityIndicator color={GREEN} />
       ) : (
-        <Text style={[styles.text, isGhost && { color: colors.accent }, isDark && { color: "#fff" }]}>{title}</Text>
+        <Text style={[styles.text, primary && { color: WHITE }, disabled && { color: DIM }]}>[ {String(title).toUpperCase()} ]</Text>
       )}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  base: {
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primary: { backgroundColor: colors.lit },
-  ghost: { backgroundColor: "transparent", borderWidth: 1, borderColor: colors.border },
-  dark: { backgroundColor: "#000000" },
-  disabled: { opacity: 0.4 },
-  pressed: { opacity: 0.8 },
-  text: { color: "#0a0c18", fontWeight: "700", fontSize: 15 },
+  base: { paddingVertical: 12, borderWidth: 1, borderColor: GREEN, alignItems: "center", justifyContent: "center" },
+  primary: { backgroundColor: "#04210d" },
+  ghost: { backgroundColor: BLACK },
+  disabled: { borderColor: DIM, backgroundColor: "transparent" },
+  pressed: { backgroundColor: "#0b4a1c" },
+  text: { fontFamily: MONO, color: GREEN, fontWeight: "700", fontSize: 14, letterSpacing: 2 },
 });

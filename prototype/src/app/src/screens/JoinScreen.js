@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, StyleSheet, Modal } from "react-native";
-import PrimaryButton from "../components/PrimaryButton";
+import { View, Text, TextInput, StyleSheet, Modal, Pressable, ScrollView } from "react-native";
 import QRScanner from "../components/QRScanner";
+import { GREEN, DIM, WHITE, BLACK, MONO } from "../components/TerminalPanel";
 import { colors, spacing, type } from "../lib/theme";
 
 /**
@@ -36,10 +36,11 @@ export default function JoinScreen({ onJoin, joining, error, initialServer, onSe
 
   const canJoin = ip.trim() && port.trim() && code.trim() && name.trim();
 
+  const disabled = !canJoin || joining;
+
   return (
-    <View style={styles.form}>
-      <Text style={type.heading}>LAUNCH SEQUENCE</Text>
-      <Text style={type.muted}>Join your crew — your engine lights as soon as you're in.</Text>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <Text style={styles.title}>C:\LAUNCH_SEQUENCE&gt; JOIN</Text>
 
       <Modal visible={scanning} animationType="slide" onRequestClose={() => setScanning(false)}>
         <View style={styles.scanner}>
@@ -47,16 +48,19 @@ export default function JoinScreen({ onJoin, joining, error, initialServer, onSe
         </View>
       </Modal>
 
-      <PrimaryButton title="Scan QR code" variant="ghost" onPress={() => setScanning(true)} />
+      <Pressable onPress={() => setScanning(true)} style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}>
+        <Text style={styles.btnText}>[ SCAN QR CODE ]</Text>
+      </Pressable>
 
-      <Text style={type.label}>YOUR NAME</Text>
-      <TextInput style={styles.input} placeholder="e.g. Alex" placeholderTextColor={colors.muted} value={name} onChangeText={setName} />
+      <Text style={styles.label}>YOUR NAME</Text>
+      <TextInput style={styles.input} placeholder="e.g. Alex" placeholderTextColor={DIM} selectionColor={GREEN} value={name} onChangeText={setName} />
 
-      <Text style={type.label}>JOIN CODE</Text>
+      <Text style={styles.label}>JOIN CODE</Text>
       <TextInput
         style={styles.input}
         placeholder="e.g. 8YXM66"
-        placeholderTextColor={colors.muted}
+        placeholderTextColor={DIM}
+        selectionColor={GREEN}
         autoCapitalize="characters"
         value={code}
         onChangeText={(v) => setCode(v.toUpperCase())}
@@ -64,22 +68,24 @@ export default function JoinScreen({ onJoin, joining, error, initialServer, onSe
 
       <View style={styles.row}>
         <View style={{ flex: 2 }}>
-          <Text style={type.label}>SERVER IP</Text>
+          <Text style={styles.label}>SERVER IP</Text>
           <TextInput
             style={styles.input}
             placeholder="192.168.0.199"
-            placeholderTextColor={colors.muted}
+            placeholderTextColor={DIM}
+            selectionColor={GREEN}
             autoCapitalize="none"
             value={ip}
             onChangeText={setIp}
           />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={type.label}>PORT</Text>
+          <Text style={styles.label}>PORT</Text>
           <TextInput
             style={styles.input}
             placeholder="4000"
-            placeholderTextColor={colors.muted}
+            placeholderTextColor={DIM}
+            selectionColor={GREEN}
             keyboardType="number-pad"
             value={port}
             onChangeText={setPort}
@@ -87,15 +93,16 @@ export default function JoinScreen({ onJoin, joining, error, initialServer, onSe
         </View>
       </View>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={styles.error}>ERROR: {error}</Text> : null}
 
-      <PrimaryButton
-        title="Join"
+      <Pressable
         onPress={() => onJoin({ ip: ip.trim(), port: port.trim(), code: code.trim().toUpperCase(), name: name.trim() })}
-        disabled={!canJoin}
-        loading={joining}
-      />
-    </View>
+        disabled={disabled}
+        style={({ pressed }) => [styles.btn, styles.btnPrimary, disabled && styles.btnDisabled, pressed && !disabled && styles.btnPressed]}
+      >
+        <Text style={[styles.btnText, { color: WHITE }, disabled && { color: DIM }]}>{joining ? "[ JOINING... ]" : "[ JOIN > ]"}</Text>
+      </Pressable>
+    </ScrollView>
   );
 }
 
@@ -103,17 +110,25 @@ const styles = StyleSheet.create({
   form: { gap: spacing.xs },
   row: { flexDirection: "row", gap: spacing.sm },
   scanner: { flex: 1, backgroundColor: colors.bg, justifyContent: "center", padding: spacing.md },
+  title: { fontFamily: MONO, color: WHITE, fontSize: 13, fontWeight: "700" },
+  label: { fontFamily: MONO, color: WHITE, fontSize: 11, letterSpacing: 2, marginTop: spacing.xs },
   input: {
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.panel,
-    color: colors.text,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    fontSize: 15,
-    marginTop: 4,
-    marginBottom: spacing.xs,
+    borderColor: GREEN,
+    backgroundColor: BLACK,
+    color: WHITE,
+    fontFamily: MONO,
+    borderRadius: 0,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    fontSize: 13,
+    marginTop: 3,
+    marginBottom: 2,
   },
-  error: { color: colors.danger, marginBottom: spacing.xs },
+  btn: { borderWidth: 1, borderColor: GREEN, paddingVertical: 9, alignItems: "center", backgroundColor: BLACK },
+  btnPrimary: { backgroundColor: "#04210d", marginTop: spacing.xs },
+  btnPressed: { backgroundColor: "#0b4a1c" },
+  btnDisabled: { borderColor: DIM, backgroundColor: "transparent" },
+  btnText: { fontFamily: MONO, color: GREEN, fontSize: 14, fontWeight: "700", letterSpacing: 2 },
+  error: { fontFamily: MONO, color: WHITE, fontSize: 12, marginBottom: spacing.xs },
 });

@@ -129,6 +129,7 @@ app.post(
 
 // Server-driven phase lengths. Scenes animate from elapsed time since phaseStartedAt.
 const TIMING = {
+  countdownMs: 5000, // 5-4-3-2-1 once the last engine is lit, then liftoff
   launchMs: 8000, // liftoff -> clears atmosphere -> space; then Memory Stars open
   arriveMs: 4500, // rocket reaches the moon; colour reveal appears after this
   revealMs: 4000, // colour reveal hold before the time jump
@@ -183,6 +184,15 @@ function clearTimers() {
   timers = [];
 }
 
+function startCountdown() {
+  session.setPhase("countdown");
+  broadcastScene();
+  later(TIMING.countdownMs, () => {
+    if (session.getSession().phase !== "countdown") return;
+    startLaunch();
+  });
+}
+
 function startLaunch() {
   session.setPhase("launching");
   io.emit("launch_sequence_start", {});
@@ -219,7 +229,7 @@ function afterJoin(p) {
   io.emit("engine_ignite", { engineSlot: p.engineSlot, participantId: p.id, name: p.name });
   const s = session.getSession();
   if (s.phase === "joining" && s.participants.length === session.MAX_PARTICIPANTS) {
-    startLaunch();
+    startCountdown();
   } else {
     broadcastScene();
   }

@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(16, 19, 35, 0.88)",
     borderColor: colors.border,
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 0,
     padding: spacing.md,
     gap: spacing.sm,
   },
@@ -60,5 +60,5 @@ const styles = StyleSheet.create({
   prompt: { color: colors.muted, fontSize: 12 },
   value: { color: colors.text, fontSize: 14 },
   media: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
-  img: { width: 110, height: 110, borderRadius: 10, backgroundColor: colors.panel },
+  img: { width: 110, height: 110, borderRadius: 0, backgroundColor: colors.panel },
 });

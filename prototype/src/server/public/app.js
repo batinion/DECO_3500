@@ -4,6 +4,7 @@ const { socket, onState } = window.LaunchScene;
 
 const PHASE_LABEL = {
   joining: "WAITING FOR CREW",
+  countdown: "LAUNCH COUNTDOWN",
   launching: "LAUNCHING",
   cruising: "CREW WRITING MEMORY STARS",
   arrived: "MISSION KEYS ASSIGNED",
@@ -15,8 +16,21 @@ const PHASE_LABEL = {
 
 const phasePill = document.getElementById("phase-pill");
 
+// Countdown: "LAUNCH IN 5 … 1", derived from the server clock so every screen agrees.
+let countdownTimer = null;
+function tickCountdown(st, offset) {
+  const left = Math.ceil((st.timing.countdownMs - (Date.now() + offset - st.phaseStartedAt)) / 1000);
+  phasePill.textContent = `LAUNCH IN ${Math.min(Math.max(left, 1), Math.ceil(st.timing.countdownMs / 1000))}`;
+}
+
 onState((st) => {
+  clearInterval(countdownTimer);
   phasePill.textContent = PHASE_LABEL[st.phase] || st.phase;
+  if (st.phase === "countdown") {
+    const offset = st.serverNow - Date.now();
+    tickCountdown(st, offset);
+    countdownTimer = setInterval(() => tickCountdown(st, offset), 200);
+  }
   phasePill.hidden = !phasePill.textContent;
 
   // The crew HUD is only for joining + writing; hide it once everyone has submitted.
@@ -37,7 +51,7 @@ onState((st) => {
     slotEl.classList.add("filled", `status-${p.status}`);
     nameEl.textContent = p.name;
     // Joined = engine lit. Before the Memory Stars open, "joined" is the honest label.
-    statusEl.textContent = p.status === "submitted" ? "submitted ✓" : st.phase === "joining" || st.phase === "launching" ? "joined" : "writing…";
+    statusEl.textContent = p.status === "submitted" ? "submitted ✓" : ["joining", "countdown", "launching"].includes(st.phase) ? "joined" : "writing…";
   });
 });
 
