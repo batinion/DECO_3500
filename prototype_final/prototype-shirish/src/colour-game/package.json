@@ -1,0 +1,9 @@
+{
+  "name": "colour-restore",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Standalone Colour restore colour-memory game, extracted from the Launch Sequence memory capsule",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "express": "^4.19.2", "socket.io": "^4.7.5" }
+}

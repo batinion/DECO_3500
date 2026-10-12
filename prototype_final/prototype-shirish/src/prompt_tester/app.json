@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Prompt Tester",
+    "slug": "prompt-tester",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "web": { "bundler": "metro" }
+  }
+}
