@@ -1,0 +1,9 @@
+{
+  "name": "rescue-your-memories",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Standalone 'Rescue your memories' spacecraft flight game, extracted from the Launch Sequence memory capsule",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "express": "^4.19.2", "socket.io": "^4.7.5" }
+}

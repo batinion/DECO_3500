@@ -1,0 +1,28 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "server (serves the web app)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "server",
+        "start"
+      ],
+      "port": 4000
+    },
+    {
+      "name": "capsule-web (dev, live reload)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "app",
+        "run",
+        "web",
+        "--",
+        "--non-interactive"
+      ],
+      "port": 8081
+    }
+  ]
+}

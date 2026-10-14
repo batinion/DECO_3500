@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+<title>Colour Restore — Launch Sequence</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: #000; color: #fff; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none;
+    font-family: "Inter Tight", "Helvetica Neue", "SF Pro Display", Inter, Arial, sans-serif; letter-spacing: -.01em; }
+  #app { position: fixed; inset: 0; }
+
+  /* three tall strips on the left: hue · saturation · brightness */
+  #strips { position: absolute; left: 0; top: 0; bottom: 0; display: flex; z-index: 3; transform: translateX(-102%); transition: transform .45s cubic-bezier(.3,1.1,.4,1); }
+  #strips.on { transform: none; }
+  .strip { position: relative; width: clamp(48px, 13vw, 84px); height: 100%; cursor: ns-resize; touch-action: none; }
+  .knob { position: absolute; left: 50%; width: 42px; height: 42px; margin: -21px 0 0 -21px; border-radius: 50%; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.35); pointer-events: none; }
+  #strips.locked { opacity: .35; pointer-events: none; }
+
+  #main { position: absolute; top: 0; bottom: 0; right: 0; left: 0; transition: left .45s cubic-bezier(.3,1.1,.4,1); }
+  #main.withStrips { left: calc(3 * clamp(48px, 13vw, 84px)); }
+  #main.withStrips #artWrap { height: 82%; }
+  #main.withStrips #artWrap svg { width: 118%; max-width: none; margin-right: -14%; }
+  #main.withStrips #head { top: calc(48px + env(safe-area-inset-top)); }
+  #main.withStrips #head .sub { font-size: 15px; }
+  #main.showing #brand { visibility: hidden; }
+  #app.guessing #mute { display: none !important; }
+  .top { position: absolute; left: 22px; right: 22px; top: calc(18px + env(safe-area-inset-top)); display: flex; justify-content: space-between; align-items: flex-start; z-index: 4; }
+  #count { font-size: 17px; font-weight: 600; letter-spacing: .08em; }
+  #brand { font-size: 15px; font-weight: 600; color: #8a8a8a; text-align: right; }
+  #mute { position: absolute; left: 50%; margin-left: -17px; top: calc(12px + env(safe-area-inset-top)); z-index: 6; width: 34px; height: 34px; border-radius: 50%; border: 0; background: #1b1b1b; color: #fff; font-size: 14px; display: none; }
+
+  /* the illustration, on a spotlight */
+  #artWrap { position: absolute; left: 0; right: 0; bottom: 0; height: 74%; display: flex; align-items: flex-end; justify-content: center; z-index: 1;
+    background: radial-gradient(ellipse 60% 45% at 55% 70%, #4a4a4a 0%, #1c1c1c 45%, #000 75%); }
+  #artWrap svg { width: min(92%, 520px); height: auto; max-height: 100%; display: block; }
+  #artWrap.fadeIn svg { animation: pop .5s cubic-bezier(.3,1.4,.5,1) both; }
+  @keyframes pop { from { opacity: 0; transform: translateY(18px) scale(.96); } to { opacity: 1; transform: none; } }
+
+  .big { font-size: clamp(40px, 11vw, 92px); font-weight: 700; line-height: .95; letter-spacing: -.045em; }
+  .sub { font-size: clamp(17px, 4.4vw, 26px); color: #9a9a9a; font-weight: 500; line-height: 1.2; letter-spacing: -.02em; }
+  #head { position: absolute; left: 22px; right: 22px; top: calc(64px + env(safe-area-inset-top)); z-index: 4; }
+  #head .sub { margin-top: 10px; max-width: 22ch; }
+  #timer { position: absolute; right: 22px; top: calc(14px + env(safe-area-inset-top)); z-index: 5; font-size: clamp(54px, 15vw, 110px); font-weight: 700; letter-spacing: -.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+
+  /* round buttons, bottom right */
+  .btns { position: absolute; right: 18px; bottom: calc(22px + env(safe-area-inset-bottom)); display: flex; gap: 14px; align-items: center; z-index: 5; }
+  .rb { width: 74px; height: 74px; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer; position: relative; transition: transform .15s; }
+  .rb:active { transform: scale(.93); }
+  .rb.white { background: #fff; color: #000; }
+  .rb.dark { background: #000; color: #fff; box-shadow: 0 0 0 2px #444 inset, 0 6px 20px rgba(0,0,0,.6); }
+  .rb svg { width: 32px; height: 32px; }
+  .rb .badge { position: absolute; right: -2px; top: -4px; width: 26px; height: 26px; border-radius: 50%; background: #fff; color: #000; font-size: 14px; font-weight: 700; display: grid; place-items: center; }
+  .rb:disabled { opacity: .35; }
+
+  #wait { position: absolute; left: 22px; right: 22px; bottom: calc(26px + env(safe-area-inset-bottom)); z-index: 5; display: none; }
+  #wait.on { display: block; }
+  #wait .t { font-size: 20px; font-weight: 600; }
+  .faces { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .faces div { width: 38px; height: 38px; opacity: .35; position: relative; }
+  .faces div.in { opacity: 1; }
+  .faces div.in::after { content: "✓"; position: absolute; right: -3px; top: -3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; color: #000; font-size: 10px; font-weight: 800; display: grid; place-items: center; }
+  .faces svg { width: 100%; height: 100%; }
+
+  /* results */
+  #result { position: absolute; inset: 0; z-index: 4; display: none; }
+  #result.on { display: block; }
+  #score { position: absolute; right: 22px; top: calc(10px + env(safe-area-inset-top)); text-align: right; }
+  #score .big { font-size: clamp(72px, 21vw, 150px); font-variant-numeric: tabular-nums; }
+  #score .sub { margin-top: 8px; margin-left: auto; max-width: 17ch; }
+  .pair { position: absolute; left: 22px; right: 22px; top: 38%; display: flex; gap: 0; }
+  .circ { width: min(40vw, 230px); text-align: center; }
+  .circ + .circ { margin-left: -14px; }
+  .disc { width: 100%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; display: flex; align-items: flex-end; justify-content: center;
+    background: radial-gradient(circle at 50% 70%, #6a6a6a 0%, #2a2a2a 55%, #111 100%); box-shadow: -8px 0 18px rgba(0,0,0,.6); }
+  .disc svg { width: 118%; height: auto; margin-bottom: -8%; }
+  .circ .lbl { margin-top: 10px; font-size: 18px; font-weight: 600; }
+  #crewLine { position: absolute; left: 22px; right: 110px; bottom: calc(26px + env(safe-area-inset-bottom)); }
+  #crewLine .t { font-size: 15px; color: #9a9a9a; line-height: 1.4; }
+  #crewLine .t b { color: #fff; font-weight: 600; }
+  .rows { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  .chip { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #ccc; }
+  .chip i { width: 18px; height: 18px; border-radius: 50%; display: block; box-shadow: 0 0 0 1px #333 inset; }
+
+  /* start / done */
+  .ov { position: absolute; inset: 0; z-index: 10; background: #000; display: flex; flex-direction: column; padding: calc(40px + env(safe-area-inset-top)) 26px calc(26px + env(safe-area-inset-bottom)); }
+  .ov.hidden { display: none; }
+  .ov .big { font-size: clamp(56px, 16vw, 120px); }
+  .ov .sub { margin-top: 14px; }
+  .ov .stage { flex: 1; display: flex; align-items: flex-end; justify-content: center; min-height: 0;
+    background: radial-gradient(ellipse 55% 35% at 50% 85%, #4a4a4a 0%, #1a1a1a 50%, #000 75%); margin: 10px -26px; }
+  .ov .stage svg { width: min(78%, 420px); max-height: 100%; }
+  .ov .row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+  .ov .row .t { font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+  #demo { position: absolute; left: 22px; bottom: calc(6px + env(safe-area-inset-bottom)); z-index: 6; background: none; border: 0; color: #555; font: inherit; font-size: 11px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="strips">
+    <div class="strip" id="sH"><div class="knob"></div></div>
+    <div class="strip" id="sS"><div class="knob"></div></div>
+    <div class="strip" id="sB"><div class="knob"></div></div>
+  </div>
+  <div id="main">
+    <div class="top"><div id="count">1 / 5</div><div id="brand">Colour restore</div></div>
+    <div id="timer"></div>
+    <div id="head"><div class="big" id="hName"></div><div class="sub" id="hSub"></div></div>
+    <div id="artWrap"></div>
+    <div class="btns" id="btns">
+      <button class="rb dark" id="hint" aria-label="Peek at the colour"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h17c2.5 0 4.5-1.5 5.5-4l1.5-3"/><path d="M21 20c0-4-3-7-8.5-7S4 16 4 20"/><path d="M12.5 13v-2.5M10 10.5h5"/><path d="M8 24h11"/><path d="M4 16c-1.5 0-2-1-2-2"/></svg><span class="badge" id="hintN">2</span></button>
+      <button class="rb white" id="lock" aria-label="Lock in my colour"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="15" cy="17" r="10"/><circle cx="15" cy="17" r="5.5"/><path d="M15 17 25 7M21 6.5l4 .5.5 4"/></svg></button>
+    </div>
+    <div id="wait"><div class="t" id="waitT">Locked in. Waiting for your crew…</div><div class="faces" id="faces"></div></div>
+  </div>
+
+  <div id="result">
+    <div class="top" style="right:auto"><div id="rCount">1 / 5</div></div>
+    <div id="score"><div class="big" id="sc">0.00</div><div class="sub" id="quip"></div></div>
+    <div class="pair">
+      <div class="circ"><div class="disc" id="dYou"></div><div class="lbl">you</div></div>
+      <div class="circ"><div class="disc" id="dTarget"></div><div class="lbl">target</div></div>
+    </div>
+    <div id="crewLine"><div class="t" id="crewT"></div><div class="rows" id="crewRows"></div></div>
+    <div class="btns"><button class="rb white" id="next" aria-label="Next"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16h20M19 9l7 7-7 7"/></svg></button></div>
+  </div>
+
+  <div class="ov" id="start">
+    <div class="big">colour restore</div>
+    <div class="sub">Your memories lost their colour.<br/>Recreate campus colours from memory.</div>
+    <div class="stage" id="startArt"></div>
+    <div class="row"><div class="t">Let's bring them back.</div><button class="rb white" id="go" aria-label="Start"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16h20M19 9l7 7-7 7"/></svg></button></div>
+  </div>
+  <div class="ov hidden" id="done">
+    <div class="big">every memory is back in colour.</div>
+    <div class="sub" id="doneSub">Nice work, crew.</div>
+    <div class="stage" id="doneArt"></div>
+    <div class="row"><div class="t">Play again?</div><button class="rb white" id="again" aria-label="Back to the lobby"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16h20M19 9l7 7-7 7"/></svg></button></div>
+  </div>
+  <button id="mute" aria-label="Sound on or off">🔊</button>
+  <button id="demo">Demo: finish colour restore</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/avatars.js"></script>
+<script src="/sfx.js"></script>
+<script>
+(function () {
+  const qs = new URLSearchParams(location.search);
+  const code = qs.get("code"), pid = qs.get("pid");
+  const $ = (id) => document.getElementById(id);
+  const SFX = window.LaunchSFX, AV = window.LaunchAvatars;
+  const face = (id, expr) => (AV ? AV.avatarSvg(id || "nova", { expr, size: 38 }) : "");
+  const socket = io();
+  const send = (evt, p = {}, cb) => socket.emit(evt, { code, participantId: pid, ...p }, cb || (() => {}));
+  socket.on("connect", () => socket.emit("game_join", { code, participantId: pid }, (r) => { if (r && r.error) location.href = "/"; }));
+
+  // ================= original UQ illustrations (T = the colour being guessed) =================
+  const K = 'stroke="#111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"';
+  const hi = (d) => `<path d="${d}" fill="#fff" opacity=".22"/>`;
+  const ART = {
+    turkey(head, wattle) {
+      return `<svg viewBox="0 0 320 330" xmlns="http://www.w3.org/2000/svg">
+        <path d="M150 250 C60 250 20 150 60 70 C90 110 120 150 150 170 Z" fill="#26222c" ${K}/>
+        <path d="M70 95 C80 150 110 190 140 205" fill="none" stroke="#3d3846" stroke-width="5"/>
+        <path d="M120 260 L112 312 M180 260 L188 312 M100 312 h26 M176 312 h26" ${K} fill="none" stroke="#8a8790"/>
+        <ellipse cx="160" cy="220" rx="88" ry="58" fill="#2e2a35" ${K}/>
+        ${'<path d="M110 205 C135 180 190 180 215 210 C190 205 140 210 110 230 Z" fill="#433d4d"/>'}
+        <path d="M205 185 C205 150 200 120 212 95 L236 98 C232 125 232 155 236 188 Z" fill="${head}" ${K}/>
+        <ellipse cx="226" cy="84" rx="27" ry="24" fill="${head}" ${K}/>
+        ${hi("M210 72 q10 -12 26 -6 q-12 2 -20 12z")}
+        <path d="M250 82 L276 90 L250 98 Z" fill="#9b958a" ${K}/>
+        <circle cx="234" cy="78" r="7" fill="#fff" stroke="#111" stroke-width="3"/><circle cx="236" cy="78" r="3" fill="#111"/>
+        <path d="M200 182 C190 210 230 222 246 196 C238 186 214 180 200 182 Z" fill="${wattle}" ${K}/>
+        ${hi("M208 190 q12 8 26 2 q-14 10 -26 -2z")}
+      </svg>`;
+    },
+    turkeyHead(T) { return ART.turkey(T, "#f2c230"); },
+    turkeyWattle(T) { return ART.turkey("#cf2a2a", T); },
+    ibis(T) {
+      return `<svg viewBox="0 0 320 330" xmlns="http://www.w3.org/2000/svg">
+        <path d="M150 262 L142 318 M182 262 L190 318 M128 318 h26 M178 318 h26" fill="none" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+        <path d="M60 210 C70 160 140 140 200 165 C240 182 240 240 190 262 C140 280 70 262 60 210 Z" fill="${T}" ${K}/>
+        <path d="M60 210 C40 220 30 238 36 250 C60 248 80 240 96 232 Z" fill="#1d1d1d" ${K}/>
+        ${hi("M90 180 q50 -30 110 -6 q-60 -6 -110 30z")}
+        <path d="M190 172 C200 140 196 110 210 90 L234 96 C224 120 228 150 214 180 Z" fill="${T}" ${K}/>
+        <ellipse cx="226" cy="80" rx="24" ry="20" fill="#1c1c1c" ${K}/>
+        <path d="M244 84 C275 100 292 130 300 168 C286 140 266 110 238 96 Z" fill="#1c1c1c" ${K}/>
+        <circle cx="230" cy="74" r="4" fill="#d33"/>
+      </svg>`;
+    },
+    lorikeet(T) {
+      return `<svg viewBox="0 0 320 330" xmlns="http://www.w3.org/2000/svg">
+        <path d="M80 300 C150 300 260 296 300 300" stroke="#5b3a22" stroke-width="12" stroke-linecap="round"/>
+        <path d="M130 250 C120 290 100 315 90 322 C120 318 150 300 160 262 Z" fill="#2f8c3d" ${K}/>
+        <path d="M110 170 C110 230 140 280 180 282 C230 284 240 220 222 160 C205 110 115 110 110 170 Z" fill="#3fa34d" ${K}/>
+        <path d="M150 150 C190 140 222 160 222 190 C210 222 165 226 138 205 C130 185 135 160 150 150 Z" fill="${T}" ${K}/>
+        ${hi("M158 158 q30 -6 50 12 q-26 -4 -50 4z")}
+        <path d="M150 228 C170 240 200 238 214 224 C214 250 196 266 176 266 C160 262 150 248 150 228 Z" fill="#2a4cc9" ${K}/>
+        <circle cx="170" cy="105" r="46" fill="#2a4cc9" ${K}/>
+        ${hi("M140 86 q20 -26 50 -14 q-30 2 -50 22z")}
+        <path d="M206 100 C232 100 240 122 222 138 C214 128 206 118 200 116 Z" fill="#e94b2b" ${K}/>
+        <circle cx="186" cy="94" r="8" fill="#fff" stroke="#111" stroke-width="3"/><circle cx="188" cy="94" r="3.5" fill="#111"/>
+        <path d="M150 300 v-22 M176 300 v-20" stroke="#8a8790" stroke-width="6" stroke-linecap="round"/>
+      </svg>`;
+    },
+    jacaranda(T) {
+      const blobs = [[160, 80, 46], [110, 105, 40], [212, 105, 42], [80, 150, 34], [245, 150, 34], [140, 140, 44], [190, 145, 42], [120, 182, 30], [205, 186, 30]];
+      return `<svg viewBox="0 0 320 330" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="160" cy="306" rx="150" ry="22" fill="#4f8a3a" ${K}/>
+        <path d="M150 300 C152 250 146 220 130 190 M150 300 C150 250 160 220 186 196 M156 240 C170 220 190 210 210 205" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
+        <path d="M150 300 C152 250 146 220 130 190 M150 300 C150 250 160 220 186 196 M156 240 C170 220 190 210 210 205" fill="none" stroke="#6b4a2f" stroke-width="10" stroke-linecap="round"/>
+        ${blobs.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${T}" ${K}/>`).join("")}
+        ${blobs.map(([x, y, r]) => `<circle cx="${x - r * 0.3}" cy="${y - r * 0.35}" r="${r * 0.3}" fill="#fff" opacity=".18"/>`).join("")}
+        ${[[60, 300], [100, 312], [210, 304], [250, 314], [270, 298]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="7" ry="4" fill="${T}" stroke="#111" stroke-width="2"/>`).join("")}
+      </svg>`;
+    },
+    building(T) {
+      const arch = (x) => `<path d="M${x} 300 v-46 a16 16 0 0 1 32 0 v46 Z" fill="#3b2a1a" ${K}/>`;
+      const win = (x, y) => `<rect x="${x}" y="${y}" width="18" height="26" rx="2" fill="#3b2a1a" stroke="#111" stroke-width="3"/>`;
+      return `<svg viewBox="0 0 320 330" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="150" width="288" height="152" fill="${T}" ${K}/>
+        <rect x="118" y="40" width="84" height="130" fill="${T}" ${K}/>
+        <path d="M110 44 L160 14 L210 44 Z" fill="${T}" ${K}/>
+        <circle cx="160" cy="80" r="17" fill="#f1ead8" stroke="#111" stroke-width="4"/><path d="M160 80 v-10 M160 80 l7 4" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+        ${win(130, 112)}${win(172, 112)}
+        <rect x="12" y="140" width="296" height="14" fill="${T}" ${K}/>
+        ${[30, 74, 214, 258].map(arch).join("")}${arch(144)}
+        ${[34, 78, 218, 262].map((x) => win(x + 7, 170)).join("")}${win(151, 186)}
+        ${hi("M22 158 h282 v8 h-282z")}
+        <rect x="0" y="300" width="320" height="30" fill="#6f9a3c" ${K}/>
+      </svg>`;
+    },
+    hoodie(T) {
+      return `<svg viewBox="0 0 320 330" xmlns="http://www.w3.org/2000/svg">
+        <path d="M100 70 C110 30 210 30 220 70 L236 98 L84 98 Z" fill="${T}" ${K}/>
+        <path d="M120 74 C130 50 190 50 200 74 C186 92 134 92 120 74 Z" fill="#1d1230" ${K}/>
+        <path d="M84 96 C60 100 40 120 30 160 L18 300 L70 304 L80 200 L84 320 L236 320 L240 200 L250 304 L302 300 L290 160 C280 120 260 100 236 96 Z" fill="${T}" ${K}/>
+        ${hi("M60 130 q10 -24 30 -30 l-6 60z")}
+        <path d="M120 250 h80 l10 50 h-100 Z" fill="${T}" ${K}/>
+        <path d="M146 92 v40 M174 92 v40" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+        <text x="160" y="205" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="800" font-size="62" fill="#fff" letter-spacing="-2">UQ</text>
+      </svg>`;
+    },
+    lake(T) {
+      const duck = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><ellipse cx="0" cy="0" rx="30" ry="16" fill="#f4f1e8" ${K}/><circle cx="22" cy="-18" r="12" fill="#f4f1e8" ${K}/><path d="M32 -18 l14 4 l-14 4z" fill="#f2a33a" stroke="#111" stroke-width="3"/><circle cx="24" cy="-21" r="2.5" fill="#111"/></g>`;
+      return `<svg viewBox="0 0 320 330" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 200 C60 170 260 170 320 200 L320 330 L0 330 Z" fill="#4f8a3a" ${K}/>
+        <ellipse cx="160" cy="262" rx="150" ry="58" fill="${T}" ${K}/>
+        ${hi("M60 250 q60 -22 140 -10 q-70 0 -140 22z")}
+        <path d="M70 280 q20 -6 40 0 M190 296 q24 -6 48 0" stroke="#fff" stroke-width="3" opacity=".35" fill="none" stroke-linecap="round"/>
+        ${duck(120, 262, 1)}${duck(212, 246, 0.75)}
+        <path d="M18 230 q4 -50 10 -70 M30 232 q2 -40 -6 -60 M290 230 q-4 -50 -10 -70" stroke="#2f6b2a" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </svg>`;
+    },
+    lawn(T) {
+      return `<svg viewBox="0 0 320 330" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 220 C80 170 240 170 320 220 L320 330 L0 330 Z" fill="${T}" ${K}/>
+        ${hi("M40 214 q100 -44 230 -4 q-120 -26 -230 14z")}
+        <path d="M70 250 L180 236 L220 286 L96 304 Z" fill="#e8e2d0" ${K}/>
+        <path d="M100 247 L124 300 M140 242 L166 296 M84 268 L200 252 M90 288 L212 270" stroke="#d24a3a" stroke-width="6"/>
+        <rect x="220" y="196" width="40" height="52" rx="10" fill="#4767c9" ${K}/><path d="M228 196 c0 -16 24 -16 24 0" fill="none" ${K}/>
+        <path d="M120 230 l6 -26 h18 l6 26 Z" fill="#f4f1e8" ${K}/><rect x="124" y="198" width="22" height="8" rx="2" fill="#6b4a2f" stroke="#111" stroke-width="3"/>
+        ${[30, 60, 270, 296].map((x) => `<path d="M${x} 236 l3 -12 l3 12" stroke="#111" stroke-width="3" fill="none"/>`).join("")}
+      </svg>`;
+    },
+  };
+  const art = (name, hex) => (ART[name] || ART.turkeyHead)(hex || "#777");
+
+  // ================= colour maths =================
+  function hsvToHex(h, s, v) {
+    const f = (n) => { const k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); };
+    return "#" + [f(5), f(3), f(1)].map((x) => Math.round(x * 255).toString(16).padStart(2, "0")).join("");
+  }
+  const pick = { h: 0, s: 0.5, b: 0.6 };
+  const pickHex = () => hsvToHex(pick.h, pick.s, pick.b);
+
+  function paintStrips() {
+    const { h, s, b } = pick;
+    $("sH").style.background = `linear-gradient(180deg, ${[0, 60, 120, 180, 240, 300, 360].map((x) => hsvToHex(x % 360, 1, 1)).join(",")})`;
+    $("sS").style.background = `linear-gradient(180deg, ${hsvToHex(h, 1, b)}, ${hsvToHex(h, 0, b)})`;
+    $("sB").style.background = `linear-gradient(180deg, ${hsvToHex(h, s, 1)}, #000)`;
+    const set = (id, frac) => ($(id).querySelector(".knob").style.top = (frac * 100).toFixed(2) + "%");
+    set("sH", h / 360); set("sS", 1 - s); set("sB", 1 - b);
+  }
+  function setArt(name, hex, anim) {
+    const w = $("artWrap");
+    w.innerHTML = art(name, hex);
+    if (anim) { w.classList.remove("fadeIn"); void w.offsetWidth; w.classList.add("fadeIn"); }
+  }
+  let curArt = "turkeyHead";
+  function repaintGuess() { paintStrips(); setArt(curArt, peeking ? peekHex : pickHex(), false); }
+
+  function dragStrip(id, apply) {
+    const el = $(id);
+    let on = false, lastTick = 0;
+    const at = (e) => {
+      const r = el.getBoundingClientRect();
+      apply(Math.max(0, Math.min(1, (e.clientY - r.top) / r.height)));
+      repaintGuess();
+      if (performance.now() - lastTick > 70) { lastTick = performance.now(); SFX.play("tick"); }
+    };
+    el.addEventListener("pointerdown", (e) => { on = true; try { el.setPointerCapture(e.pointerId); } catch (_) {} at(e); });
+    el.addEventListener("pointermove", (e) => on && at(e));
+    ["pointerup", "pointercancel"].forEach((t) => el.addEventListener(t, () => (on = false)));
+  }
+  dragStrip("sH", (f) => (pick.h = f * 360));
+  dragStrip("sS", (f) => (pick.s = 1 - f));
+  dragStrip("sB", (f) => (pick.b = 1 - f));
+
+  // ================= game state =================
+  let gs = null, clockOff = 0, key = "", hints = 2, peeking = false, peekHex = null, lastSec = -1;
+  const lower = (t) => (t || "").replace(/^A /, "a ").replace(/^(Brush|Rainbow|Jacaranda)\b/, (m) => m.toLowerCase());
+  const quips = [
+    [9.5, "Did you bring a colour chart to uni? Seek help."],
+    [8.5, "Basically a UQ brand guideline."],
+    [7, "Close. Your eyes did the readings."],
+    [5, "Somewhere in the right building."],
+    [3, "That's… a colour. Technically."],
+    [0, "Were you even at UQ?"],
+  ];
+  const quip = (sc) => quips.find(([min]) => sc >= min)[1];
+
+  socket.on("game_state", (s) => {
+    if (s.type !== "colorgame") return;
+    clockOff = s.serverNow - Date.now();
+    const prev = key;
+    gs = s;
+    key = `${s.round}:${s.stage}`;
+    const changed = key !== prev;
+    const t = s.target || {};
+    curArt = t.art || curArt;
+    $("count").textContent = $("rCount").textContent = `${Math.min(s.round + 1, s.rounds)} / ${s.rounds}`;
+    const guessing = s.stage === "guess";
+    const locked = guessing && s.lockedIn.includes(pid);
+    $("strips").classList.toggle("on", guessing);
+    $("strips").classList.toggle("locked", locked);
+    $("main").classList.toggle("withStrips", guessing);
+    $("main").classList.toggle("showing", s.stage === "show");
+    $("app").classList.toggle("guessing", guessing);
+    $("result").classList.toggle("on", s.stage === "result");
+    $("main").style.visibility = s.stage === "result" ? "hidden" : "visible";
+    $("done").classList.toggle("hidden", s.stage !== "done");
+
+    if (s.stage === "show") {
+      $("hName").textContent = lower(t.name);
+      $("hSub").textContent = "Memorise this colour.";
+      $("btns").style.display = "none"; $("wait").classList.remove("on");
+      if (changed) {
+        setArt(curArt, t.hex, true); SFX.play("reveal");
+        pick.h = Math.random() * 360; pick.s = 0.55; pick.b = 0.6;
+      }
+    } else if (guessing) {
+      $("hName").textContent = "";
+      $("hSub").textContent = lower(t.name);
+      $("btns").style.display = locked ? "none" : "flex";
+      $("wait").classList.toggle("on", locked);
+      $("faces").innerHTML = s.members.map((m) => `<div class="${s.lockedIn.includes(m.id) ? "in" : ""}" title="${m.name}">${face(m.avatar)}</div>`).join("");
+      $("hintN").textContent = hints; $("hint").disabled = hints <= 0;
+      if (changed) { SFX.play("beep"); repaintGuess(); }
+    } else if (s.stage === "result") {
+      const me = (s.results || []).find((r) => r.id === pid);
+      const mine = me ? me.score : 0;
+      $("sc").textContent = mine.toFixed(2);
+      $("quip").textContent = me ? quip(mine) : "You didn't lock one in. The crew had your back.";
+      $("dYou").innerHTML = art(curArt, me ? me.hex : "#333");
+      const cap = s.capsules[s.round] || {};
+      $("dTarget").innerHTML = art(curArt, cap.target || t.hex);
+      const g = cap.glimpses || [];
+      $("crewT").innerHTML = `Crew average <b>${(s.crewScore ?? 0).toFixed(2)}</b> · <b>+${g.length}</b> ${g.length === 1 ? "memory" : "memories"} restored` +
+        (g.length ? `<br>${g.map((x) => `Capsule ${x.capsule ?? "?"} · about ${x.about}`).join(" · ")}` : "");
+      $("crewRows").innerHTML = (s.results || []).map((r) => `<div class="chip"><i style="background:${r.hex}"></i>${r.id === pid ? "you" : r.name} ${r.score.toFixed(2)}</div>`).join("");
+      const voted = (s.nextVotes || []).includes(pid);
+      $("next").disabled = voted;
+      if (changed) SFX.play("score", { score: mine });
+    } else if (s.stage === "done") {
+      $("doneArt").innerHTML = art(curArt, (s.capsules[s.capsules.length - 1] || {}).target || "#51247a");
+      if (changed) SFX.play("fanfare");
+    }
+  });
+
+  $("lock").onclick = () => {
+    if (!gs || gs.stage !== "guess") return;
+    SFX.play("pop");
+    send("color_guess", { hex: pickHex() });
+  };
+  $("hint").onclick = () => {
+    if (hints <= 0 || !gs || gs.stage !== "guess") return;
+    send("color_hint", {}, (r) => {
+      if (!r || !r.hex) return;
+      hints--; $("hintN").textContent = hints; $("hint").disabled = hints <= 0;
+      peeking = true; peekHex = r.hex; repaintGuess(); SFX.play("reveal");
+      setTimeout(() => { peeking = false; repaintGuess(); }, 650);
+    });
+  };
+  $("next").onclick = () => { SFX.play("pop"); $("next").disabled = true; send("color_next"); };
+
+  // countdown digits (memorise + guess)
+  (function loop() {
+    requestAnimationFrame(loop);
+    if (!gs || !gs.stageMs || (gs.stage !== "show" && gs.stage !== "guess")) { $("timer").textContent = ""; return; }
+    const left = Math.max(0, gs.stageStartedAt + gs.stageMs - (Date.now() + clockOff));
+    const sec = Math.ceil(left / 1000);
+    const showT = gs.stage === "show" || sec <= 10;
+    $("timer").textContent = showT ? String(sec) : "";
+    $("timer").style.color = gs.stage === "guess" && sec <= 5 ? "#ff6b6b" : "#fff";
+    if (sec !== lastSec) { lastSec = sec; if (sec > 0 && (gs.stage === "show" || sec <= 5) && !gs.lockedIn.includes(pid)) SFX.play("tick"); }
+  })();
+
+  $("startArt").innerHTML = art("turkeyHead", "#cf2a2a");
+  $("go").onclick = () => { SFX.unlock(); SFX.play("ready"); $("start").classList.add("hidden"); $("mute").style.display = "block"; };
+  $("mute").onclick = () => { SFX.unlock(); SFX.setMuted(!SFX.muted); $("mute").textContent = SFX.muted ? "🔇" : "🔊"; };
+  $("demo").onclick = () => send("demo_finish_game");
+  $("again").onclick = () => { location.href = "/"; };
+  paintStrips();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c0726">
+<title>Rescue your memories</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:radial-gradient(ellipse at 50% 0%,#3a1a6e 0%,#0c0726 65%) fixed;color:#efe9ff;
+  font-family:"Avenir Next","Avenir","Segoe UI",system-ui,sans-serif}
+main{width:min(520px,100%);margin:0 auto;padding:max(28px,env(safe-area-inset-top)) 18px 40px}
+h1{font-size:clamp(32px,8vw,48px);line-height:1.02;font-weight:800;letter-spacing:-.02em}
+h1 span{display:block;font-size:.4em;font-weight:600;letter-spacing:.01em;color:#c9b3ff;margin-top:8px}
+.lede{margin:14px 0 20px;font-size:15px;line-height:1.5;color:#d8ccff}
+.panel{background:rgba(255,255,255,.06);border:2px solid rgba(201,179,255,.3);border-radius:18px;padding:16px;margin-bottom:14px}
+label.t{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c9b3ff;margin-bottom:8px}
+input[type=text]{width:100%;padding:14px;border-radius:12px;border:2px solid rgba(201,179,255,.35);background:rgba(12,7,38,.7);color:#fff;font:inherit;font-size:18px}
+input[type=text]:focus{outline:none;border-color:#ffd166}
+.avs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.av{border:2px solid transparent;border-radius:14px;background:rgba(255,255,255,.06);padding:4px 2px 2px;cursor:pointer;font:inherit;color:#d8ccff;font-size:11px;font-weight:700;text-align:center}
+.av svg{width:100%;height:auto;display:block}
+.av.on{border-color:#ffd166;background:rgba(255,209,102,.14);color:#fff}
+button.go{width:100%;padding:16px;border-radius:14px;border:0;background:#ffd166;color:#2b1060;font:inherit;font-size:18px;font-weight:800;cursor:pointer}
+button.go.alt{background:rgba(255,255,255,.1);color:#fff;border:2px solid rgba(201,179,255,.4)}
+button.go:disabled{opacity:.45}
+.row{display:flex;gap:10px;margin-top:10px}
+.row input{flex:1;text-transform:uppercase;letter-spacing:.2em;text-align:center}
+.row button{width:auto;padding:14px 22px;flex:none}
+.hint{font-size:12px;color:#9584c9;margin-top:8px;line-height:1.4}
+.err{color:#ff8a8a;font-size:14px;font-weight:700;min-height:20px;margin:6px 0}
+.code{font-size:44px;font-weight:800;letter-spacing:.18em;color:#ffd166;text-align:center;margin:2px 0 4px}
+.crew{display:flex;flex-direction:column;gap:8px;margin:6px 0 12px}
+.crew div{display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;border-radius:14px;background:rgba(255,255,255,.07);font-weight:700}
+.crew svg{width:40px;height:40px;flex:none}
+.crew small{margin-left:auto;color:#9584c9;font-weight:600}
+.link{background:none;border:0;color:#9584c9;font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;display:block;margin:12px auto 0}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{border:2px solid rgba(201,179,255,.3);border-radius:16px;background:rgba(255,255,255,.05);color:#d8ccff;padding:12px;text-align:left;font:inherit;font-size:12.5px;line-height:1.4;cursor:pointer}
+.mode b{display:block;font-size:16px;color:#fff;margin-bottom:4px}
+.mode.on{border-color:#ffd166;background:rgba(255,209,102,.14);color:#fff}
+.mode svg{width:34px;height:34px;display:block;margin-bottom:6px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <h1>Rescue your memories<span>Fly together through space</span></h1>
+  <p class="lede">Your crew's memories are scattered between here and the UQ Space Faculty, past black holes, debris and asteroids. Everyone flies their own ship in the same space, live. Fly through the glowing capsules to save them, then dock at the faculty together.</p>
+
+  <!-- step 1: who are you, and which room -->
+  <section id="enter">
+    <div class="panel">
+      <label class="t">Choose a version</label>
+      <div class="modes" id="modes"></div>
+    </div>
+    <div class="panel">
+      <label class="t" for="name">Your name</label>
+      <input type="text" id="name" maxlength="20" placeholder="e.g. Sam" autocomplete="off">
+      <div class="avs" id="avs"></div>
+    </div>
+    <p class="err" id="err"></p>
+    <button class="go" id="solo">Play now (with simulated crewmates)</button>
+    <div class="panel" style="margin-top:14px">
+      <label class="t">Playing with friends?</label>
+      <button class="go alt" id="create">Create a room</button>
+      <div class="row"><input type="text" id="code" maxlength="6" placeholder="CODE" autocomplete="off"><button class="go alt" id="join">Join</button></div>
+      <p class="hint">Everyone opens this page on the same Wi-Fi: <b id="lan"></b></p>
+    </div>
+  </section>
+
+  <!-- step 2: the room -->
+  <section id="room" class="hide">
+    <div class="panel">
+      <label class="t">Room code</label>
+      <div class="code" id="roomCode"></div>
+      <p class="hint" style="text-align:center">Friends join at <b class="lanUrl"></b> with this code</p>
+    </div>
+    <div class="panel">
+      <label class="t">Version</label>
+      <div class="modes" id="roomModes"></div>
+      <p class="err" id="err3" style="margin-bottom:0"></p>
+    </div>
+    <div class="panel">
+      <label class="t">Crew</label>
+      <div class="crew" id="crew"></div>
+      <button class="go alt" id="bots">Add simulated crewmates</button>
+    </div>
+    <p class="err" id="err2"></p>
+    <button class="go" id="start">Start</button>
+    <button class="go hide" id="again">Play again</button>
+    <button class="link" id="leave">Leave this room</button>
+  </section>
+</main>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/avatars.js"></script>
+<script>
+(() => {
+  const AV = window.LaunchAvatars;
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get() { try { return JSON.parse(localStorage.getItem("session") || "null"); } catch (_) { return null; } },
+    set(v) { try { v ? localStorage.setItem("session", JSON.stringify(v)) : localStorage.removeItem("session"); } catch (_) {} },
+  };
+  const socket = io();
+  const MODES = [
+    { id: "classic", name: "Classic", text: "Everyone flies their own ship, in the same space. Simulated crewmates can join.",
+      icon: '<svg viewBox="0 0 34 34" fill="#ffd166"><path d="M8 24l7-14 3 8zM20 26l7-14 3 8z" opacity=".9"/></svg>' },
+    { id: "shared", name: "One ship", text: "One ship, shared controls. Steering, throttle, altitude, pick-up and gun are dealt out at random. Up to 5 players.",
+      icon: '<svg viewBox="0 0 34 34" fill="#7fdbff"><path d="M17 4l9 22-9-5-9 5z"/></svg>' },
+  ];
+  let mode = (store.get() || {}).mode || "classic";
+  let me = store.get() || {}, avatar = me.avatar || AV.pickFree([]), busy = false;
+
+  fetch("/api/info").then((r) => r.json()).then((i) => {
+    const url = `http://${i.lanIp}:${i.port}`;
+    $("lan").textContent = url;
+    document.querySelectorAll(".lanUrl").forEach((el) => (el.textContent = url));
+  }).catch(() => {});
+
+  // ---- character picker ----
+  function paintAvatars() {
+    $("avs").innerHTML = AV.CHARACTERS.map((c) => `<button class="av ${c.id === avatar ? "on" : ""}" data-id="${c.id}">${AV.avatarSvg(c.id, { size: 64 })}${c.name}</button>`).join("");
+    $("avs").querySelectorAll(".av").forEach((b) => (b.onclick = () => { avatar = b.dataset.id; paintAvatars(); }));
+  }
+  paintAvatars();
+  $("name").value = me.name || "";
+
+  const modeCards = (el, active, pick) => {
+    el.innerHTML = MODES.map((m) => `<button class="mode ${m.id === active ? "on" : ""}" data-id="${m.id}">${m.icon}<b>${m.name}</b>${m.text}</button>`).join("");
+    el.querySelectorAll(".mode").forEach((b) => (b.onclick = () => pick(b.dataset.id)));
+  };
+  const paintModes = () => modeCards($("modes"), mode, (id) => { mode = id; paintModes(); });
+  paintModes();
+
+  const entry = () => ({ name: $("name").value.trim(), avatar, mode });
+  const emit = (evt, payload) => new Promise((res) => socket.emit(evt, payload, res));
+  const fail = (id, msg) => { $(id).textContent = msg || ""; };
+
+  function entered(r) {
+    me = { code: r.code, participantId: r.participantId, name: r.name, avatar: r.avatar, mode };
+    store.set(me);
+    resume(); // the server answers with the room's current state
+  }
+
+  async function guard(fn) {
+    if (busy) return;
+    busy = true;
+    try { await fn(); } finally { busy = false; }
+  }
+
+  $("create").onclick = () => guard(async () => {
+    fail("err");
+    const r = await emit("create_room", entry());
+    if (r.error) return fail("err", r.error);
+    entered(r);
+  });
+  $("join").onclick = () => guard(async () => {
+    fail("err");
+    const r = await emit("join_room", { ...entry(), code: $("code").value.trim() });
+    if (r.error) return fail("err", r.error);
+    entered(r);
+  });
+  $("solo").onclick = () => guard(async () => {
+    fail("err");
+    const r = await emit("create_room", entry());
+    if (r.error) return fail("err", r.error);
+    entered(r);
+    if (mode === "classic") await emit("add_bots", {});
+    const s = await emit("start_game", {});
+    if (s.error) fail("err", s.error);
+  });
+  $("bots").onclick = () => guard(async () => { const r = await emit("add_bots", {}); fail("err2", r.error); });
+  $("start").onclick = () => guard(async () => { const r = await emit("start_game", {}); fail("err2", r.error); });
+  $("again").onclick = () => guard(async () => { const r = await emit("play_again", {}); fail("err2", r.error); });
+  $("leave").onclick = () => { store.set(null); me = {}; $("room").classList.add("hide"); $("enter").classList.remove("hide"); };
+
+  // ---- room view ----
+  socket.on("room_state", (s) => {
+    if (!me.participantId || s.code !== me.code) return;
+    if (s.phase !== "lobby" && s.phase !== "done") {
+      location.href = `/play?code=${me.code}&pid=${me.participantId}`;
+      return;
+    }
+    $("enter").classList.add("hide");
+    $("room").classList.remove("hide");
+    $("roomCode").textContent = s.code;
+    $("crew").innerHTML = s.members.map((m) => `<div>${AV.avatarSvg(m.avatar, { size: 40 })}${m.id === me.participantId ? "You" : m.name}${m.isSimulated ? "<small>simulated</small>" : ""}</div>`).join("");
+    const done = s.phase === "done";
+    $("start").classList.toggle("hide", done);
+    $("again").classList.toggle("hide", !done);
+    mode = s.mode;
+    modeCards($("roomModes"), s.mode, async (id) => { if (!done) fail("err3", (await emit("set_mode", { mode: id })).error); });
+    $("bots").classList.toggle("hide", done || s.mode === "shared" || s.members.length >= s.max);
+    $("roomModes").parentElement.classList.toggle("hide", done);
+  });
+
+  // Coming back to the page (reload, or "Back to lobby" after a game): rejoin the saved room.
+  function resume() {
+    if (!me.code || !me.participantId) return;
+    socket.emit("join_room", { code: me.code, participantId: me.participantId }, (r) => {
+      if (r && r.error) { store.set(null); me = {}; }
+    });
+  }
+  socket.on("connect", resume);
+})();
+</script>
+</body>
+</html>
