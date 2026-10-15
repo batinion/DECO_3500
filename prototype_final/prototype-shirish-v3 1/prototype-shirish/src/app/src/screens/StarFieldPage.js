@@ -107,6 +107,7 @@ export default function StarFieldPage({ week, participants, answeredIds, totalMi
     return map;
   }, [stars]);
 
+  const minMet = !!(needs.image && needs.collab && needs.prompt); // the least a crewmate must load
   const addedCount = Object.keys(added).length;
   const openStar = stars.find((s) => s.id === openStarId) || null;
   const noCrew = participants.length === 0;
@@ -205,7 +206,7 @@ export default function StarFieldPage({ week, participants, answeredIds, totalMi
             />
           </View>
           <View style={{ flex: 1 }}>
-            <PrimaryButton title="Done" onPress={() => (sent.length ? setReview(true) : onDone())} />
+            <PrimaryButton title="Done" disabled={!minMet} onPress={() => (sent.length ? setReview(true) : onDone())} />
           </View>
         </View>
       </View>

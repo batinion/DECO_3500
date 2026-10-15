@@ -495,6 +495,12 @@ export default function App() {
           </Pressable>
         )}
 
+        {fullScreenCollecting && !showIntro && (
+          <Pressable onPress={() => setView("home")} style={[styles.mute, styles.back]} hitSlop={8} accessibilityLabel="Back">
+            <Text style={styles.muteText}>←</Text>
+          </Pressable>
+        )}
+
         {toast && (
           <Animated.View
             style={[
@@ -550,7 +556,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  muteText: { fontSize: 16 },
+  back: { right: 56 },
+  muteText: { fontSize: 16, color: colors.text },
   centerText: { textAlign: "center" },
   countdownNum: { color: colors.lit, fontSize: 96, fontWeight: "800", textAlign: "center", lineHeight: 110 },
   watchDemo: {
