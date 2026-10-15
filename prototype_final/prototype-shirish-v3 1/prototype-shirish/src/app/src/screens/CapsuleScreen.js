@@ -2,6 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, ScrollView, Image, Pressable, StyleSheet, Modal, useWindowDimensions, Platform } from "react-native";
 import { colors, spacing, type } from "../lib/theme";
 import Avatar from "../components/Avatar";
+import GlassCarousel from "../components/GlassCarousel";
+import ReactionBurst from "../components/ReactionBurst";
+import { downloadCard } from "../lib/cardImage";
 
 /**
  * The opened capsule as a memory wall: photos and sketches as polaroids, messages as bright
@@ -17,6 +20,7 @@ export default function CapsuleScreen({ capsule, serverUrl, selfId, onStartOver 
   const [guesses, setGuesses] = useState({}); // memoryId -> guessed member id
   const [showAll, setShowAll] = useState(false);
   const [open, setOpen] = useState(null); // index into `shown`
+  const [burst, setBurst] = useState(null); // { id, emoji, name }
   const abs = (u) => (u && u.startsWith("/") ? `${serverUrl}${u}` : u);
   const members = capsule?.members || [];
   const h = capsule?.highlights || {};
@@ -48,7 +52,7 @@ export default function CapsuleScreen({ capsule, serverUrl, selfId, onStartOver 
   const avatarOf = (id) => members.find((m) => m.id === id)?.avatar;
   const nameOf = (id) => (id === selfId ? "you" : members.find((m) => m.id === id)?.name || "someone");
   const candidates = (m) => members.filter((x) => x.id !== m.aboutId && x.id !== selfId);
-  const revealed = (m) => m.authorId === selfId || showAll || !!guesses[m.id] || candidates(m).length < 2;
+  const revealed = () => true; // authors are always shown on the panels
   const guessable = (capsule?.memories || []).filter((m) => m.authorId !== selfId && candidates(m).length >= 2);
   const guessed = guessable.filter((m) => guesses[m.id]);
   const right = guessed.filter((m) => guesses[m.id] === m.authorId).length;
@@ -75,55 +79,26 @@ export default function CapsuleScreen({ capsule, serverUrl, selfId, onStartOver 
 
   return (
     <View style={{ flex: 1 }}>
+      {/* behind the page, so the glass panels sit in front of the emojis */}
+      <ReactionBurst burst={burst} onDone={() => setBurst(null)} />
+      {onStartOver && (
+        <Pressable onPress={onStartOver} hitSlop={8} style={styles.startOverTop} accessibilityLabel="Start over">
+          <Text style={styles.toggle}>↻ Start over</Text>
+        </Pressable>
+      )}
       <ScrollView contentContainerStyle={[styles.wrap, { width: pageW + spacing.md * 2 }]}>
         <Text style={styles.kicker}>24 YEARS LATER</Text>
         <Text style={styles.title}>the capsule is open</Text>
-        {onStartOver && (
-          <Pressable onPress={onStartOver} hitSlop={8} style={styles.startOverLink} accessibilityLabel="Start over">
-            <Text style={styles.toggle}>↻ Start over</Text>
-          </Pressable>
-        )}
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.awards}>
-          <Award icon="✦" label="memories" value={String(h.total || 0)} />
-          {h.mostRemembered && <Award icon="💛" label="most remembered" value={h.mostRemembered.name} />}
-          {h.chiefHistorian && <Award icon="✍️" label="crew historian" value={h.chiefHistorian.name} />}
-        </ScrollView>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
-          {filters.map(([key, label]) => (
-            <Pressable key={key} onPress={() => setFilter(key)} style={[styles.chip, filter === key && styles.chipOn]}>
-              <Text style={[styles.chipText, filter === key && styles.chipTextOn]}>{label}</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-
-        <View style={styles.guessBar}>
-          <Text style={styles.guessText}>
-            Tap a memory to open it and guess who wrote it{guessed.length ? ` · ${right}/${guessed.length} right` : ""}
-          </Text>
-          <Pressable onPress={() => setShowAll((v) => !v)} hitSlop={8}>
-            <Text style={styles.toggle}>{showAll ? "Hide names" : "Show all names"}</Text>
-          </Pressable>
-        </View>
-
         {shown.length === 0 && <Text style={[type.muted, { textAlign: "center", marginTop: spacing.lg }]}>Nothing here.</Text>}
 
-        <View style={styles.masonry}>
-          {columns.map((c, ci) => (
-            <View key={ci} style={{ width: colW, gap: 12 }}>
-              {c.items.map(({ m, i }) => (
-                <Tile key={m.id} m={m} w={colW} abs={abs} selfId={selfId} revealed={revealed(m)} avatarOf={avatarOf} nameOf={nameOf} guess={guesses[m.id]} onPress={() => setOpen(i)} />
-              ))}
-            </View>
-          ))}
-        </View>
-
-        {onStartOver && (
-          <Pressable onPress={onStartOver} style={({ pressed }) => [styles.startOver, pressed && { opacity: 0.8 }]} accessibilityLabel="Start over">
-            <Text style={styles.startOverText}>↻ Start over</Text>
-          </Pressable>
+        {shown.length > 0 && (
+          <View style={{ paddingBottom: spacing.lg }}>
+            <GlassCarousel items={shown} width={pageW + spacing.md * 2} abs={abs} revealed={revealed} nameOf={nameOf}
+              onReact={(emoji) => setBurst({ id: Date.now(), emoji, name: members.find((x) => x.id === selfId)?.name || "You" })}
+              onDownload={(m) => downloadCard(m, nameOf(m.authorId), abs)} />
+          </View>
         )}
+
       </ScrollView>
 
       <Modal visible={open != null && !!shown[open]} transparent animationType="fade" onRequestClose={() => setOpen(null)}>
@@ -311,7 +286,7 @@ const styles = StyleSheet.create({
   guessBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
   guessText: { color: colors.muted, fontSize: 13, flexShrink: 1 },
   toggle: { color: colors.accent, fontSize: 12 },
-  startOverLink: { alignSelf: "center", marginTop: -8 },
+  startOverTop: { position: "absolute", bottom: spacing.md, right: spacing.md, zIndex: 20, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
   startOver: { alignSelf: "center", backgroundColor: colors.lit, borderRadius: 999, paddingHorizontal: 28, paddingVertical: 14, marginBottom: spacing.xl },
   startOverText: { color: "#0a0c18", fontSize: 16, fontWeight: "800" },
   masonry: { flexDirection: "row", gap: 12, alignItems: "flex-start", paddingBottom: spacing.xl, paddingTop: 4 },
