@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Text, TextInput, Modal, Pressable, StyleSheet, KeyboardAvoidingView, Platform, Image, ScrollView } from "react-native";
 import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker";
@@ -7,16 +7,21 @@ import FriendPicker from "./FriendPicker";
 import { colors, spacing, type } from "../lib/theme";
 import { parseTemplate, templateHasName, templateBlankCount } from "../lib/prompts";
 import { uploadPhoto } from "../lib/api";
+import VoicePlayer from "./VoicePlayer";
+import { mediaBlockedReason, webCameraSupported, openCameraStream, stopStream, snapshot } from "../lib/camera";
+import { voiceSupported, startRecording, MAX_VOICE_SECONDS } from "../lib/voice";
 
 /**
  * One memory capsule, opened. Fill the sentence, pick the crewmate, optionally attach a photo
  * from that moment, and drop it into the capsule.
  */
-export default function PromptSheet({ visible, star, participants, onCollect, onClose, serverUrl, code, participantId }) {
+export default function PromptSheet({ visible, star, participants, onCollect, onClose, serverUrl, code, participantId, initial = null }) {
   const isFree = star?.kind === "free";
   const isImage = star?.kind === "image";
-  const blankCount = isFree ? 1 : isImage ? 0 : star ? templateBlankCount(star.template) : 0;
-  const hasName = isFree || isImage ? false : star ? templateHasName(star.template) : false;
+  const isVoice = star?.kind === "voice";
+  const isSelfie = star?.kind === "selfie";
+  const blankCount = isFree ? 1 : isImage || isVoice || isSelfie ? 0 : star ? templateBlankCount(star.template) : 0;
+  const hasName = isFree || isImage || isVoice || isSelfie ? false : star ? templateHasName(star.template) : false;
 
   const [filledText, setFilledText] = useState([]);
   const [aboutParticipantId, setAboutParticipantId] = useState(null);
@@ -26,19 +31,44 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(null);
+  const [audio, setAudio] = useState(null); // voice capsule: the uploaded recording (server path)
+  const [localUri, setLocalUri] = useState(null); // ...and the same recording on this device, for instant playback
+  const [recording, setRecording] = useState(false);
+  const [secs, setSecs] = useState(0);
+  const [cameraOn, setCameraOn] = useState(false);
+  const streamRef = useRef(null);
+  const videoRef = useRef(null);
+  const recRef = useRef(null);
+  const tickRef = useRef(null);
 
   useEffect(() => {
     if (!visible) return;
-    setFilledText(Array(blankCount).fill(""));
-    setAboutParticipantId(participants.length === 1 && hasName ? participants[0].id : null);
-    setPhoto(null);
-    setImages([]);
-    setCaption("");
+    // editing a loaded capsule starts from what was submitted
+    setFilledText(initial?.filledText?.length ? [...initial.filledText] : Array(blankCount).fill(""));
+    setAboutParticipantId(initial ? initial.aboutParticipantId || null : participants.length === 1 && hasName ? participants[0].id : null);
+    setPhoto(initial?.photo || null);
+    setImages(initial?.images ? [...initial.images] : []);
+    setCaption(initial?.caption || "");
+    setAudio(initial?.audio || null);
+    setLocalUri(null);
+    setSecs(0);
     setError(null);
   }, [visible, star?.id]);
 
+  // closing the sheet mid-recording drops the recording and frees the mic (and the camera)
+  useEffect(() => {
+    if (visible) return;
+    stopStream(streamRef.current);
+    streamRef.current = null;
+    setCameraOn(false);
+    clearInterval(tickRef.current);
+    recRef.current?.cancel();
+    recRef.current = null;
+    setRecording(false);
+  }, [visible]);
+
   if (!star) return null;
-  const tokens = isFree || isImage ? [] : parseTemplate(star.template);
+  const tokens = isFree || isImage || isVoice || isSelfie ? [] : parseTemplate(star.template);
 
   function setBlank(index, value) {
     setFilledText((prev) => {
@@ -49,7 +79,103 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
   }
 
   const filledAll = filledText.length === blankCount && filledText.every((t) => t && t.trim());
-  const canAdd = isImage ? images.length > 0 && !uploading : filledAll && (!hasName || aboutParticipantId) && (!star?.needsPhoto || !!photo) && !uploading;
+  const canAdd = isSelfie ? !!photo && !cameraOn && !uploading : isVoice ? !!audio && !recording && !uploading : isImage ? images.length > 0 && !uploading : filledAll && (!hasName || aboutParticipantId) && (!star?.needsPhoto || !!photo) && !uploading;
+
+  async function uploadSelfie(asset) {
+    setUploading(true);
+    try {
+      setPhoto(await uploadPhoto(serverUrl, { code, participantId, questionId: "group-selfie", asset }));
+    } catch (e) {
+      setError(e.message || "Couldn't save that picture.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function openCamera() {
+    setError(null);
+    if (Platform.OS !== "web") {
+      // phones: the system camera
+      try {
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+        if (!permission.granted) return setError("Allow camera access to take the selfie.");
+        const result = await ImagePicker.launchCameraAsync({ quality: 0.7, cameraType: ImagePicker.CameraType.front });
+        if (result.canceled || !result.assets?.length) return;
+        setLocalUri(result.assets[0].uri);
+        await uploadSelfie({ uri: result.assets[0].uri, fileName: "selfie.jpg" });
+      } catch (e) {
+        setError(e.message || "Couldn't open the camera.");
+      }
+      return;
+    }
+    if (!webCameraSupported()) return setError(mediaBlockedReason("camera"));
+    try {
+      streamRef.current = await openCameraStream();
+      setPhoto(null);
+      setLocalUri(null);
+      setCameraOn(true);
+    } catch (e) {
+      setError("Couldn't open the camera. Allow camera access and try again.");
+    }
+  }
+
+  async function takePicture() {
+    if (!videoRef.current) return;
+    try {
+      const { uri } = await snapshot(videoRef.current);
+      stopStream(streamRef.current);
+      streamRef.current = null;
+      setCameraOn(false);
+      setLocalUri(uri);
+      await uploadSelfie({ uri, fileName: "selfie.jpg" });
+    } catch (e) {
+      setError(e.message || "Couldn't take the picture.");
+    }
+  }
+
+  function closeCamera() {
+    stopStream(streamRef.current);
+    streamRef.current = null;
+    setCameraOn(false);
+  }
+
+  async function beginRecording() {
+    setError(null);
+    if (!voiceSupported()) return setError(Platform.OS === "web" ? mediaBlockedReason("microphone") : "Voice notes need the web version for now.");
+    try {
+      recRef.current = await startRecording();
+    } catch (e) {
+      return setError("Couldn't use the microphone. Allow microphone access and try again.");
+    }
+    setAudio(null);
+    setLocalUri(null);
+    setSecs(0);
+    setRecording(true);
+    const startedAt = Date.now();
+    tickRef.current = setInterval(() => {
+      const s = Math.floor((Date.now() - startedAt) / 1000);
+      setSecs(s);
+      if (s >= MAX_VOICE_SECONDS) endRecording();
+    }, 250);
+  }
+
+  async function endRecording() {
+    clearInterval(tickRef.current);
+    const rec = recRef.current;
+    recRef.current = null;
+    setRecording(false);
+    if (!rec) return;
+    try {
+      const { uri, ext } = await rec.stop();
+      setLocalUri(uri);
+      setUploading(true);
+      setAudio(await uploadPhoto(serverUrl, { code, participantId, questionId: "voice-note", asset: { uri, fileName: `voice.${ext}` } }));
+    } catch (e) {
+      setError(e.message || "Couldn't save that recording.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function addImages() {
     setError(null);
@@ -94,7 +220,7 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
     setSending(true);
     setError(null);
     try {
-      await onCollect({ filledText, aboutParticipantId, photo, images, caption });
+      await onCollect({ filledText, aboutParticipantId, photo, images, caption, audio });
     } catch (e) {
       setError(e.message || "Couldn't add that memory.");
     } finally {
@@ -102,7 +228,7 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
     }
   }
 
-  const missing = isImage ? (images.length === 0 ? "Add at least one image" : null) : !filledAll ? "Fill in the blank to add it" : hasName && !aboutParticipantId ? "Pick which crewmate it's about" : star?.needsPhoto && !photo ? "Upload the photo to add it" : null;
+  const missing = isSelfie ? (cameraOn ? "Smile, then tap the shutter" : !photo ? "Take the selfie to add it" : null) : isVoice ? (recording ? "Tap stop when you're done" : !audio ? "Record a voice note to add it" : null) : isImage ? (images.length === 0 ? "Add at least one image" : null) : !filledAll ? "Fill in the blank to add it" : hasName && !aboutParticipantId ? "Pick which crewmate it's about" : star?.needsPhoto && !photo ? "Upload the photo to add it" : null;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -111,7 +237,7 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.sheetWrap} pointerEvents="box-none">
           <BlurView intensity={55} tint="dark" style={styles.sheet}>
             <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1 }}>
-              <Text style={type.label}>{isImage ? "ADD IMAGES FROM A MOMENT" : isFree ? "WRITE ANYTHING ABOUT YOUR CREW" : "FINISH THE SENTENCE ABOUT A CREWMATE"}</Text>
+              <Text style={type.label}>{isSelfie ? "GROUP SELFIE" : isVoice ? "RECORD A VOICE NOTE" : isImage ? "ADD IMAGES FROM A MOMENT" : isFree ? "WRITE ANYTHING ABOUT YOUR CREW" : "FINISH THE SENTENCE ABOUT A CREWMATE"}</Text>
 
               <View style={styles.body}>
                 {isImage ? (
@@ -139,6 +265,68 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
                       value={caption}
                       onChangeText={setCaption}
                     />
+                    {participants.length > 0 && (
+                      <View style={[styles.freeFriendRow, { marginTop: 0 }]}>
+                        <Text style={type.muted}>About: </Text>
+                        <FriendPicker participants={participants} value={aboutParticipantId} onChange={setAboutParticipantId} placeholder="the whole group" />
+                      </View>
+                    )}
+                  </View>
+                ) : isSelfie ? (
+                  <View style={{ gap: spacing.md, marginTop: spacing.md }}>
+                    <Text style={styles.voicePrompt}>Take a selfie with your team</Text>
+                    {cameraOn ? (
+                      <>
+                        {React.createElement("video", {
+                          ref: (el) => {
+                            videoRef.current = el;
+                            if (el && streamRef.current && el.srcObject !== streamRef.current) el.srcObject = streamRef.current;
+                          },
+                          autoPlay: true,
+                          playsInline: true,
+                          muted: true,
+                          style: { width: "100%", borderRadius: 14, backgroundColor: "#000", transform: "scaleX(-1)" },
+                        })}
+                        <View style={styles.voiceRow}>
+                          <View style={{ flex: 1 }}>
+                            <PrimaryButton title="📷  Take picture" onPress={takePicture} />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <PrimaryButton title="Cancel" variant="dark" onPress={closeCamera} />
+                          </View>
+                        </View>
+                      </>
+                    ) : photo ? (
+                      <>
+                        <Image source={{ uri: localUri || `${serverUrl}${photo}` }} style={styles.selfieImg} resizeMode="cover" />
+                        <Pressable onPress={openCamera} disabled={uploading}>
+                          <Text style={styles.removePhoto}>{uploading ? "Saving…" : "Retake"}</Text>
+                        </Pressable>
+                      </>
+                    ) : (
+                      <PrimaryButton title={uploading ? "Saving…" : "📷  Open camera"} onPress={openCamera} disabled={uploading} />
+                    )}
+                    <TextInput
+                      style={styles.captionInput}
+                      placeholder="Add a small caption (optional)"
+                      placeholderTextColor={colors.muted}
+                      value={caption}
+                      onChangeText={setCaption}
+                      maxLength={120}
+                    />
+                  </View>
+                ) : isVoice ? (
+                  <View style={{ gap: spacing.md, marginTop: spacing.md }}>
+                    <Text style={styles.voicePrompt}>{star.voicePrompt}</Text>
+                    <View style={styles.voiceRow}>
+                      <Pressable onPress={recording ? endRecording : beginRecording} disabled={uploading} style={[styles.micBtn, recording && styles.micBtnOn]} accessibilityLabel={recording ? "Stop recording" : "Start recording"}>
+                        <Text style={styles.micIcon}>{recording ? "■" : "🎙️"}</Text>
+                      </Pressable>
+                      <Text style={styles.voiceStatus}>
+                        {recording ? `Recording… ${secs}s` : uploading ? "Saving…" : audio ? "Recorded. Listen back or record again." : `Tap the mic to record (up to ${MAX_VOICE_SECONDS}s)`}
+                      </Text>
+                    </View>
+                    {audio && !recording ? <VoicePlayer src={localUri || `${serverUrl}${audio}`} /> : null}
                     {participants.length > 0 && (
                       <View style={[styles.freeFriendRow, { marginTop: 0 }]}>
                         <Text style={type.muted}>About: </Text>
@@ -185,7 +373,7 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
                   </View>
                 )}
 
-                {!isImage && <View style={styles.photoRow}>
+                {!isImage && !isVoice && !isSelfie && <View style={styles.photoRow}>
                   {photo ? (
                     <>
                       <Image source={{ uri: `${serverUrl}${photo}` }} style={styles.thumb} />
@@ -208,7 +396,7 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
                   <PrimaryButton title="Back" variant="dark" onPress={onClose} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <PrimaryButton title="Load onto rocket" onPress={handleCollect} disabled={!canAdd} loading={sending} />
+                  <PrimaryButton title={initial ? "Save changes" : "Load"} onPress={handleCollect} disabled={!canAdd} loading={sending} />
                 </View>
               </View>
             </ScrollView>
@@ -221,12 +409,12 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
 
 const styles = StyleSheet.create({
   modalRoot: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.md },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.5)" },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.8)" },
   sheetWrap: { width: "100%", maxWidth: 480, alignItems: "center", justifyContent: "center", maxHeight: "94%" },
   sheet: {
     width: "100%",
     overflow: "hidden",
-    backgroundColor: "rgba(22, 26, 46, 0.6)",
+    backgroundColor: "rgba(10, 12, 24, 0.9)",
     borderRadius: 24,
     padding: spacing.lg,
     borderWidth: 1,
@@ -259,6 +447,13 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   freeFriendRow: { flexDirection: "row", alignItems: "center", marginTop: spacing.md, zIndex: 10 },
+  selfieImg: { width: "100%", aspectRatio: 4 / 3, borderRadius: 14, backgroundColor: colors.panel },
+  voicePrompt: { ...type.heading, lineHeight: 28 },
+  voiceRow: { flexDirection: "row", alignItems: "center", gap: spacing.md },
+  micBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: "rgba(255,255,255,0.1)", borderWidth: 1, borderColor: colors.accent, alignItems: "center", justifyContent: "center" },
+  micBtnOn: { backgroundColor: "#d93a4c", borderColor: "#ff8896" },
+  micIcon: { fontSize: 24, color: "#fff" },
+  voiceStatus: { color: colors.text, fontSize: 14, flex: 1 },
   imageGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   imageCell: { width: 76, height: 76 },
   imageThumb: { width: 76, height: 76, borderRadius: 12, backgroundColor: colors.panel },

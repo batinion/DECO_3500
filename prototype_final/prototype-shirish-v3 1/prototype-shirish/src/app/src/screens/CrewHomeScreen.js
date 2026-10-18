@@ -1,15 +1,38 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Pressable, Modal, Image, Platform, Share, ScrollView } from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import Avatar from "../components/Avatar";
 import { colors, spacing, type } from "../lib/theme";
 import { inviteLink } from "../lib/server";
 
+// Thin, dark scrollbar for the memory preview list (web only; phones already use slim overlay bars).
+function useSlimScrollbar() {
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof document === "undefined" || document.getElementById("slim-scroll-style")) return;
+    const el = document.createElement("style");
+    el.id = "slim-scroll-style";
+    // The standard scrollbar-width/color properties would switch the ::-webkit rules off (and have no arrows),
+    // so only the webkit ones are used.
+    const arrow = (d) => `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='${d}' fill='white'/%3E%3C/svg%3E")`;
+    el.textContent = `
+      [data-slim-scroll]::-webkit-scrollbar { width: 8px; }
+      [data-slim-scroll]::-webkit-scrollbar-track { background: #0b0c10; border-radius: 4px; }
+      [data-slim-scroll]::-webkit-scrollbar-thumb { background: #2a2d37; border-radius: 4px; }
+      [data-slim-scroll]::-webkit-scrollbar-thumb:hover { background: #3a3e4c; }
+      [data-slim-scroll]::-webkit-scrollbar-button:single-button { display: block; height: 8px; width: 8px; background-color: transparent; background-repeat: no-repeat; background-position: center; background-size: 6px 6px; }
+      [data-slim-scroll]::-webkit-scrollbar-button:single-button:vertical:decrement { background-image: ${arrow("M5 2 L9 8 L1 8 Z")}; }
+      [data-slim-scroll]::-webkit-scrollbar-button:single-button:vertical:increment { background-image: ${arrow("M1 2 L9 2 L5 8 Z")}; }
+    `;
+    document.head.appendChild(el);
+  }, []);
+}
+
 /**
  * The crew's home for the whole semester. Everyone sees the same thing and has the same
  * controls — there's no host.
  */
-export default function CrewHomeScreen({ scene, selfId, server, onAddMemories, onAddMedia, onMyMemories, onSetReady, onDemo, onWatchIntro, readyBusy, error, myMemories = [] }) {
+export default function CrewHomeScreen({ scene, selfId, server, onAddMemories, onAddMedia, onMyMemories, onSetReady, onDemo, onWatchIntro, onRemoveMemory, readyBusy, error, myMemories = [] }) {
+  useSlimScrollbar();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -22,7 +45,7 @@ export default function CrewHomeScreen({ scene, selfId, server, onAddMemories, o
   const readyCount = members.filter((m) => m.ready).length;
   const myCount = me?.memoryCount || 0;
   const needs = me?.needs || {};
-  const canBeReady = !!(needs.image && needs.collab && needs.prompt);
+  const canBeReady = myCount >= rules.minMemories;
   const link = inviteLink(server, scene.code);
   const hasSims = members.some((m) => m.isSimulated);
 
@@ -68,12 +91,17 @@ export default function CrewHomeScreen({ scene, selfId, server, onAddMemories, o
         {myMemories.length === 0 ? (
           <Text style={styles.previewEmpty}>Memories you load will show up here.</Text>
         ) : (
-          <ScrollView style={styles.previewScroll} nestedScrollEnabled showsVerticalScrollIndicator>
+          <ScrollView style={styles.previewScroll} dataSet={{ slimScroll: "1" }} nestedScrollEnabled showsVerticalScrollIndicator>
             {myMemories.map((m) => (
               <View key={m.id} style={styles.previewRow}>
-                <Text style={styles.previewText} numberOfLines={2}>
-                  {m.text || (m.photo ? "🖼️  Image" : m.drawing ? "✎  Sketch" : "")}
+                <Text style={[styles.previewText, onRemoveMemory && { paddingRight: 28 }]} numberOfLines={2}>
+                  {m.audio ? "🎙️  Voice note" : m.text || (m.photo ? "🖼️  Image" : m.drawing ? "✎  Sketch" : "")}
                 </Text>
+                {onRemoveMemory ? (
+                  <Pressable onPress={() => onRemoveMemory(m.id)} style={styles.previewX} hitSlop={8} accessibilityLabel="Remove this memory">
+                    <Text style={styles.previewXText}>✕</Text>
+                  </Pressable>
+                ) : null}
               </View>
             ))}
           </ScrollView>
@@ -178,6 +206,8 @@ const styles = StyleSheet.create({
   previewScroll: { flex: 1 },
   previewEmpty: { color: colors.muted, fontSize: 13, paddingVertical: 12 },
   previewRow: { height: 42, justifyContent: "center", borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
+  previewX: { position: "absolute", top: 4, right: 0, width: 18, height: 18, borderRadius: 9, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
+  previewXText: { color: colors.text, fontSize: 9, fontWeight: "800" },
   previewText: { color: colors.text, fontSize: 13, lineHeight: 17 },
   previewSub: { color: colors.muted, fontSize: 11, marginTop: 1 },
   crewStatus: { maxHeight: 58, flexGrow: 0 },

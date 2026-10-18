@@ -51,14 +51,13 @@
     </div>
     <div id="day">
       <div class="day-sun"></div>
-      <div class="day-globe">🌍</div>
       <i class="day-cloud dc1"></i><i class="day-cloud dc2"></i><i class="day-cloud dc3"></i>
       <div class="day-hills far"></div><div class="day-hills near"></div>
     </div>
-    <div id="cine-a" class="cine"><span>Memories &amp; avatars interstellar…</span></div>
-    <div id="cine-d" class="cine"><span>…and on Earth<br>You all go on your own ways…</span></div>
+    <div id="cine-a" class="cine"><span>Memories &amp; avatars into stars...</span></div>
+    <div id="cine-d" class="cine"><span>…and on Earth.<br>You all go on your own ways…</span></div>
+    <div id="bye" class="fslide"><div class="f-frame"><img alt="Goodbye" data-src="/future/goodbye.gif" /></div></div>
     <div id="cine-c" class="cine"><span>Rocket is coming back to Earth…</span></div>
-    <div id="cine-e" class="cine"><span>It's time to reunite with old friends from DECO3500</span></div>
     <div id="cine-b" class="cine"><span>…and on Earth.</span></div>
     <div id="cine-f" class="cine"><span>You on Earth...</span></div>
     <div id="marquee"><span>This demo in earth is added to show the passing of 24 years in real life</span></div>
@@ -76,7 +75,7 @@
     sky: $("sky"), atmo: $("atmo"), moon: $("moon"), earthWrap: $("earth-wrap"), earth: $("earth"),
     ground: $("ground"), pad: $("pad"), rocket: $("rocket"),
     warpHud: $("warp-hud"), whDay: $("wh-day"), whDate: $("wh-date"), whFill: $("wh-fill"),
-    flash: $("flash"), alarm: $("alarm"), cineA: $("cine-a"), cineB: $("cine-b"), cineC: $("cine-c"), cineD: $("cine-d"), cineE: $("cine-e"), cineF: $("cine-f"), marquee: $("marquee"), day: $("day"), future: $("future"),
+    flash: $("flash"), alarm: $("alarm"), cineA: $("cine-a"), cineB: $("cine-b"), cineC: $("cine-c"), cineD: $("cine-d"), bye: $("bye"), cineF: $("cine-f"), marquee: $("marquee"), day: $("day"), future: $("future"),
     enginesBox: $("engines"), cargoFill: $("cargo-fill"), crewChars: $("crew-chars"),
   };
   // Engines are built to match the crew size (4 to 6) — one per crewmate.
@@ -439,6 +438,14 @@
     });
   }
 
+  /** The goodbye gif restarts from its first frame each time it appears. */
+  let byeShown = false;
+  function showBye(on) {
+    if (on === byeShown) return;
+    byeShown = on;
+    if (on) el.bye.querySelector("img").src = `${el.bye.querySelector("img").dataset.src}?play=${Date.now()}`;
+  }
+
   function render(now) {
     // Preview aid: /scene?preview=cruising&t=5000 freezes the scene 5 s into that phase (handy for checking the transitions).
     if (PREVIEW) {
@@ -459,7 +466,7 @@
     // --- rocket: {x,y px, s scale, r deg, z behind moon}
     let rk = { x: 0, y: 0, s: unit, r: 0, behind: false };
     let warp = 0, groundP = 0, atmo = 1, tunnel = 0, flash = 0, hud = false;
-    let rocketO = 1, earthT = 0, cineA = false, cineB = false, cineC = false, cineD = false, cineE = false, cineF = false, marq = false, dayOn = false, headTop = false, slide = -1, enginesOff = false;
+    let rocketO = 1, earthT = 0, cineA = false, cineB = false, cineC = false, cineD = false, byeOn = false, cineF = false, marq = false, dayOn = false, headTop = false, slide = -1, enginesOff = false;
 
     const padPose = () => ({ x: padX(), y: groundY - (ROCKET_H / 2) * unit + 6, s: unit, r: 0 });
     const cruisePose = () => {
@@ -484,16 +491,14 @@
       const pad = padPose();
       const u = clamp01((t - HOLD) / (T.launchMs - HOLD)); // liftoff after the 6 s countdown hold
       moon.o = 1 - clamp01((t - HOLD - 2500) / 2500);
-      const top = { x: lerp(pad.x, L.cruise.x * W, 0.5), y: H * 0.3 };
       const cr = cruisePose();
       if (t < HOLD) {
         rk = { ...pad, x: pad.x + Math.sin(t / 22) * 1.5 * unit, y: pad.y + Math.sin(t / 31) * 1.2 * unit };
-      } else if (u < 0.6) {
-        const p = easeIn(u / 0.6);
-        rk = { x: lerp(pad.x, top.x, p), y: lerp(pad.y, top.y, p), s: unit, r: lerp(0, cr.r * 0.4, p) };
       } else {
-        const p = easeOut((u - 0.6) / 0.4);
-        rk = { x: lerp(top.x, cr.x, p), y: lerp(top.y, cr.y, p), s: unit, r: lerp(cr.r * 0.4, cr.r, p) };
+        // One continuous path from the pad to the cruise position (smootherstep: zero speed and
+        // acceleration at both ends), so there is no sudden speed change or change of direction.
+        const p = u * u * u * (u * (u * 6 - 15) + 10);
+        rk = { x: lerp(pad.x, cr.x, p), y: lerp(pad.y, cr.y, p), s: unit, r: lerp(0, cr.r, p) };
       }
       groundP = easeIn(clamp01((t - HOLD) / 3500));
       atmo = 1 - easeInOut(clamp01((t - HOLD) / 4500));
@@ -519,11 +524,11 @@
       const slidesEnd = FUT.slideStart + FUT.slideMs * FUTURE.length;
       // A daylight Earth scene slides in from the left; the heading stays on it while the gifs play.
       dayOn = t > 0; // stays on screen to the end, so the reunite line has the daylight scene to itself
-      cineD = t > 2500 && t < 6500; // 2. "You all go on your own ways…" in the middle (4 s)
+      cineD = byeOn = t > 2500 && t < 7500; // 2. the caption with the goodbye gif below it (5 s, so it lingers)
       cineB = false; // (now one two-line message in cineD)
       cineF = t >= FUT.slideStart && t < slidesEnd - 200; // "You on Earth..." comes in with the first gif and stays until the reunite line appears
       marq = t >= 7600 && t < 15600; // 4. the glass banner, bottom centre, for 8 s (then 1 s before the gifs), then gone; the gifs start after it
-      cineE = t >= slidesEnd - 200; // after the last gif: only "It's time to reunite with old friends from DECO3500"
+      // after the last gif the phones show the "Summon the rocket" email; the scene just keeps the daylight Earth
       headTop = true; // the heading sits at the top from the very start
       if (t >= FUT.slideStart && t < slidesEnd - 200 && idx >= 0 && idx < FUTURE.length) slide = idx;
     } else {
@@ -580,7 +585,8 @@
     cls(el.cineB, "show", cineB);
     cls(el.cineC, "show", cineC);
     cls(el.cineD, "show", cineD);
-    cls(el.cineE, "show", cineE);
+    cls(el.bye, "show", byeOn);
+    showBye(byeOn);
     cls(el.cineF, "show", cineF);
     cls(el.marquee, "run", marq);
     cls(el.cineB, "top", headTop);

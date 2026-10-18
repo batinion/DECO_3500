@@ -19,7 +19,7 @@ npm install      # first time only
 npm start
 ```
 
-(or double-click `start-servers.bat` on Windows / run `./start-server.sh` on Mac.)
+(or, to start everything at once, double-click `start-all.bat` on Windows / run `./start-all.sh` on Mac and Linux. That also starts the two standalone games on 4001 and 4002.)
 
 The terminal prints two links:
 
@@ -66,7 +66,7 @@ memory chimes, a 3-2-1 countdown, a launch rumble, whooshes and a fanfare.
 
 | Stage | What happens |
 |---|---|
-| **Briefing** | First visit: a ~1-minute animated briefing with sound (skippable, replay any time). |
+| **Briefing** | First visit: a ~40-second animated briefing with sound (skippable, replay any time). |
 | **Join (2 steps)** | 1) Pick an astronaut + type your name. 2) Two separate choices: **Join a crew** (just the 6-letter code) or **Create a new crew** (crew name → you get a code to share). |
 | **Collecting (all semester)** | Crew home shows one "what to do next" line, **Load a memory**, sketch/photo, my memories and the ready button. Crew list, activity feed and demo tools are folded away. Memories are **capsules** you fill in and load onto the rocket. After each one, a **privacy card** shows exactly what you sent and how it's used. |
 | **Practice mode** | Alone? "Add 2 simulated crewmates" — they write memories, get ready, and play both games. |

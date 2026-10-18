@@ -124,6 +124,15 @@
       tone(120, { type: "sine", at: 0.06, dur: 0.25, peak: 0.4, glideTo: 70 });
       noise({ at: 0.06, dur: 0.2, peak: 0.15, filter: "lowpass", from: 400 });
     },
+    // a bright notification bell: "cling-cling"
+    bell() {
+      [0, 0.32].forEach((at) => {
+        tone(1568, { type: "sine", at, dur: 1.1, peak: 0.22, attack: 0.002 });
+        tone(2349, { type: "sine", at, dur: 0.8, peak: 0.12, attack: 0.002 });
+        tone(3136, { type: "sine", at, dur: 0.5, peak: 0.07, attack: 0.002 });
+        tone(4186, { type: "triangle", at, dur: 0.25, peak: 0.03, attack: 0.002 });
+      });
+    },
     ready() {
       tone(660, { type: "triangle", dur: 0.1, peak: 0.15 });
       tone(990, { type: "triangle", at: 0.1, dur: 0.18, peak: 0.15 });

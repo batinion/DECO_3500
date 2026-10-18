@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, Animated, Pressable, useWindowDimensions } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView, StatusBar, Animated, Pressable, Platform, Alert, useWindowDimensions } from "react-native";
 import { StatusBar as ExpoStatusBar } from "expo-status-bar";
 
 import { getSocket, emitWithAck } from "./src/lib/socket";
@@ -21,6 +21,7 @@ import DrawUploadPage from "./src/screens/DrawUploadPage";
 import MyMemoriesScreen from "./src/screens/MyMemoriesScreen";
 import LostScreen from "./src/screens/LostScreen";
 import GameFrame from "./src/components/GameFrame";
+import SummonLetter from "./src/components/SummonLetter";
 import CapsuleScreen from "./src/screens/CapsuleScreen";
 
 /**
@@ -115,6 +116,7 @@ export default function App() {
   const [readyBusy, setReadyBusy] = useState(false);
   const [homeError, setHomeError] = useState(null);
   const [toast, setToast] = useState(null);
+  const [remoteBurst, setRemoteBurst] = useState(null); // an emoji reaction from a crewmate in the reveal
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const selfName = useRef(null);
   const [showIntro, setShowIntro] = useState(false);
@@ -151,6 +153,8 @@ export default function App() {
       socket.off("memory_added");
       socket.off("engine_ignite");
       socket.off("start_over");
+      socket.off("capsule_reaction");
+      socket.on("capsule_reaction", (r) => setRemoteBurst({ id: Date.now() + Math.random(), emoji: r.emoji, name: r.name, from: r.from }));
       socket.on("start_over", resetToJoin); // someone used Demo tools > Start over
       socket.on("scene_state", (s) => s.code && setScene(s));
       socket.on("engine_ignite", () => play("ignite"));
@@ -263,6 +267,16 @@ export default function App() {
     AsyncStorage.setItem(INTRO_KEY, "1").catch(() => {});
   }, []);
 
+  // Leaves this crew on this device and goes back to the join screen, so ask first.
+  function confirmStartOver() {
+    const message = "Start over? You'll leave this crew on this device and go back to the join screen.";
+    if (Platform.OS === "web") {
+      if (typeof window === "undefined" || window.confirm(message)) resetToJoin();
+    } else {
+      Alert.alert("Start over?", message, [{ text: "Cancel", style: "cancel" }, { text: "Start over", style: "destructive", onPress: resetToJoin }]);
+    }
+  }
+
   function toggleMute() {
     const m = !muted;
     setMuted(m);
@@ -307,7 +321,8 @@ export default function App() {
   }
 
   async function addMemory(memory) {
-    await act("add_memory", { memory });
+    const ack = await act("add_memory", { memory });
+    return ack?.id;
   }
 
   // Liftoff countdown: 6 … 0 while the rocket holds on the pad, then the number goes as it lifts.
@@ -324,6 +339,21 @@ export default function App() {
     };
     tick();
     const id = setInterval(tick, 100);
+    return () => clearInterval(id);
+  }, [scene?.phase, scene?.phaseStartedAt]);
+
+  // The "Summon the rocket" email arrives once the last future gif has played.
+  const [summonOn, setSummonOn] = useState(false);
+  useEffect(() => {
+    if (scene?.phase !== "timejump") {
+      setSummonOn(false);
+      return undefined;
+    }
+    const startedAt = Date.now() - (scene.serverNow - scene.phaseStartedAt);
+    const at = scene.timing?.warpMs || 38200;
+    const tick = () => setSummonOn(Date.now() - startedAt >= at);
+    tick();
+    const id = setInterval(tick, 250);
     return () => clearInterval(id);
   }, [scene?.phase, scene?.phaseStartedAt]);
 
@@ -362,6 +392,7 @@ export default function App() {
       <ExpoStatusBar style="light" />
       <SceneBackground server={serverUrl ? server : null} code={joined ? code : null} />
       {!panel && <View style={styles.scrim} pointerEvents="none" />}
+      {fullScreenCollecting && view === "stars" && <View style={styles.capsuleScrim} pointerEvents="none" />}
 
       {/* Tagline, top left, on the first stage (join + crew home) while the rocket is on the pad */}
       {(screen === "join" || (screen === "collecting" && view === "home")) && (
@@ -412,6 +443,7 @@ export default function App() {
               myMemories={myMemories}
               onAddMedia={() => setView("media")}
               onMyMemories={() => setView("mine")}
+              onRemoveMemory={(memoryId) => act("remove_memory", { memoryId }).catch((e) => showToast(e.message))}
               onSetReady={setReady}
               onDemo={demo}
               onWatchIntro={() => setShowIntro(true)}
@@ -428,6 +460,8 @@ export default function App() {
             totalMine={me?.memoryCount || 0}
             needs={me?.needs || {}}
             onAddMemory={addMemory}
+            onRemoveMemory={(memoryId) => act("remove_memory", { memoryId })}
+            onBack={() => setView("home")}
             onDone={() => setView("home")}
             serverUrl={serverUrl}
             code={code}
@@ -458,9 +492,9 @@ export default function App() {
           <CrewPanel>
             {scene.phase === "boarding" ? (
               <>
-                <Text style={type.label}>LOADING THE CARGO HOLD</Text>
-                <Text style={type.heading}>Everyone's loading their memories 📦</Text>
-                <Text style={type.muted}>One by one, your crew slides their memory capsules on board. Then the hatch locks.</Text>
+                <Text style={type.label}>BOARDING THE ROCKET</Text>
+                <Text style={type.heading}>Avatars getting into the rocket 🚀</Text>
+                <Text style={type.muted}>One by one, your crew's avatars climb in with their memory capsules. Then the hatch locks.</Text>
               </>
             ) : count !== null && count > 0 ? (
               <>
@@ -478,12 +512,21 @@ export default function App() {
             )}
           </CrewPanel>
         )}
+        {screen === "scene" && summonOn && (
+          <SummonLetter
+            members={members}
+            summonReady={scene.summonReady}
+            selfId={participantId}
+            crewName={scene.crewName}
+            onSummon={() => act("summon_ready").catch((e) => showToast(e.message))}
+          />
+        )}
         {screen === "lost" && (
           <CrewPanel wide>
             <LostScreen memoryTotal={scene.memoryTotal} onChoose={(activity) => act("choose_activity", { activity }).catch((e) => showToast(e.message))} />
           </CrewPanel>
         )}
-        {screen === "capsule" && <CapsuleScreen capsule={scene?.capsule} serverUrl={serverUrl} selfId={participantId} onStartOver={resetToJoin} />}
+        {screen === "capsule" && <CapsuleScreen capsule={scene?.capsule} serverUrl={serverUrl} selfId={participantId} remoteBurst={remoteBurst} onReactShare={(emoji) => emitWithAck("capsule_react", { code, participantId, emoji }).catch(() => {})} onStartOver={resetToJoin} />}
 
         {screen === "game" && serverUrl && (
           <GameFrame serverUrl={serverUrl} kind="rescue" code={code} participantId={participantId} />
@@ -495,8 +538,14 @@ export default function App() {
           </Pressable>
         )}
 
+        {screen !== "join" && screen !== "game" && !showIntro && (
+          <Pressable onPress={confirmStartOver} style={[styles.mute, styles.back]} hitSlop={8} accessibilityLabel="Start over">
+            <Text style={styles.muteText}>↻</Text>
+          </Pressable>
+        )}
+
         {fullScreenCollecting && !showIntro && (
-          <Pressable onPress={() => setView("home")} style={[styles.mute, styles.back]} hitSlop={8} accessibilityLabel="Back">
+          <Pressable onPress={() => setView("home")} style={[styles.mute, styles.backBtn]} hitSlop={8} accessibilityLabel="Back">
             <Text style={styles.muteText}>←</Text>
           </Pressable>
         )}
@@ -528,6 +577,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   safe: { flex: 1, paddingTop: StatusBar.currentHeight || 0 },
   scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(5, 6, 15, 0.55)" },
+  capsuleScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(2, 3, 10, 0.5)" }, // extra dimming so the capsules stand out
   tagline: { position: "absolute", top: 16, left: 16, zIndex: 5 },
   taglineBig: { color: colors.text, fontWeight: "700", letterSpacing: 0, textShadowColor: "rgba(0,0,0,0.6)", textShadowRadius: 8 },
   taglineSmall: { color: colors.lit, fontWeight: "600", marginTop: 3, letterSpacing: 0, textShadowColor: "rgba(0,0,0,0.6)", textShadowRadius: 6 },
@@ -557,6 +607,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   back: { right: 56 },
+  backBtn: { right: 100 }, // sits left of the start-over button
   muteText: { fontSize: 16, color: colors.text },
   centerText: { textAlign: "center" },
   countdownNum: { color: colors.lit, fontSize: 96, fontWeight: "800", textAlign: "center", lineHeight: 110 },

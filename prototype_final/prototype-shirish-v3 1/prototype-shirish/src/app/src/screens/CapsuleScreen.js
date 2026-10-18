@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Image, Pressable, StyleSheet, Modal, useWindowD
 import { colors, spacing, type } from "../lib/theme";
 import Avatar from "../components/Avatar";
 import GlassCarousel from "../components/GlassCarousel";
+import VoicePlayer from "../components/VoicePlayer";
 import ReactionBurst from "../components/ReactionBurst";
 import { downloadCard } from "../lib/cardImage";
 
@@ -14,13 +15,17 @@ import { downloadCard } from "../lib/cardImage";
 const NOTE_COLORS = ["#ffd166", "#ff9fb2", "#9be7c4", "#a8c7ff", "#d7b8ff", "#ffb38a", "#f6f0a6"];
 const hash = (s) => [...String(s)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
 
-export default function CapsuleScreen({ capsule, serverUrl, selfId, onStartOver }) {
+export default function CapsuleScreen({ capsule, serverUrl, selfId, onStartOver, remoteBurst, onReactShare }) {
   const { width } = useWindowDimensions();
   const [filter, setFilter] = useState("all");
   const [guesses, setGuesses] = useState({}); // memoryId -> guessed member id
   const [showAll, setShowAll] = useState(false);
   const [open, setOpen] = useState(null); // index into `shown`
   const [burst, setBurst] = useState(null); // { id, emoji, name }
+  // a crewmate's reaction shows on this screen too (our own is already shown instantly)
+  useEffect(() => {
+    if (remoteBurst && remoteBurst.from !== selfId) setBurst(remoteBurst);
+  }, [remoteBurst?.id]);
   const abs = (u) => (u && u.startsWith("/") ? `${serverUrl}${u}` : u);
   const members = capsule?.members || [];
   const h = capsule?.highlights || {};
@@ -94,7 +99,10 @@ export default function CapsuleScreen({ capsule, serverUrl, selfId, onStartOver 
         {shown.length > 0 && (
           <View style={{ paddingBottom: spacing.lg }}>
             <GlassCarousel items={shown} width={pageW + spacing.md * 2} abs={abs} revealed={revealed} nameOf={nameOf}
-              onReact={(emoji) => setBurst({ id: Date.now(), emoji, name: members.find((x) => x.id === selfId)?.name || "You" })}
+              onReact={(emoji) => {
+                setBurst({ id: Date.now(), emoji, name: members.find((x) => x.id === selfId)?.name || "You" });
+                onReactShare && onReactShare(emoji);
+              }}
               onDownload={(m) => downloadCard(m, nameOf(m.authorId), abs)} />
           </View>
         )}
@@ -168,7 +176,7 @@ function Tile({ m, w, abs, selfId, revealed, avatarOf, nameOf, guess, onPress })
   const fs = len < 60 ? 19 : len < 120 ? 16 : 14;
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.note, { backgroundColor: bg, transform: [{ rotate: `${tilt}deg` }, { scale: pressed ? 0.97 : 1 }] }]}>
-      <Text style={styles.noteWeek}>CAPSULE {m.n}</Text>
+      <Text style={styles.noteWeek}>CAPSULE {m.n}{m.audio ? "  🎙️ VOICE NOTE" : ""}</Text>
       <Text style={styles.quote}>“</Text>
       <Text style={[styles.noteText, { fontSize: fs, lineHeight: fs * 1.32 }]} numberOfLines={9}>
         {m.text}
@@ -199,6 +207,7 @@ function Viewer({ m, index, count, abs, selfId, width, revealed, guess, candidat
           {m.photo ? <Image source={{ uri: abs(m.photo) }} style={{ width: "100%", aspectRatio: 1, borderRadius: 6, backgroundColor: "#ddd" }} resizeMode="cover" /> : null}
           {m.drawing ? <Image source={{ uri: abs(m.drawing) }} style={{ width: "100%", aspectRatio: 1, borderRadius: 6, backgroundColor: "#fff", marginTop: m.photo ? 8 : 0 }} resizeMode="contain" /> : null}
           <Text style={styles.viewerWeek}>CAPSULE {m.n} · {m.aboutName ? (m.aboutId === selfId ? "about you" : `about ${m.aboutName}`) : "about the group"}</Text>
+          {m.audio ? <VoicePlayer src={abs(m.audio)} dark /> : null}
           {m.text ? <Text style={[styles.viewerText, media && { fontSize: 18 }]}>{media ? m.text : `“${m.text}”`}</Text> : null}
           {m.rescue ? <Text style={styles.viewerNote}>{rescueLine(m.rescue, selfId)}</Text> : null}
         </View>

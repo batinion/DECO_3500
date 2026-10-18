@@ -1,5 +1,6 @@
+import Svg, { Path, Circle } from "react-native-svg";
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Pressable, Text, View, StyleSheet, Easing } from "react-native";
+import { Animated, Platform, Pressable, Text, View, StyleSheet, Easing } from "react-native";
 import { colors } from "../lib/theme";
 
 /**
@@ -7,9 +8,61 @@ import { colors } from "../lib/theme";
  * rocket. (These used to be stars — but stars belong to space, which comes *after* the
  * memories are loaded, so testers found the order confusing.) It floats gently to invite a tap.
  */
-export default function CapsulePod({ visual, collected, label, isFree, isExample, isImage, isCollab, number, onPress }) {
+/** Camera / microphone drawn in plain white, so they read clearly on the capsule window (emoji can't be recoloured). */
+function WhiteIcon({ kind, size }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+      {kind === "mic" ? (
+        <>
+          <Path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+          <Path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" />
+        </>
+      ) : (
+        <>
+          <Path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+          <Circle cx={12} cy={13} r={4} />
+        </>
+      )}
+    </Svg>
+  );
+}
+
+export default function CapsulePod({ visual, collected, label, isFree, isExample, isImage, isVoice, isSelfie, isCollab, number, onPress, onRemove, onDuplicate, onEdit }) {
   const float = useRef(new Animated.Value(0)).current;
   const [hovered, setHovered] = useState(false);
+  const hideTimer = useRef(null);
+  // Leaving is delayed a moment so the pointer can cross the gap between the capsule and its preview.
+  const hoverIn = () => {
+    clearTimeout(hideTimer.current);
+    setHovered(true);
+  };
+  const hoverOut = () => {
+    clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setHovered(false), 250);
+  };
+  useEffect(() => () => clearTimeout(hideTimer.current), []);
+  // react-native-web ends a Pressable's hover as soon as a Pressable inside it is hovered, which closed the
+  // preview the moment the pointer reached it. A plain DOM pointerenter/leave on the whole wrapper (capsule
+  // and preview together) doesn't have that problem.
+  const wrapRef = useRef(null);
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (Platform.OS !== "web" || !el?.addEventListener) return undefined;
+    const onEnter = (e) => e.pointerType !== "touch" && hoverIn();
+    const onLeave = (e) => e.pointerType !== "touch" && hoverOut();
+    el.addEventListener("pointerenter", onEnter);
+    el.addEventListener("pointerleave", onLeave);
+    return () => {
+      el.removeEventListener("pointerenter", onEnter);
+      el.removeEventListener("pointerleave", onLeave);
+    };
+  }, []);
+  const closePreview = () => {
+    clearTimeout(hideTimer.current);
+    setHovered(false);
+    setPinned(false);
+  };
+  const [pinned, setPinned] = useState(false); // touch screens have no hover: tapping a loaded capsule pins its preview
 
   useEffect(() => {
     if (collected) {
@@ -32,45 +85,76 @@ export default function CapsulePod({ visual, collected, label, isFree, isExample
 
   const w = Math.max(isExample ? 76 : 0, Math.round(52 + visual.size)); // the example is the same size as the others
   const h = Math.round(w * 0.5);
+  const halo = isExample ? 16 : 9; // the example capsule gets a bigger, red halo
   const translateY = float.interpolate({ inputRange: [0, 1], outputRange: [0, -6] });
 
-  return (
-    <Pressable
-      onPress={onPress}
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
-      style={[styles.wrap, { left: visual.left - w / 2, top: visual.top - h / 2 }]}
-      hitSlop={10}
-      accessibilityLabel={collected ? "Loaded" : label}
-    >
-      <Animated.View style={{ transform: [{ translateY }], opacity: collected ? 0.45 : 1 }}>
-        <View style={[styles.glow, { width: w + 18, height: h + 18, borderRadius: (h + 18) / 2, left: -9, top: -9, backgroundColor: `${visual.hue}33` }]} />
-        <View style={[styles.pod, { width: w, height: h, borderRadius: h / 2, borderColor: collected ? "#ffffff" : visual.hue }]}>
-          <View style={[styles.band, { backgroundColor: visual.hue }]} />
-          {isExample ? (
-            <Text style={styles.exampleText}>example</Text>
-          ) : (
-            <View style={[styles.window, { width: h * 0.48, height: h * 0.48, borderRadius: h * 0.24 }]}>
-              <Text style={[styles.windowText, isImage && !collected && styles.windowEmoji, isCollab && !collected && { color: "#fff" }]}>{collected ? "✓" : isImage ? "🖼️" : isFree ? "✎" : isCollab ? "⇄" : "?"}</Text>
-            </View>
-          )}
-        </View>
-      </Animated.View>
-      {!isExample && number ? <Text style={[styles.number, collected && styles.numberLoaded]}>{`Capsule ${number}${collected ? " · loaded" : ""}`}</Text> : null}
+  // A loaded capsule has nothing to open, so tapping it pins its preview (touch screens have no hover).
+  const handlePress = collected && !isExample ? () => setPinned((v) => !v) : onPress;
 
-      {hovered && !!label && !collected && (
-        <View style={styles.tooltip} pointerEvents="none">
-          <Text style={styles.tooltipText} numberOfLines={3}>
-            {label}
-          </Text>
-        </View>
-      )}
-    </Pressable>
+  const showTip = (hovered || pinned) && !!label;
+  const canRemove = !!onRemove && !collected;
+  const hasActions = !isExample && (onDuplicate || canRemove || (collected && onEdit));
+
+  return (
+    <View ref={wrapRef} style={[styles.wrap, { left: visual.left - w / 2, top: visual.top - h / 2, zIndex: showTip ? 10 : 1 }]}>
+      <View style={styles.inner} accessibilityLabel={collected ? "Loaded" : label}>
+        <Pressable onPress={handlePress} hitSlop={10} style={styles.inner}>
+          <Animated.View style={{ transform: [{ translateY }], opacity: collected ? 0.45 : 1 }}>
+            <View style={[styles.glow, { width: w + halo * 2, height: h + halo * 2, borderRadius: (h + halo * 2) / 2, left: -halo, top: -halo, backgroundColor: isExample ? "rgba(255, 59, 59, 0.38)" : `${visual.hue}33` }]} />
+            <View style={[styles.pod, isExample && { shadowColor: "#ff3b3b", shadowOpacity: 0.95, shadowRadius: 18 }, { width: w, height: h, borderRadius: h / 2, borderColor: collected ? "#ffffff" : visual.hue }]}>
+              <View style={[styles.band, { backgroundColor: visual.hue }]} />
+              {isExample ? (
+                <Text style={styles.exampleText}>example</Text>
+              ) : (
+                <View style={[styles.window, { width: h * 0.48, height: h * 0.48, borderRadius: h * 0.24 }]}>
+                  {!collected && (isVoice || isSelfie) ? (
+                    <WhiteIcon kind={isVoice ? "mic" : "camera"} size={h * 0.3} />
+                  ) : (
+                    <Text style={[styles.windowText, isImage && !collected && styles.windowEmoji, isCollab && !collected && { color: "#fff" }]}>{collected ? "✓" : isImage ? "🖼️" : isFree ? "✎" : isCollab ? "⇄" : "?"}</Text>
+                  )}
+                </View>
+              )}
+            </View>
+          </Animated.View>
+          {!isExample && number ? <Text style={[styles.number, collected && styles.numberLoaded]}>{`Capsule ${number}${collected ? " · loaded" : ""}`}</Text> : null}
+        </Pressable>
+
+        {showTip && (
+          <View style={styles.tooltipHolder}>
+            <View style={styles.tooltip}>
+              <Text style={styles.tooltipText} numberOfLines={3}>
+                {label}
+              </Text>
+              {hasActions && (
+                <View style={styles.tipActions}>
+                  {collected && onEdit ? (
+                    <Pressable onPress={() => { closePreview(); onEdit(); }} style={({ pressed }) => [styles.tipBtn, pressed && styles.tipBtnPressed]} hitSlop={8} accessibilityLabel="Edit this memory">
+                      <Text style={[styles.tipBtnText, { fontSize: 10 }]}>✎</Text>
+                    </Pressable>
+                  ) : null}
+                  {canRemove ? (
+                    <Pressable onPress={() => { closePreview(); onRemove(); }} style={({ pressed }) => [styles.tipBtn, styles.tipBtnBlack, pressed && { opacity: 0.7 }]} hitSlop={8} accessibilityLabel="Remove this copy">
+                      <Text style={[styles.tipBtnText, { fontSize: 10 }]}>{"✕"}</Text>
+                    </Pressable>
+                  ) : null}
+                  {onDuplicate ? (
+                    <Pressable onPress={() => { closePreview(); onDuplicate(); }} style={({ pressed }) => [styles.tipBtn, pressed && styles.tipBtnPressed]} hitSlop={8} accessibilityLabel="Duplicate this capsule">
+                      <Text style={[styles.tipBtnText, { fontSize: 10 }]}>⧉</Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   wrap: { position: "absolute", alignItems: "center" },
+  inner: { alignItems: "center" },
   glow: { position: "absolute" },
   pod: {
     backgroundColor: "#e9ecff",
@@ -91,17 +175,24 @@ const styles = StyleSheet.create({
   number: { color: colors.muted, fontSize: 10, fontWeight: "700", marginTop: 4, letterSpacing: 0.5 },
   numberLoaded: { color: colors.lit },
   loaded: { color: colors.lit, fontSize: 10, fontWeight: "700", marginTop: 4, letterSpacing: 1 },
+  tooltipHolder: { position: "absolute", bottom: "100%", paddingBottom: 10, width: 246, alignItems: "center" },
+  tipBtnBlack: { backgroundColor: "#000000" },
+  tipActions: { flexDirection: "row", justifyContent: "center", gap: 6, marginTop: 6 },
+  tipBtn: { borderWidth: 1, borderColor: colors.border, borderRadius: 6, paddingVertical: 2, paddingHorizontal: 7, backgroundColor: "rgba(255,255,255,0.08)" },
+  tipBtnPressed: { backgroundColor: "rgba(255,255,255,0.25)" },
+  tipBtnText: { color: colors.text, fontSize: 12, fontWeight: "700" },
   tooltip: {
-    position: "absolute",
-    bottom: "100%",
-    marginBottom: 12,
-    width: 190,
-    backgroundColor: "rgba(10, 12, 24, 0.95)",
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
+    width: 246,
+    backgroundColor: "#05060f", // solid, so the text doesn't blur into the scene behind
+    borderWidth: 1.5,
+    borderColor: "rgba(255, 255, 255, 0.45)",
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
   },
-  tooltipText: { color: colors.text, fontSize: 12, lineHeight: 16, textAlign: "center" },
+  tooltipText: { color: "#ffffff", fontSize: 15, lineHeight: 21, fontWeight: "600", textAlign: "left" },
 });

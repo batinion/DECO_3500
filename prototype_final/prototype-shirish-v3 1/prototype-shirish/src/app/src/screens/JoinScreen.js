@@ -71,8 +71,8 @@ export default function JoinScreen({ onCreate, onJoin, busy, error, initialCode,
     return (
       <View style={styles.form}>
         <Text style={type.label}>LAUNCH SEQUENCE · STEP 1 OF 2</Text>
-        <Text style={styles.title}>Who's on board?</Text>
-        <Text style={type.label}>SELECT AVATAR AND NAME</Text>
+        <Text style={styles.title}>Select an avatar</Text>
+        <Text style={type.label}>Your avatar goes to space with memories.</Text>
 
         <View style={styles.avatars}>
           {CHARACTERS.map((c) => {
@@ -87,7 +87,7 @@ export default function JoinScreen({ onCreate, onJoin, busy, error, initialCode,
 
         <TextInput
           style={styles.input}
-          placeholder="What your crew calls you"
+          placeholder="Your name"
           placeholderTextColor={colors.muted}
           value={name}
           onChangeText={setName}

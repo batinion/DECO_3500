@@ -328,7 +328,6 @@ html, body {
   box-shadow: 0 0 60px 24px rgba(255, 220, 90, 0.55); animation: day-pulse 4s ease-in-out infinite;
 }
 @keyframes day-pulse { 50% { transform: scale(1.08); box-shadow: 0 0 80px 34px rgba(255, 220, 90, 0.6); } }
-.day-globe { position: absolute; left: 7%; top: 8%; font-size: 46px; animation: day-spin 14s linear infinite; filter: drop-shadow(0 4px 10px rgba(0,0,0,.25)); }
 @keyframes day-spin { to { transform: rotate(360deg); } }
 .day-cloud {
   position: absolute; left: -30%; width: 150px; height: 44px; border-radius: 44px; background: rgba(255,255,255,.92);
@@ -358,7 +357,9 @@ html, body {
 #cine-c { top: 70%; }
 
 /* "You all go on your own ways…" shares the spot of "Interstellar…" in deep space */
-#cine-d { top: 36%; }
+#cine-d { top: 4%; transition: opacity 1.6s ease, transform 1.6s ease; }
+#cine-d span { display: inline-block; line-height: 1.35; }
+#bye { transition: opacity 1.6s ease, transform 1.6s ease; top: 24%; z-index: 8; pointer-events: none; }
 
 /* the red banner: bottom centre for a few seconds, then it goes and the gifs begin */
 #marquee { position: absolute; left: 50%; bottom: 5%; z-index: 8; pointer-events: none; width: min(92vw, 760px); text-align: center; opacity: 0; transform: translateX(-50%); transition: opacity 0.5s ease; }
@@ -375,7 +376,6 @@ html, body {
 .f-frame img { max-height: 50vh; }
 
 /* "…and you in Earth." has a black outline so it reads on the sky */
-#cine-b span, #cine-d span, #cine-e span, #cine-f span { color: #fff; font-weight: 700; -webkit-text-stroke: 6px #000; paint-order: stroke fill; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+#cine-b span, #cine-d span, #cine-f span { color: #fff; font-weight: 700; -webkit-text-stroke: 6px #000; paint-order: stroke fill; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
 
-/* "…and on Earth / You all go on your own ways…": one sentence on two lines */
-#cine-d span { display: inline-block; line-height: 1.35; }
+

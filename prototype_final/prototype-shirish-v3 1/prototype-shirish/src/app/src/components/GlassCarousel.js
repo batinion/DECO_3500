@@ -1,3 +1,4 @@
+import VoicePlayer from "./VoicePlayer";
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, Image, Pressable, StyleSheet, Platform } from "react-native";
 import { colors } from "../lib/theme";
@@ -167,11 +168,17 @@ function Panel({ m, w, h, abs, revealed, nameOf, focus, onReact, onDownload }) {
             <Image source={{ uri: abs(m.photo || m.drawing) }} style={{ width: "100%", aspectRatio: 1, borderRadius: 6, backgroundColor: "#111" }} resizeMode={m.photo ? "cover" : "contain"} />
             {m.text ? <Text style={styles.caption} numberOfLines={3}>“{m.text}”</Text> : null}
           </>
-        ) : (
+        ) : m.text ? (
           <Text style={[styles.quote, { fontSize: fs, lineHeight: fs * 1.4 }]} numberOfLines={10}>
             “{m.text}”
           </Text>
-        )}
+        ) : null}
+        {m.audio ? (
+          <View style={styles.voice} onStartShouldSetResponder={() => true}>
+            <Text style={styles.voiceTag}>🎙️ VOICE NOTE</Text>
+            <VoicePlayer src={abs(m.audio)} />
+          </View>
+        ) : null}
       </View>
       <View style={styles.foot}>
         <View style={styles.byWrap} onStartShouldSetResponder={() => true}>
@@ -212,6 +219,8 @@ const styles = StyleSheet.create({
     ...(Platform.OS === "web" ? { backdropFilter: "blur(14px)", } : null),
   },
   date: { position: "absolute", top: 12, right: 14, color: "rgba(238,240,255,0.55)", fontSize: 10, letterSpacing: 0.5 },
+  voice: { width: "100%", padding: 10, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.1)", borderWidth: 1, borderColor: "rgba(255,255,255,0.25)" },
+  voiceTag: { color: "#ffd166", fontSize: 11, fontWeight: "800", letterSpacing: 1 },
   body: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
   quote: { color: colors.text, textAlign: "center", fontWeight: "600" },
   caption: { color: "rgba(238,240,255,0.85)", fontSize: 14, lineHeight: 19, textAlign: "center", fontWeight: "500" },

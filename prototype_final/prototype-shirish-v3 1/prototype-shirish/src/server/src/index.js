@@ -3,6 +3,8 @@ const fs = require("fs");
 const os = require("os");
 const express = require("express");
 const http = require("http");
+const https = require("https");
+const { execFileSync } = require("child_process");
 const { Server } = require("socket.io");
 const multer = require("multer");
 const QRCode = require("qrcode");
@@ -35,7 +37,7 @@ app.get("/avatars.js", (req, res) => res.type("js").sendFile(path.join(__dirname
 // The 40-second "mission briefing" explainer clip (plays inside the app, or open it directly).
 app.get(["/intro", "/intro/"], (req, res) => res.sendFile(path.join(PUBLIC_DIR, "intro", "index.html")));
 // The rescue flight (one ship, flown by the whole crew), embedded full-screen in the app once the hatch blows open.
-app.get(["/game/rescue", "/game/shared"], (req, res) => res.sendFile(path.join(PUBLIC_DIR, "game", "shared.html")));
+app.get(["/game/rescue", "/game/shared"], (req, res) => res.set("Cache-Control", "no-store").sendFile(path.join(PUBLIC_DIR, "game", "shared.html")));
 app.use(express.static(PUBLIC_DIR, { index: false }));
 app.use("/uploads", express.static(SUBMISSIONS_DIR));
 
@@ -125,7 +127,7 @@ const TIMING = {
   boardTailMs: 1200, // hatch closes
   launchMs: 12500, // 6 s countdown hold -> liftoff -> clears atmosphere -> space
   cruiseMs: 7000, // reaches outer space, shuts down its engines and floats away until it vanishes
-  warpMs: 44500, // "meanwhile on Earth": a line of text, then the future gifs (2032, 2040, 2050)
+  warpMs: 38200, // "meanwhile on Earth": goodbye gif, the future gifs (2032, 2040, 2050), then the "Summon the rocket" email arrives and waits for everyone
   homecomingMs: 21500, // rescue flight done: dock -> memories back in the rocket -> rocket reaches Earth
   earthMs: 13000, // "memories coming back" text, rocket drifts in towards Earth... then the cargo hatch blows
 };
@@ -144,6 +146,19 @@ function activityView(crew) {
     aboutId: a.aboutId || null,
     aboutName: a.aboutId ? name(a.aboutId) : null,
   }));
+}
+
+/**
+ * Which of the rocket's engines are firing. The rocket always has at least 4, and every one of them
+ * must run at launch, however small the crew (demo accounts count as crew too): engines are shared
+ * out round-robin, so 2 people hold 2 each and 3 people hold 2 + 1 + 1. An engine fires once its
+ * holder is ready, and once the rocket has left the collecting phase they all fire.
+ */
+function readyEngineSlots(crew, members) {
+  const count = Math.max(4, members.length);
+  if (crew.phase !== "collecting") return Array.from({ length: count }, (_, i) => i + 1);
+  if (!members.length) return [];
+  return Array.from({ length: count }, (_, i) => i + 1).filter((slot) => members[(slot - 1) % members.length].ready);
 }
 
 function buildSceneState(crew) {
@@ -179,8 +194,9 @@ function buildSceneState(crew) {
     },
     members,
     litEngines: members.map((m) => m.engineSlot),
-    readyEngines: members.filter((m) => m.ready).map((m) => m.engineSlot),
+    readyEngines: readyEngineSlots(crew, members),
     engineCount: Math.max(4, members.length),
+    summonReady: crew.summonReady || [],
     memoryTotal: crew.memories.length,
     activity: activityView(crew),
     game: crew.game ? games.summary(crew) : null,
@@ -237,7 +253,7 @@ function myMemories(crew, memberId) {
   return crew.memories
     .filter((m) => m.authorId === memberId)
     .sort((a, b) => b.createdAt - a.createdAt)
-    .map((m) => ({ id: m.id, kind: m.kind, promptId: m.promptId, text: m.text, n: crew.memories.indexOf(m) + 1, week: m.week, createdAt: m.createdAt, aboutName: name(m.aboutId), photo: m.photo, drawing: m.drawing }));
+    .map((m) => ({ id: m.id, kind: m.kind, promptId: m.promptId, text: m.text, n: crew.memories.indexOf(m) + 1, week: m.week, createdAt: m.createdAt, aboutName: name(m.aboutId), photo: m.photo, drawing: m.drawing, audio: m.audio || null }));
 }
 function sendMyMemories(crew, memberId) {
   io.to(memberRoom(memberId)).emit("my_memories", myMemories(crew, memberId));
@@ -269,12 +285,45 @@ function schedule(crew) {
     case "cruising":
       return after(TIMING.cruiseMs - elapsed, () => crews.setPhase(crew, "timejump"));
     case "timejump":
-      return after(TIMING.warpMs - elapsed, () => crews.setPhase(crew, "earth"));
+      // No fixed end: once the email has arrived the phase waits until every crewmate has summoned the rocket.
+      if (elapsed >= TIMING.warpMs) {
+        autoSummon(crew); // (also after a server restart mid-wait; harmless if repeated)
+        return undefined;
+      }
+      return after(TIMING.warpMs - elapsed, () => autoSummon(crew));
     case "earth":
       return after(TIMING.earthMs - elapsed, () => crews.setPhase(crew, "lost"));
     default:
       return undefined; // collecting / lost / games / revealed wait on the crew
   }
+}
+
+/** Everyone has pressed "Summon the rocket": back to space, the rocket is coming home. */
+function summonCheck(crew) {
+  if (crew.phase !== "timejump" || !crew.members.length) return;
+  const ready = new Set(crew.summonReady || []);
+  if (!crew.members.every((m) => ready.has(m.id))) return;
+  crews.setPhase(crew, "earth");
+  schedule(crew);
+}
+
+function markSummonReady(crew, memberId) {
+  crew.summonReady = crew.summonReady || [];
+  if (!crew.summonReady.includes(memberId)) crew.summonReady.push(memberId);
+}
+
+/** Demo accounts press the button by themselves, one after another, once the email has arrived. */
+function autoSummon(crew) {
+  crew.members
+    .filter((m) => m.isSimulated)
+    .forEach((m, i) =>
+      setTimeout(() => {
+        if (crews.getCrew(crew.code) !== crew || crew.phase !== "timejump") return;
+        markSummonReady(crew, m.id);
+        summonCheck(crew);
+        broadcast(crew);
+      }, 900 * (i + 1))
+    );
 }
 
 function maybeLaunch(crew) {
@@ -610,6 +659,28 @@ io.on("connection", (socket) => {
     })
   );
 
+  // An emoji reaction in the capsule reveal floats up on every crewmate's screen (including the sender's).
+  socket.on(
+    "capsule_react",
+    asMember(({ crew, member, payload }) => {
+      const emoji = String(payload.emoji || "").slice(0, 8);
+      if (!emoji) return;
+      io.to(room(crew.code)).emit("capsule_reaction", { emoji, name: member.name, from: member.id });
+    })
+  );
+
+  // "Summon the rocket": each crewmate presses it on the email at the end of the time jump.
+  socket.on(
+    "summon_ready",
+    asMember(({ crew, member, reply }) => {
+      if (crew.phase !== "timejump" || Date.now() - crew.phaseStartedAt < TIMING.warpMs) return reply({ error: "Not yet." });
+      markSummonReady(crew, member.id);
+      reply({ ok: true });
+      summonCheck(crew);
+      broadcast(crew);
+    })
+  );
+
   socket.on(
     "demo_ready_others",
     asMember(({ crew, reply }) => {
@@ -635,6 +706,40 @@ crews.allCrews().forEach((crew) => {
 // Pick up where any crew left off if the server restarted mid-launch.
 crews.allCrews().forEach(schedule);
 
+// ---- HTTPS (for the camera and microphone) -------------------------------------------------
+// Browsers only allow camera/mic on https:// or http://localhost. So alongside the normal port the server also
+// listens on HTTPS_PORT with a self-signed certificate (made once with openssl, valid for localhost and this
+// computer's LAN address). Opening https://<ip>:4443 shows a one-time "not private" warning: choose Advanced, Proceed.
+const HTTPS_PORT = process.env.HTTPS_PORT ? Number(process.env.HTTPS_PORT) : 4443;
+const CERT_DIR = path.join(__dirname, "..", "certs");
+function loadCert() {
+  const keyFile = path.join(CERT_DIR, "key.pem");
+  const certFile = path.join(CERT_DIR, "cert.pem");
+  const ipFile = path.join(CERT_DIR, "ip.txt");
+  const current = fs.existsSync(ipFile) ? fs.readFileSync(ipFile, "utf8").trim() : "";
+  if (!fs.existsSync(keyFile) || !fs.existsSync(certFile) || current !== LAN_IP) {
+    try {
+      fs.mkdirSync(CERT_DIR, { recursive: true });
+      execFileSync(
+        "openssl",
+        ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "825", "-keyout", keyFile, "-out", certFile, "-subj", "/CN=launch-sequence", "-addext", `subjectAltName=DNS:localhost,IP:127.0.0.1,IP:${LAN_IP}`],
+        { stdio: "ignore" }
+      );
+      fs.writeFileSync(ipFile, LAN_IP);
+    } catch (e) {
+      return null; // no openssl: HTTPS stays off, everything else works
+    }
+  }
+  return { key: fs.readFileSync(keyFile), cert: fs.readFileSync(certFile) };
+}
+const tls = loadCert();
+if (tls) {
+  const httpsServer = https.createServer(tls, app);
+  io.attach(httpsServer, { cors: { origin: "*" } });
+  httpsServer.on("error", (e) => console.error(`HTTPS on ${HTTPS_PORT} not started: ${e.message}`));
+  httpsServer.listen(HTTPS_PORT, "0.0.0.0");
+}
+
 httpServer.listen(PORT, "0.0.0.0", () => {
   console.log("");
   console.log("==================================================");
@@ -643,6 +748,7 @@ httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`  On this computer:      http://localhost:${PORT}`);
   console.log(`  Phones on same Wi-Fi:  http://${LAN_IP}:${PORT}`);
   console.log("  Open that link on every phone/laptop. No host screen needed.");
+  if (tls) console.log(`  Camera + voice notes need HTTPS:  https://${LAN_IP}:${HTTPS_PORT}  (accept the one-time warning)`);
   console.log("==================================================");
   console.log("");
 });

@@ -7,7 +7,7 @@
 <title>Rescue Memories</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:#000;color:#efe9ff;
+html,body{height:100%;overflow:hidden;background:#000;color:#fff;
   font-family:"Avenir Next","Avenir","Segoe UI",system-ui,sans-serif;
   user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;overscroll-behavior:none}
 canvas#g{position:fixed;inset:0;width:100%;height:100%;display:block}
@@ -30,7 +30,16 @@ canvas#g{position:fixed;inset:0;width:100%;height:100%;display:block}
 /* who holds which control */
 #roster{position:fixed;z-index:5;left:0;right:0;top:calc(max(10px,env(safe-area-inset-top)) + 104px);display:none;flex-wrap:wrap;justify-content:center;gap:5px;padding:0 10px;pointer-events:none}
 #roster.show{display:flex}
-.rch{display:flex;align-items:center;gap:5px;padding:3px 9px 3px 4px;border-radius:999px;background:rgba(14,8,40,.8);font-size:11.5px;font-weight:700;color:#d8ccff;transition:background .08s,color .08s}
+#others{position:fixed;z-index:5;right:max(10px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));display:none;flex-direction:column;gap:5px;padding:7px 9px 9px;
+  width:164px;border-radius:18px;background:rgba(8,5,22,.96);border:2px solid rgba(225,210,255,.75);pointer-events:none}
+#others.show:not(:empty){display:flex}
+#others h4{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#fff;text-align:center;margin-bottom:1px}
+.oth{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 9px;border-radius:12px;background:#4a4590;box-shadow:0 3px 0 rgba(0,0,0,.4);font-size:12px;font-weight:800;line-height:1.1;color:#fff}
+.oth span{color:#ffd166}
+.oth b{font-weight:800;color:#fff;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:82px}
+.oth.act{background:#ffd166}.oth.act span,.oth.act b{color:#2b1060}
+@media(max-width:700px){#others{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 168px);width:150px}}
+.rch{display:flex;align-items:center;gap:5px;padding:3px 9px 3px 4px;border-radius:999px;background:rgba(8,5,22,.92);font-size:12px;font-weight:800;color:#fff;transition:background .08s,color .08s}
 .rch i{width:12px;height:12px;border-radius:50%;display:block;flex:none}
 .rch.me{box-shadow:0 0 0 2px #fff inset}
 .rch.act{background:#ffd166;color:#2b1060}
@@ -39,14 +48,14 @@ canvas#g{position:fixed;inset:0;width:100%;height:100%;display:block}
 #ctrl{position:fixed;z-index:6;left:0;right:0;bottom:0;display:none;gap:10px;justify-content:center;align-items:flex-end;flex-wrap:wrap;touch-action:none;
   padding:0 max(12px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
 #ctrl.show{display:flex}
-.rc{display:none;background:rgba(20,14,48,.88);border:2px solid rgba(201,179,255,.35);border-radius:18px;padding:7px 9px 9px;text-align:center}
+.rc{display:none;background:rgba(8,5,22,.96);border:2px solid rgba(225,210,255,.75);border-radius:18px;padding:7px 9px 9px;text-align:center}
 .rc.mine{display:block}
-.rc h4{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#c9b3ff;margin-bottom:6px}
+.rc h4{font-size:11.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#fff;margin-bottom:6px}
 .pair{display:flex;gap:8px}
-.cb{min-width:76px;height:70px;padding:0 10px;border-radius:16px;border:0;background:rgba(60,56,88,.95);color:#fff;font:inherit;font-size:13px;font-weight:800;
+.cb{min-width:76px;height:70px;padding:0 10px;border-radius:16px;border:0;background:#3a3668;color:#fff;font:inherit;font-size:14px;font-weight:800;
   display:grid;place-items:center;touch-action:none;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.4);line-height:1.15}
 .cb{position:relative}
-.kh{position:absolute;left:7px;top:5px;font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.02em;opacity:.75;pointer-events:none;white-space:nowrap}
+.kh{position:absolute;left:7px;top:5px;font-style:normal;font-size:11px;font-weight:800;letter-spacing:.02em;opacity:1;color:#ffd166;pointer-events:none;white-space:nowrap}
 #skipGame{position:fixed;z-index:8;left:max(10px,env(safe-area-inset-left));top:calc(max(10px,env(safe-area-inset-top)) + 52px);padding:6px 11px;border-radius:10px;border:0;
   background:rgba(20,14,48,.85);color:#d8ccff;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
 #tip{position:fixed;z-index:7;display:none;max-width:210px;padding:7px 11px;border-radius:12px;background:#ffd166;color:#2b1060;font-size:12.5px;font-weight:800;line-height:1.25;text-align:center;
@@ -56,6 +65,7 @@ canvas#g{position:fixed;inset:0;width:100%;height:100%;display:block}
 @keyframes tipin{from{opacity:0;margin-top:8px}to{opacity:1;margin-top:0}}
 .cb b{display:block;font-size:24px;line-height:1}
 .cb.on{background:#ffd166;color:#2b1060}
+.cb.on .kh,.cb.ready .kh{color:#2b1060}
 .cb.hi.on{background:#7fdbff;color:#0c2a3a}
 .cb.big{width:128px;height:70px;border-radius:16px}
 .cb.ready{background:#ffd166;color:#2b1060;animation:pulse .6s infinite alternate}
@@ -66,24 +76,40 @@ canvas#g{position:fixed;inset:0;width:100%;height:100%;display:block}
   background:rgba(0,0,0,.94);padding:16px;overflow:auto;touch-action:pan-y}
 .card{width:min(560px,100%);max-height:100%;overflow:auto;padding:4px}
 h1{font-size:clamp(28px,6vw,44px);line-height:1.02;font-weight:800;letter-spacing:-.02em}
-h1 span{display:block;font-size:.42em;letter-spacing:.01em;font-weight:600;color:#c9b3ff;margin-top:8px}
-.lede{margin:10px 0 12px;font-size:14px;line-height:1.5;color:#d8ccff}
-.mine-box{border-radius:16px;padding:12px;background:rgba(255,209,102,.12);border:2px solid #ffd166;margin:8px 0 10px}
-.mine-box h2{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:#ffd166;margin-bottom:6px}
-.mine-box li{list-style:none;font-size:15px;font-weight:700;line-height:1.7}
-.mine-box li small{font-weight:500;color:#d8ccff;font-size:12.5px}
+h1 span{display:block;font-size:.42em;letter-spacing:.01em;font-weight:700;color:#fff;margin-top:8px}
+.lede{margin:10px 0 12px;font-size:15px;line-height:1.5;color:#fff}
 .crew{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 12px}
 .crew span{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:999px;background:rgba(255,255,255,.07);font-size:13px;font-weight:700}
 .crew i{width:14px;height:14px;border-radius:50%;display:block}
-.goal{font-size:13px;line-height:1.5;color:#bfb0ea;margin-bottom:14px}
+.goal{font-size:14px;line-height:1.5;color:#fff;margin-bottom:14px}
 .goal li{margin-left:18px}
 .go{width:100%;padding:16px;border-radius:14px;border:0;background:#ffd166;color:#2b1060;font:inherit;font-size:18px;font-weight:800;cursor:pointer}
+.ctl-ref{border-radius:16px;padding:10px 12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.35);margin:0 0 10px}
+.ctl-ref h2{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:#ffd166;margin-bottom:6px}
+.ctl-ref table{width:100%;border-collapse:collapse;font-size:14px}
+.ctl-ref th{text-align:left;font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;padding:0 6px 6px 0}
+.ctl-ref td{padding:6px 6px 6px 0;border-top:1px solid rgba(255,255,255,.3);vertical-align:middle}
+.ctl-name{font-weight:800;color:#fff}
+.ctl-keys div{display:flex;gap:5px;flex-wrap:wrap}
+.ctl-keys kbd{font:inherit;font-size:13px;font-weight:800;padding:4px 8px;border-radius:8px;background:#3a3668;border:1px solid rgba(255,255,255,.45);color:#fff;box-shadow:0 2px 0 rgba(0,0,0,.4);white-space:nowrap}
+.ctl-desc{color:#fff;line-height:1.35}
+.ctl-key{font-weight:800;color:#ffd166;white-space:nowrap;font-size:13.5px}
+.arrow-demo{display:flex;align-items:center;gap:12px;border-radius:16px;padding:8px 12px;background:rgba(14,8,40,.85);border:2px solid #ffd166;margin:0 0 12px}
+.arrow-demo svg{flex:none}
+.arrow-demo p{font-size:14px;line-height:1.4;color:#fff}
+.arrow-demo b{color:#ffd166}
 .keys{margin-top:10px;font-size:11px;color:#9584c9;text-align:center;line-height:1.5}
 .demo{display:block;margin:10px auto 0;background:none;border:0;color:#9584c9;font:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
 .stat{font-size:15px;line-height:1.7;margin:14px 0}
 .stat strong{font-size:30px;display:block;color:#ffd166}
 #startOver{position:fixed;z-index:30;right:max(10px,env(safe-area-inset-right));top:calc(max(10px,env(safe-area-inset-top)) + 52px);
   height:32px;padding:0 12px;border-radius:10px;border:0;background:rgba(20,14,48,.85);color:#d8ccff;font:inherit;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.35)}
+/* maximum-contrast text for the control boxes and the instructions */
+.rc,.rc *,.ctl-ref,.ctl-ref *:not(.ctl-key),.arrow-demo p,.goal,.lede,.rch{color:#fff;text-shadow:0 0 1px #fff,0 1px 2px #000;-webkit-font-smoothing:antialiased}
+.ctl-ref h2,.ctl-ref .ctl-key,.rc .kh,.arrow-demo b{color:#ffd166;text-shadow:0 1px 2px #000}
+.cb.on,.cb.on *,.cb.ready,.cb.ready *,.rch.act{color:#1a0a3a;text-shadow:none}
+.cb{background:#4a4590}
+.cb.on,.cb.ready{background:#ffd166}.cb.hi.on{background:#7fdbff}
 </style>
 </head>
 <body>
@@ -100,6 +126,7 @@ h1 span{display:block;font-size:.42em;letter-spacing:.01em;font-weight:600;color
 <button id="skipGame" aria-label="Skip to the capsule reveal">Skip ⏭</button>
 <div id="msg"></div>
 <div id="roster"></div>
+<div id="others"></div>
 <div id="tip"></div>
 
 <div id="ctrl">
@@ -120,18 +147,35 @@ h1 span{display:block;font-size:.42em;letter-spacing:.01em;font-weight:600;color
 
 <div class="ov" id="menu">
   <div class="card">
-    <h1>Rescue Memories<span>Operate avatars - restore memories</span></h1>
-    <p class="lede">Your crew's memories are scattered between here and your rocket. There is only one ship, and the controls have been dealt out at random, so nobody can fly it alone. Talk to each other!</p>
-    <div class="mine-box"><h2>Your controls</h2><ul id="mineList"></ul></div>
+    <h1>Rescue Memories<span>Operate avatars - Restore memories</span></h1>
+    <p class="lede">Navigate the spaceship together, collect the memories and head back to the rocket.</p>
     <div class="crew" id="crewList"></div>
+    <div class="ctl-ref">
+      <h2>Controls</h2>
+      <table>
+        <thead><tr><th>Control</th><th>Button</th><th>What it does</th><th>Keyboard</th></tr></thead>
+        <tbody>
+          <tr><td class="ctl-name">Steering</td><td class="ctl-keys"><div><kbd>◀ Left</kbd><kbd>▶ Right</kbd></div></td><td class="ctl-desc">Turns the ship left or right.</td><td class="ctl-key">← / A &nbsp;·&nbsp; → / D</td></tr>
+          <tr><td class="ctl-name">Throttle</td><td class="ctl-keys"><div><kbd>▲ Forward</kbd><kbd>▼ Back</kbd></div></td><td class="ctl-desc">Speeds the ship up or slows it down and reverses.</td><td class="ctl-key">↑ / W &nbsp;·&nbsp; ↓ / S</td></tr>
+          <tr><td class="ctl-name">Altitude</td><td class="ctl-keys"><div><kbd>⇧ Up</kbd><kbd>⇩ Down</kbd></div></td><td class="ctl-desc">Flies High or Low to slip past debris.</td><td class="ctl-key">E &nbsp;·&nbsp; Q</td></tr>
+          <tr><td class="ctl-name">Memory pick-up</td><td class="ctl-keys"><div><kbd>✦ Pick up</kbd></div></td><td class="ctl-desc">Picks up a memory when you are close to it.</td><td class="ctl-key">P</td></tr>
+          <tr><td class="ctl-name">Gun</td><td class="ctl-keys"><div><kbd>◎ Fire</kbd></div></td><td class="ctl-desc">Shoots asteroids out of the way.</td><td class="ctl-key">Space</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="arrow-demo">
+      <svg viewBox="0 0 128 128" width="64" height="64" aria-hidden="true">
+        <circle cx="64" cy="64" r="56" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="4"/>
+        <line x1="64" y1="64" x2="104" y2="64" stroke="rgba(255,255,255,.35)" stroke-width="5" stroke-linecap="round" transform="rotate(-70 64 64)"/>
+        <polygon points="54,0 12,-16 20,0 12,16" fill="#ffd166" transform="translate(64 64) rotate(-40)"/>
+        <circle cx="64" cy="64" r="6" fill="#fff"/>
+      </svg>
+      <p><b>Follow this arrow</b> for direction: it points to the nearest memory, and to the rocket once every memory is saved.</p>
+    </div>
     <ul class="goal">
-      <li><b>Follow the arrow</b> at the top: it points to the nearest memory.</li>
-      <li>To save a memory, fly close and the <b>pick-up</b> person taps their button.</li>
-      <li>Debris says ▲ High or ▼ Low: change altitude to slip past. Shoot asteroids or steer around them.</li>
       <li>Black holes pull you back (+8s), asteroid crashes +3s. Once every memory is saved, fly back into your <b>rocket</b>.</li>
     </ul>
     <button class="go" id="launch">Take your seats</button>
-    <p class="keys">Laptop: ←→ / A D steer · ↑↓ / W S throttle · E up, Q down · Enter pick up · Space fire<br>(only the controls you were dealt will work)</p>
     <button class="demo" id="skipMenu">Demo: skip the flight and finish now</button>
   </div>
 </div>
@@ -214,9 +258,8 @@ sock.on('game_state',g=>{
     g.rocksGone.forEach(id=>rocksGone.add(id));
     roles=g.roles;for(const r in roles)if(roles[r]===PID)mine.add(r);
     $('crewList').innerHTML=members.map(m=>`<span><i style="background:${suit(m.avatar)}"></i>${m.id===PID?'You':m.name}</span>`).join('');
-    $('mineList').innerHTML=[...mine].map(r=>`<li>${ROLES[r].label} <small>${ROLES[r].how}</small></li>`).join('')||'<li>(none)</li>';
     document.querySelectorAll('.rc').forEach(c=>c.classList.toggle('mine',mine.has(c.dataset.role)));
-    buildRoster();
+    buildRoster();buildOthers();
   }
   WORLD.mems.forEach(m=>{const c=g.capsules.find(x=>x.id===m.id);if(c&&c.collected)m.got=true;m.byName=c&&c.byName;});
   S.pen=g.pen;
@@ -257,9 +300,16 @@ function buildRoster(){
     return `<span class="rch ${roles[r]===PID?'me':''}" data-role="${r}"><i style="background:${suit(m&&m.avatar)}"></i>${ROLES[r].short} · ${roles[r]===PID?'You':(m?m.name:'?')}</span>`;
   }).join('');
 }
+function buildOthers(){
+  const rows=Object.keys(ROLES).filter(r=>roles[r]&&roles[r]!==PID).map(r=>{
+    const m=members.find(x=>x.id===roles[r]);
+    return `<div class="oth" data-role="${r}"><span>${ROLES[r].short}</span><b>${m?m.name:'?'}</b></div>`;
+  }).join('');
+  $('others').innerHTML=rows?'<h4>Other controls</h4>'+rows:'';
+}
 function paintRoster(){
   const I=S.inputs,on={steer:I.steer!==0,throttle:I.throttle!==0,altitude:I.alt===1,pickup:S.pickFlash>0,gun:I.fire===1};
-  $('roster').querySelectorAll('.rch').forEach(el=>el.classList.toggle('act',!!on[el.dataset.role]));
+  document.querySelectorAll('.rch,.oth').forEach(el=>el.classList.toggle('act',!!on[el.dataset.role]));
 }
 
 // ---------- controls: only the ones I was dealt ----------
@@ -477,7 +527,7 @@ function frame(now){
 requestAnimationFrame(frame);
 
 // ---------- screens ----------
-function showControls(on){['top','ctrl','roster'].forEach(id=>$(id).classList.toggle('show',on));}
+function showControls(on){['top','ctrl','others'].forEach(id=>$(id).classList.toggle('show',on));}
 function beginFlight(){
   $('wait').style.display='none';$('menu').style.display='none';showControls(true);
   const n=WORLD?WORLD.mems.filter(m=>!m.got).length:0;say(`${n} memories out there. Follow the arrow — and talk to each other!`,3.5);

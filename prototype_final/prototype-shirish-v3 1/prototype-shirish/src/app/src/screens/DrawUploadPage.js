@@ -116,7 +116,7 @@ export default function DrawUploadPage({ code, participantId, serverUrl, partici
           <PrimaryButton title={sent.length ? "Done for now" : "Back"} variant="ghost" onPress={() => (sent.length ? setReview(true) : onBack())} />
         </View>
         <View style={{ flex: 1 }}>
-          <PrimaryButton title="Load onto rocket" onPress={handleSubmit} loading={sending} disabled={uploading} />
+          <PrimaryButton title="Load" onPress={handleSubmit} loading={sending} disabled={uploading} />
         </View>
       </View>
       <PrivacyCard memories={review ? sent : null} serverUrl={serverUrl} onDone={() => { setReview(false); setSent([]); onBack(); }} />

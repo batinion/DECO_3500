@@ -95,6 +95,7 @@ function setPhase(crew, phase) {
   crew.phase = phase;
   crew.phaseStartedAt = Date.now();
   crew.timeJumpStep = 0;
+  crew.summonReady = []; // who has pressed "Summon the rocket" (the email at the end of the time jump)
   crew.stepStartedAt = crew.phaseStartedAt;
   save();
 }
@@ -170,7 +171,8 @@ function memoryCount(crew, memberId) {
   return crew.memories.filter((m) => m.authorId === memberId).length;
 }
 
-// Everyone has to load three kinds of capsule before they can be ready for launch:
+// (No longer required for readiness - any three capsules will do - but still reported per member.)
+// The three kinds:
 //   image   - an "Add images" capsule
 //   collab  - an "ask your crewmate" prompt (the ones that need the other person's input)
 //   prompt  - one more ordinary prompt (or a free-write)
@@ -183,9 +185,9 @@ function requirements(crew, memberId) {
     prompt: mine.some((m) => (m.kind === "prompt" || m.kind === "free") && !COLLAB_PROMPT_IDS.has(m.promptId)),
   };
 }
+// Ready to launch once a person has loaded the minimum number of capsules, of any kind.
 function meetsRequirements(crew, memberId) {
-  const r = requirements(crew, memberId);
-  return r.image && r.collab && r.prompt;
+  return memoryCount(crew, memberId) >= MIN_MEMORIES_TO_BE_READY;
 }
 
 /**
@@ -198,15 +200,17 @@ function addMemory(crew, memberId, input = {}) {
   if (!author) return { error: "You're not in this crew." };
   if (crew.phase !== "collecting") return { error: "The capsule is sealed — the rocket has launched." };
 
-  const kind = ["prompt", "free", "media"].includes(input.kind) ? input.kind : "prompt";
+  const kind = ["prompt", "free", "media", "voice"].includes(input.kind) ? input.kind : "prompt";
   const filledText = Array.isArray(input.filledText) ? input.filledText.map((t) => String(t || "").slice(0, 500)) : [];
   const text = String(input.text || "").slice(0, 1200).trim();
   const photo = typeof input.photo === "string" ? input.photo : null;
   const drawing = typeof input.drawing === "string" ? input.drawing : null;
+  const audio = typeof input.audio === "string" && input.audio.startsWith("/uploads/") ? input.audio : null; // voice note
   const about = findMember(crew, input.aboutId);
 
   if (kind === "media" && !photo && !drawing) return { error: "Add a sketch or a photo first." };
-  if (kind !== "media" && !text && !filledText.some((t) => t.trim())) return { error: "Write something first." };
+  if (kind === "voice" && !audio) return { error: "Record a voice note first." };
+  if (kind !== "media" && kind !== "voice" && !text && !filledText.some((t) => t.trim())) return { error: "Write something first." };
   if (about && about.id === author.id) return { error: "Memories are about your crewmates, not yourself." };
 
   const memory = {
@@ -220,6 +224,7 @@ function addMemory(crew, memberId, input = {}) {
     aboutId: about ? about.id : null,
     photo,
     drawing,
+    audio,
     week: currentWeek(crew),
     createdAt: Date.now(),
   };
@@ -258,7 +263,7 @@ function setReady(crew, memberId, ready, skip = false) {
   if (crew.phase !== "collecting") return { error: "Already launched." };
   // "Skip memory submission": ready to launch without the minimum number of memories
   if (ready && !skip && !meetsRequirements(crew, memberId)) {
-    return { error: "Load an image capsule, a collaborate capsule and one more prompt before you're ready to launch." };
+    return { error: `Load at least ${MIN_MEMORIES_TO_BE_READY} capsules before you're ready to launch.` };
   }
   me.skippedMemories = !!ready && !!skip && !meetsRequirements(crew, memberId);
   if (me.ready !== !!ready) {
@@ -331,6 +336,7 @@ function buildCapsule(crew) {
       aboutName: name(m.aboutId),
       photo: m.photo,
       drawing: m.drawing,
+      audio: m.audio || null,
       rescue: gameNote(crew, m.id),
     }));
 
