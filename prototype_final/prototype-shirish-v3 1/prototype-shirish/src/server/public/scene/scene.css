@@ -118,6 +118,12 @@ html, body {
 .engine.lit { border-color: var(--lit); box-shadow: 0 0 16px 2px var(--lit); }
 .engine.lit .flame { height: 38px; opacity: 1; animation: flicker 0.15s infinite alternate; }
 .boost .engine.lit .flame { height: 84px; width: 12px; }
+/* landing: the flames and the engine glow die away slowly once the rocket has settled */
+.phase-landing .engine, .phase-revealed .engine { transition: box-shadow 1.6s ease, border-color 1.6s ease; }
+.phase-landing .engine .flame, .phase-revealed .engine .flame { transition: height 1.6s ease, opacity 1.6s ease; }
+/* after the landing the scene goes very dark behind the carousel; only the landed rocket just shows */
+#scene-root::after { content: ""; position: absolute; inset: 0; z-index: 30; background: rgba(1, 2, 6, 0.93); opacity: 0; pointer-events: none; transition: opacity 2.4s ease; }
+#scene-root.phase-revealed::after { opacity: 1; }
 @keyframes flicker { from { transform: scaleY(1); } to { transform: scaleY(0.82); } }
 
 /* ---- Join panel (QR + code). Shown on Mission Control always, participant screens while joining. ---- */

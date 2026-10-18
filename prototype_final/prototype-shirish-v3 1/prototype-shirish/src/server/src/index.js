@@ -127,8 +127,9 @@ const TIMING = {
   boardTailMs: 1200, // hatch closes
   launchMs: 12500, // 6 s countdown hold -> liftoff -> clears atmosphere -> space
   cruiseMs: 7000, // reaches outer space, shuts down its engines and floats away until it vanishes
-  warpMs: 38200, // "meanwhile on Earth": goodbye gif, the future gifs (2032, 2040, 2050), then the "Summon the rocket" email arrives and waits for everyone
+  warpMs: 41400, // "meanwhile on Earth": goodbye gif, the future gifs (last one ends at 40.2 s, fading out by ~40.7 s), then the "Summon the rocket" email arrives (with a 0.7 s gap) and waits for everyone
   homecomingMs: 21500, // rescue flight done: dock -> memories back in the rocket -> rocket reaches Earth
+  landingMs: 10000, // rescue done: the empty launch site for 1 s, then the rocket comes down onto the same pad, thrusters fading as it settles
   earthMs: 13000, // "memories coming back" text, rocket drifts in towards Earth... then the cargo hatch blows
 };
 const boardMs = (crew) => crew.members.length * TIMING.boardPerMs + TIMING.boardTailMs;
@@ -236,8 +237,9 @@ function emitGameEvents(crew, events) {
       // homecoming first (dock, memories back in the rocket, rocket reaches Earth).
       setTimeout(() => {
         if (crew.phase === "rescue") {
-          crews.setPhase(crew, "revealed");
+          crews.setPhase(crew, "landing");
           broadcast(crew);
+          schedule(crew);
         }
       }, crew.game?.type === "shared" ? 5000 : TIMING.homecomingMs);
       return;
@@ -293,6 +295,8 @@ function schedule(crew) {
       return after(TIMING.warpMs - elapsed, () => autoSummon(crew));
     case "earth":
       return after(TIMING.earthMs - elapsed, () => crews.setPhase(crew, "lost"));
+    case "landing":
+      return after(TIMING.landingMs - elapsed, () => crews.setPhase(crew, "revealed"));
     default:
       return undefined; // collecting / lost / games / revealed wait on the crew
   }
@@ -550,9 +554,10 @@ io.on("connection", (socket) => {
     asMember(({ crew, reply }) => {
       if (crew.phase !== "rescue" || !crew.game) return reply({ error: "No game running." });
       games.finishNow(crew);
-      crews.setPhase(crew, "revealed");
+      crews.setPhase(crew, "landing");
       reply({ ok: true });
       broadcast(crew);
+      schedule(crew);
     })
   );
 

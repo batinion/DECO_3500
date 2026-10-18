@@ -19,7 +19,7 @@ const SEMESTER_WEEKS = 13;
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 // boarding: crew loads their memories one by one · timejump: the 3-year warp · lost: the
 // cargo hatch blew open and the crew picks a rescue activity · rescue / colorgame: the games.
-const PHASES = ["collecting", "boarding", "launching", "cruising", "timejump", "earth", "lost", "rescue", "revealed"];
+const PHASES = ["collecting", "boarding", "launching", "cruising", "timejump", "earth", "lost", "rescue", "landing", "revealed"];
 const FAKE_NAMES = ["Noah", "Ruben", "Ed", "Priya", "Mei"];
 const AVATARS = ["nova", "comet", "orbit", "luna", "pixel", "sprout", "blaze", "moji"];
 

@@ -74,6 +74,8 @@ function deriveScreen(joined, scene, selfId) {
       return "scene";
     case "earth":
       return "earth";
+    case "landing":
+      return "scene"; // just the scene: the rocket settles back onto its pad
     case "lost":
       return "lost";
     case "rescue":
@@ -247,6 +249,7 @@ export default function App() {
     } else if (phase === "launching") playCountdown();
     else if (phase === "cruising") play("cruise"); // engine rumble fades away slowly in deep space
     else if (phase === "earth") play("radio");
+    else if (phase === "landing") play("cruise"); // thrusters rumble, then fade as the rocket touches down
     else if (phase === "lost") play("breach");
     else if (phase === "revealed") play("fanfare");
   }, [scene?.phase]);
@@ -350,7 +353,7 @@ export default function App() {
       return undefined;
     }
     const startedAt = Date.now() - (scene.serverNow - scene.phaseStartedAt);
-    const at = scene.timing?.warpMs || 38200;
+    const at = scene.timing?.warpMs || 41400;
     const tick = () => setSummonOn(Date.now() - startedAt >= at);
     tick();
     const id = setInterval(tick, 250);

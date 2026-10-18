@@ -118,14 +118,14 @@ function Note({ crewName, iAmReady, onSummon }) {
         <Text style={styles.text2}>Time to get back with {crewName || "the crew"}</Text>
 
         <View style={styles.btnArea}>
-          <Pressable onPress={onSummon} onPressIn={() => setDown(true)} onPressOut={() => setDown(false)} disabled={iAmReady} accessibilityLabel="Summon the rocket" style={styles.btnHit}>
+          <Pressable onPress={onSummon} onPressIn={() => setDown(true)} onPressOut={() => setDown(false)} disabled={iAmReady} accessibilityLabel="Summon the rocket back to earth" style={styles.btnHit}>
             <View style={[styles.btnBase, iAmReady && styles.btnBaseDone]} />
             <View style={[styles.btnTop, iAmReady && styles.btnTopDone, (down || iAmReady) && { top: 9 }]}>
               <View style={styles.gloss} />
               <Text style={styles.btnIcon}>{iAmReady ? "✓" : "🚀"}</Text>
             </View>
           </Pressable>
-          <Text style={styles.btnLabel}>{iAmReady ? "You're ready. Waiting for the crew…" : "Summon the rocket"}</Text>
+          <Text style={styles.btnLabel}>{iAmReady ? "You're ready. Waiting for the crew…" : "Summon the rocket\nback to earth."}</Text>
         </View>
       </View>
     </View>

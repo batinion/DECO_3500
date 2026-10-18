@@ -25,7 +25,7 @@
     <line class="hh" x1="24" y1="24" x2="24" y2="14" stroke="#ffb84c" stroke-width="3.5" stroke-linecap="round"/>
     <line class="mh" x1="24" y1="24" x2="24" y2="9" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><circle cx="24" cy="24" r="2.5" fill="#fff"/></svg>`;
   // timings of the "meanwhile" sequence, in ms from the start of the phase
-  const FUT = { textEnd: 0, slideStart: 16600, slideMs: 7200, fadeOut: 1000 };
+  const FUT = { textEnd: 0, slideStart: 18600, slideMs: 7200, fadeOut: 1000 };
 
   // ---- DOM ------------------------------------------------------------------
   root.innerHTML = `
@@ -145,7 +145,6 @@
     el.cargoFill.style.height = Math.min(100, Math.round(((st.memoryTotal || 0) / target) * 100)) + "%";
     lastMemoryTotal = st.memoryTotal || 0;
     syncCrew(st.members || []);
-    root.classList.toggle("boost", st.phase === "launching");
 
     // one class per phase, so the CSS can style the big moments (boarding, alarm…)
     root.className = root.className.replace(/\bphase-\S+/g, "").trim() + " phase-" + st.phase;
@@ -466,6 +465,7 @@
     // --- rocket: {x,y px, s scale, r deg, z behind moon}
     let rk = { x: 0, y: 0, s: unit, r: 0, behind: false };
     let warp = 0, groundP = 0, atmo = 1, tunnel = 0, flash = 0, hud = false;
+    let thrust = false;
     let rocketO = 1, earthT = 0, cineA = false, cineB = false, cineC = false, cineD = false, byeOn = false, cineF = false, marq = false, dayOn = false, headTop = false, slide = -1, enginesOff = false;
 
     const padPose = () => ({ x: padX(), y: groundY - (ROCKET_H / 2) * unit + 6, s: unit, r: 0 });
@@ -524,13 +524,30 @@
       const slidesEnd = FUT.slideStart + FUT.slideMs * FUTURE.length;
       // A daylight Earth scene slides in from the left; the heading stays on it while the gifs play.
       dayOn = t > 0; // stays on screen to the end, so the reunite line has the daylight scene to itself
-      cineD = byeOn = t > 2500 && t < 7500; // 2. the caption with the goodbye gif below it (5 s, so it lingers)
+      cineD = byeOn = t > 2500 && t < 9500; // 2. the caption with the goodbye gif below it (7 s)
       cineB = false; // (now one two-line message in cineD)
       cineF = t >= FUT.slideStart && t < slidesEnd - 200; // "You on Earth..." comes in with the first gif and stays until the reunite line appears
-      marq = t >= 7600 && t < 15600; // 4. the glass banner, bottom centre, for 8 s (then 1 s before the gifs), then gone; the gifs start after it
+      marq = t >= 9600 && t < 17600; // 4. the glass banner, bottom centre, for 8 s (then 1 s before the gifs), then gone; the gifs start after it
       // after the last gif the phones show the "Summon the rocket" email; the scene just keeps the daylight Earth
       headTop = true; // the heading sits at the top from the very start
       if (t >= FUT.slideStart && t < slidesEnd - 200 && idx >= 0 && idx < FUTURE.length) slide = idx;
+    } else if (phase === "landing" || phase === "revealed") {
+      // Back where it all began. First the empty launch site on Earth (pad, ground, sky, moon, no rocket) for a
+      // second; then the rocket comes down from above the screen onto the very pad it took off from, thrusters
+      // blazing. They dim and go out once it has settled. Then (revealed) the whole scene fades to near-black
+      // behind the memory carousel, the landed rocket only just visible.
+      const LAND = T.landingMs || 10000;
+      const EMPTY = 1000; // the empty pad, before the rocket appears
+      const u = phase === "landing" ? clamp01((t - EMPTY) / (LAND - EMPTY)) : 1;
+      const sm = (x) => { x = clamp01(x); return x * x * x * (x * (x * 6 - 15) + 10); }; // smootherstep
+      const pad = padPose();
+      const p = sm(u / 0.9); // touches down at 90%, then sits still while the thrusters die away
+      const hover = (1 - p) * 3 * unit;
+      const startY = -(ROCKET_H * unit);
+      rk = { x: pad.x + Math.sin(now / 70) * hover, y: lerp(startY, pad.y, p) + Math.sin(now / 55) * hover, s: unit, r: 0 };
+      earthT = 0; groundP = 0; atmo = 1; warp = 0;
+      enginesOff = u >= 0.9;
+      thrust = phase === "landing" && u > 0 && u < 0.9;
     } else {
       // earth: the rocket comes back into view and heads for Earth · lost: the hatch blows · games / revealed: parked by Earth
       // Order of events: the rocket appears out of deep space at the centre of the screen, then
@@ -581,6 +598,7 @@
     el.flash.style.opacity = flash.toFixed(3);
     cls(el.warpHud, "show", hud);
     cls(root, "engines-off", enginesOff);
+    cls(root, "boost", phase === "launching" || thrust);
     cls(el.cineA, "show", cineA);
     cls(el.cineB, "show", cineB);
     cls(el.cineC, "show", cineC);
