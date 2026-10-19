@@ -5,7 +5,7 @@ import * as ImagePicker from "expo-image-picker";
 import PrimaryButton from "./PrimaryButton";
 import FriendPicker from "./FriendPicker";
 import { colors, spacing, type } from "../lib/theme";
-import { parseTemplate, templateHasName, templateBlankCount } from "../lib/prompts";
+import { parseTemplate, templateHasName, templateBlankCount, ASK_MATES_LABEL, EXTRA_LABELS } from "../lib/prompts";
 import { uploadPhoto } from "../lib/api";
 import VoicePlayer from "./VoicePlayer";
 import { mediaBlockedReason, webCameraSupported, openCameraStream, stopStream, snapshot } from "../lib/camera";
@@ -21,7 +21,8 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
   const isVoice = star?.kind === "voice";
   const isSelfie = star?.kind === "selfie";
   const blankCount = isFree ? 1 : isImage || isVoice || isSelfie ? 0 : star ? templateBlankCount(star.template) : 0;
-  const hasName = isFree || isImage || isVoice || isSelfie ? false : star ? templateHasName(star.template) : false;
+  // an ask prompt carries the crewmate picker in its instruction line, since its template may not name anyone
+  const hasName = isFree || isImage || isVoice || isSelfie ? false : star ? templateHasName(star.ask || star.template) : false;
 
   const [filledText, setFilledText] = useState([]);
   const [aboutParticipantId, setAboutParticipantId] = useState(null);
@@ -68,7 +69,10 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
   }, [visible]);
 
   if (!star) return null;
-  const tokens = isFree || isImage || isVoice || isSelfie ? [] : parseTemplate(star.template);
+  const plain = isFree || isImage || isVoice || isSelfie;
+  const tokens = plain ? [] : parseTemplate(star.template);
+  const askTokens = plain || !star.ask ? [] : parseTemplate(star.ask);
+  const friendName = participants.find((p) => p.id === aboutParticipantId)?.name;
 
   function setBlank(index, value) {
     setFilledText((prev) => {
@@ -274,7 +278,7 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
                   </View>
                 ) : isSelfie ? (
                   <View style={{ gap: spacing.md, marginTop: spacing.md }}>
-                    <Text style={styles.voicePrompt}>Take a selfie with your team</Text>
+                    <Text style={styles.voicePrompt}>{EXTRA_LABELS.selfie}</Text>
                     {cameraOn ? (
                       <>
                         {React.createElement("video", {
@@ -345,10 +349,25 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
                     autoFocus
                   />
                 ) : (
-                  <View style={styles.sentence}>
+                  <>
+                  {askTokens.length > 0 && (
+                    <View style={[styles.sentence, { marginBottom: spacing.sm, zIndex: 30 }]}>
+                      {askTokens.map((tok, i) =>
+                        tok.type === "name" ? (
+                          <FriendPicker key={i} participants={participants} value={aboutParticipantId} onChange={setAboutParticipantId} placeholder="pick a crewmate" />
+                        ) : (
+                          <Text key={i} style={[styles.sentenceText, styles.askText]}>{tok.value}</Text>
+                        )
+                      )}
+                    </View>
+                  )}
+                  {star.askMates ? <Text style={[styles.sentenceText, { marginTop: spacing.md }]}>{ASK_MATES_LABEL}</Text> : null}
+                  <View style={[styles.sentence, star.askMates && { marginTop: 0 }]}>
                     {tokens.map((tok, i) => {
                       if (tok.type === "text") return <Text key={i} style={styles.sentenceText}>{tok.value}</Text>;
                       if (tok.type === "name") {
+                        // in an ask prompt the picker is already above, so the template just repeats the pick
+                        if (star.ask) return <Text key={i} style={styles.sentenceText}>{friendName || "…"}</Text>;
                         return <FriendPicker key={i} participants={participants} value={aboutParticipantId} onChange={setAboutParticipantId} placeholder="pick a crewmate" />;
                       }
                       return (
@@ -364,6 +383,7 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
                       );
                     })}
                   </View>
+                  </>
                 )}
 
                 {isFree && participants.length > 0 && (
@@ -409,20 +429,20 @@ export default function PromptSheet({ visible, star, participants, onCollect, on
 
 const styles = StyleSheet.create({
   modalRoot: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.md },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.8)" },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.94)" },
   sheetWrap: { width: "100%", maxWidth: 480, alignItems: "center", justifyContent: "center", maxHeight: "94%" },
   sheet: {
     width: "100%",
     overflow: "hidden",
-    backgroundColor: "rgba(10, 12, 24, 0.9)",
+    backgroundColor: "#05060f",
     borderRadius: 24,
     padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.22)",
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.6)",
   },
   body: { flexGrow: 1, position: "relative", zIndex: 5, marginTop: spacing.sm },
-  sentence: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", marginTop: spacing.md },
-  sentenceText: { ...type.heading, lineHeight: 30 },
+  sentence: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", marginTop: spacing.md, zIndex: 20 }, // above the photo row, so the crewmate list isn't covered by it
+  sentenceText: { ...type.heading, color: "#ffffff", lineHeight: 30 },
   blankInput: {
     minWidth: 120,
     minHeight: 40,
@@ -449,6 +469,7 @@ const styles = StyleSheet.create({
   freeFriendRow: { flexDirection: "row", alignItems: "center", marginTop: spacing.md, zIndex: 10 },
   selfieImg: { width: "100%", aspectRatio: 4 / 3, borderRadius: 14, backgroundColor: colors.panel },
   voicePrompt: { ...type.heading, lineHeight: 28 },
+  askText: { color: "#d9def5", fontSize: 16 },
   voiceRow: { flexDirection: "row", alignItems: "center", gap: spacing.md },
   micBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: "rgba(255,255,255,0.1)", borderWidth: 1, borderColor: colors.accent, alignItems: "center", justifyContent: "center" },
   micBtnOn: { backgroundColor: "#d93a4c", borderColor: "#ff8896" },

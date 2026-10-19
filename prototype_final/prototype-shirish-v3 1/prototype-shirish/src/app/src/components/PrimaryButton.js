@@ -37,5 +37,5 @@ const styles = StyleSheet.create({
   dark: { backgroundColor: "#000000" },
   disabled: { opacity: 0.4 },
   pressed: { opacity: 0.8 },
-  text: { color: "#0a0c18", fontWeight: "700", fontSize: 15 },
+  text: { color: "#0a0c18", fontWeight: "700", fontSize: 18 },
 });

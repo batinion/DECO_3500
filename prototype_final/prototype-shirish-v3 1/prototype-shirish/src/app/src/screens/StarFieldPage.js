@@ -6,7 +6,7 @@ import PrivacyCard from "../components/PrivacyCard";
 import PromptSheet from "../components/PromptSheet";
 import PrimaryButton from "../components/PrimaryButton";
 import { colors, spacing, type } from "../lib/theme";
-import { isCollabPrompt, pickPrompts, previewTemplate, renderFilledTemplate, semesterStage } from "../lib/prompts";
+import { isCollabPrompt, pickCapsules, previewTemplate, renderFilledTemplate, VOICE_PROMPTS, EXTRA_LABELS } from "../lib/prompts";
 
 const HUES = ["#ff6ec7", "#ffb84c", "#2ec4b6", "#4cc9f0", "#9b5de5", "#3ddc97", "#f4d35e"];
 // Submission meter: [from this many submissions, fill, caption]
@@ -17,16 +17,6 @@ const METER = [
   [5, 0.6, "Ready. Amazing"],
   [9, 1, "Ready. Rockstar!"],
 ];
-// Prompts for the two voice-note capsules in every round
-const VOICE_PROMPTS = [
-  "Say something to your crew for when you all open this in 24 years.",
-  "Tell the story of a moment from this semester that still makes you laugh.",
-  "What do you want your crew to remember about working together?",
-  "Leave a message for the person you were in week one.",
-  "Give your crew a shout-out in your own voice.",
-  "What will you miss most about this group?",
-];
-const STAGE_LABEL = { start: "start of semester", mid: "mid-semester", end: "end of semester" };
 
 // The example capsule is pinned to the right side of the field so it is always easy to find.
 const examplePoint = (width, height) => ({ left: Math.max(74, width - 74), top: Math.max(52, height * 0.15) });
@@ -110,12 +100,16 @@ export default function StarFieldPage({ week, participants, answeredIds, totalMi
   const visualCache = useRef({});
 
   const baseStars = useMemo(() => {
-    const picked = pickPrompts(week, answeredIds).map((p) => ({ id: `${p.id}`, promptId: p.id, kind: "prompt", template: p.template, needsPhoto: !!p.needsPhoto }));
-    return [...picked, { id: `free_${round}`, promptId: "free_text", kind: "free" }, ...[0, 1].map((i) => ({ id: `image_${round}_${i}`, promptId: "image", kind: "image" })),
-      { id: `selfie_${round}`, promptId: "selfie", kind: "selfie" },
-      ...[0, 1].map((i) => ({ id: `voice_${round}_${i}`, promptId: "voice", kind: "voice", voicePrompt: VOICE_PROMPTS[(round * 2 + i) % VOICE_PROMPTS.length] })), { id: "example", kind: "example" }];
+    const { prompts, extras } = pickCapsules({ participantId, crewIds: participants.map((x) => x.id), round });
+    const picked = prompts.map((p) => ({ id: `${p.id}`, promptId: p.id, kind: "prompt", template: p.template, ask: p.ask || null, askMates: !!p.askMates, needsPhoto: !!p.needsPhoto }));
+    const voice = (i) => ({ id: `voice_${round}_${i}`, promptId: "voice", kind: "voice", voicePrompt: VOICE_PROMPTS[i].text });
+    return [...picked,
+      ...(extras.free ? [{ id: `free_${round}`, promptId: "free_text", kind: "free" }] : []),
+      ...(extras.images ? [{ id: `image_${round}`, promptId: "image", kind: "image" }] : []),
+      ...(extras.selfie ? [{ id: `selfie_${round}`, promptId: "selfie", kind: "selfie" }] : []),
+      ...(extras.voice ? [voice(0)] : []), ...(extras.voice2050 ? [voice(1)] : []), { id: "example", kind: "example" }];
     // new stars on each "shuffle" round; answeredIds intentionally read once per round
-  }, [round, week]);
+  }, [round, participantId, participants.map((x) => x.id).join()]);
   const stars = useMemo(() => [...baseStars, ...dupes], [baseStars, dupes]);
 
   const positions = useMemo(() => {
@@ -264,7 +258,8 @@ export default function StarFieldPage({ week, participants, answeredIds, totalMi
               isSelfie={s.kind === "selfie"}
               isCollab={s.kind === "prompt" && isCollabPrompt(s.promptId)}
               number={numbers[s.id]}
-              label={added[s.id]?.preview || (s.kind === "example" ? "See how a memory is written" : s.kind === "image" ? "Add images" : s.kind === "voice" ? s.voicePrompt : s.kind === "selfie" ? "Take a selfie with your team" : s.kind === "free" ? "Write anything about your crew" : previewTemplate(s.template))}
+              label={added[s.id]?.preview || (s.kind === "example" ? EXTRA_LABELS.example : s.kind === "image" ? EXTRA_LABELS.images : s.kind === "voice" ? s.voicePrompt : s.kind === "selfie" ? EXTRA_LABELS.selfie : s.kind === "free" ? EXTRA_LABELS.freeWrite : previewTemplate(s.template, s.ask))}
+              askMates={!!s.askMates}
               onRemove={s.id.startsWith("dup_") && !added[s.id] ? () => removeDupe(s.id) : undefined}
               onDuplicate={s.kind === "example" ? undefined : () => duplicate(s)}
               onEdit={added[s.id] ? () => setOpenStarId(s.id) : undefined}

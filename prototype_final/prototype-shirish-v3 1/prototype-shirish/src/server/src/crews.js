@@ -176,7 +176,7 @@ function memoryCount(crew, memberId) {
 //   image   - an "Add images" capsule
 //   collab  - an "ask your crewmate" prompt (the ones that need the other person's input)
 //   prompt  - one more ordinary prompt (or a free-write)
-const COLLAB_PROMPT_IDS = new Set(["q1", "q2", "q3", "q4", "q5", "q6"]);
+const COLLAB_PROMPT_IDS = new Set(["q1", "q3", "q4", "q5"]);
 function requirements(crew, memberId) {
   const mine = crew.memories.filter((m) => m.authorId === memberId);
   return {
@@ -380,15 +380,18 @@ function fastForwardWeek(crew) {
 }
 
 const CANNED = [
-  { template: "{name} and I got lost looking for __ on the first day.", fill: ["the Hawken building"] },
-  { template: "I'll always remember {name} at the Great Court __.", fill: ["feeding chips to a bin chicken"] },
-  { template: "{name}'s best idea all semester was __.", fill: ["the rocket"] },
-  { template: "{name}'s Merlo order is __, no exceptions.", fill: ["a large oat flat white"] },
-  { template: "In crit, {name} defended our idea by saying __.", fill: ["\"users don't read, they scan\""] },
+  { template: "The first thing I noticed about {name} in week one was __.", fill: ["how neatly they labelled every sticky note"] },
+  { template: "When we formed our group, {name} was the one who __.", fill: ["made a group chat before anyone else had spoken"] },
+  { template: "The most {name} moment during user testing was when they __.", fill: ["laughed so hard the participant joined in"] },
+  { template: "When our prototype broke mid-demo, {name} __.", fill: ["kept talking like nothing had happened"] },
+  { template: "The tutor feedback that hit {name} hardest was “__”.", fill: ["users don’t read, they scan"] },
+  { template: "{name} turned our messiest affinity map into __.", fill: ["a story the whole room understood"] },
   { template: "The night before the deadline, {name} was __.", fill: ["re-exporting the Figma file for the fourth time"] },
-  { template: "{name} could spend hours on the Miro board just __.", fill: ["colour-coding sticky notes"] },
-  { template: "During user testing, {name} __.", fill: ["laughed so hard the participant joined in"] },
-  { template: "I never told {name} this but __.", fill: ["their sketches made our pitch"] },
+  { template: "If {name} won an award this semester, it’d be “Best __”.", fill: ["Sticky Note Wrangler"] },
+  { template: "{name}’s go-to phrase when things went wrong was “__”.", fill: ["it’s fine, we’ll iterate"] },
+  { template: "I never told {name} this, but __.", fill: ["their sketches saved our pitch"] },
+  { template: "{name} was secretly the best at __.", fill: ["calming everyone down at 1am"] },
+  { template: "Our group chat at 1am was mostly __.", fill: ["memes and panicked Figma links"] },
 ];
 
 function addSimulatedMember(crew) {

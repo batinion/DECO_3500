@@ -41,19 +41,19 @@ export default function JoinScreen({ onCreate, onJoin, busy, error, initialCode,
   if (step === 0) {
     return (
       <View style={styles.form}>
-        <Text style={styles.title}>Setup</Text>
+        <Text style={[styles.title, { fontSize: 14, letterSpacing: 1.5 }]}>SETUP</Text>
         <Text style={styles.lead}>
           Preserve your memories with our capsule in space.
         </Text>
 
-        <Text style={type.label}>EXPERIENCE</Text>
+        <Text style={styles.label}>EXPERIENCE</Text>
         <Text style={[styles.hint, styles.underHeading]}>Memories of this experience/event will be preserved</Text>
         <View style={styles.locked}>
           <Text style={styles.lockedText}>{SETUP.experience}</Text>
           <Text style={styles.lockIcon}>🔒</Text>
         </View>
 
-        <Text style={[type.label, { marginTop: spacing.lg }]}>NO OF YEARS</Text>
+        <Text style={[styles.label, { marginTop: spacing.lg }]}>NO OF YEARS</Text>
         <Text style={[styles.hint, styles.underHeading]}>Your memories will be preserved for this many years.</Text>
         <View style={styles.locked}>
           <Text style={styles.lockedText}>{SETUP.years}</Text>
@@ -70,9 +70,9 @@ export default function JoinScreen({ onCreate, onJoin, busy, error, initialCode,
   if (step === 1) {
     return (
       <View style={styles.form}>
-        <Text style={type.label}>LAUNCH SEQUENCE · STEP 1 OF 2</Text>
+        <Text style={styles.label}>LAUNCH SEQUENCE · STEP 1 OF 2</Text>
         <Text style={styles.title}>Select an avatar</Text>
-        <Text style={type.label}>Your avatar goes to space with memories.</Text>
+        <Text style={styles.label}>Your avatar goes to space with memories.</Text>
 
         <View style={styles.avatars}>
           {CHARACTERS.map((c) => {
@@ -109,7 +109,7 @@ export default function JoinScreen({ onCreate, onJoin, busy, error, initialCode,
         <Text style={styles.edit}>change</Text>
       </Pressable>
 
-      <Text style={type.label}>STEP 2 OF 2</Text>
+      <Text style={styles.label}>STEP 2 OF 2</Text>
       <Text style={styles.title}>Your crew</Text>
 
       {/* Two separate, unmistakable choices */}
@@ -122,7 +122,7 @@ export default function JoinScreen({ onCreate, onJoin, busy, error, initialCode,
       />
       {mode === "join" && (
         <View style={styles.expand}>
-          <Text style={type.label}>CREW CODE</Text>
+          <Text style={styles.label}>CREW CODE</Text>
           <TextInput
             style={[styles.input, styles.codeInput]}
             placeholder="ABC123"
@@ -152,7 +152,7 @@ export default function JoinScreen({ onCreate, onJoin, busy, error, initialCode,
       />
       {mode === "create" && (
         <View style={styles.expand}>
-          <Text style={type.label}>CREW NAME</Text>
+          <Text style={styles.label}>CREW NAME</Text>
           <TextInput
             style={styles.input}
             placeholder="e.g. Studio group 4"
@@ -193,17 +193,18 @@ function Choice({ on, icon, title, sub, onPress }) {
 
 const styles = StyleSheet.create({
   form: { gap: spacing.sm },
-  title: { ...type.heading, fontSize: 22 },
-  lead: { color: colors.muted, fontSize: 13, lineHeight: 18, marginBottom: spacing.xs },
+  label: { color: "#FFFFFF", fontSize: 14, letterSpacing: 1.5, fontWeight: "600" },
+  title: { ...type.heading, fontSize: 28, color: "#FFFFFF" },
+  lead: { color: "#C4C9E0", fontSize: 17, lineHeight: 23, marginBottom: spacing.xs },
   input: {
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.panel,
-    color: colors.text,
+    color: "#FFFFFF",
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 11,
-    fontSize: 16,
+    fontSize: 19,
   },
   codeInput: { letterSpacing: 6, fontWeight: "800", fontSize: 22, textAlign: "center" },
   avatars: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: spacing.xs },
@@ -219,11 +220,11 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     opacity: 0.85,
   },
-  lockedText: { flex: 1, color: colors.text, fontSize: 16 },
+  lockedText: { flex: 1, color: "#FFFFFF", fontSize: 19 },
   lockIcon: { fontSize: 14 },
   meRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: spacing.xs },
-  meName: { color: colors.text, fontWeight: "700", fontSize: 15 },
-  edit: { color: colors.accent, fontSize: 12, marginLeft: "auto" },
+  meName: { color: "#FFFFFF", fontWeight: "700", fontSize: 19 },
+  edit: { color: "#FFFFFF", fontSize: 15, marginLeft: "auto" },
   choice: {
     flexDirection: "row",
     alignItems: "center",
@@ -236,13 +237,13 @@ const styles = StyleSheet.create({
   },
   choiceOn: { borderColor: colors.lit, backgroundColor: "rgba(255, 184, 76, 0.08)" },
   choiceIcon: { fontSize: 26 },
-  choiceTitle: { color: colors.text, fontWeight: "800", fontSize: 16 },
-  choiceSub: { color: colors.muted, fontSize: 12, marginTop: 2 },
+  choiceTitle: { color: "#FFFFFF", fontWeight: "800", fontSize: 20 },
+  choiceSub: { color: "#FFFFFF", fontSize: 15, marginTop: 2 },
   radio: { color: colors.muted, fontSize: 18 },
   radioOn: { color: colors.lit },
   expand: { gap: spacing.sm, paddingHorizontal: 4, paddingBottom: spacing.sm },
   underHeading: { marginTop: -6 }, // tuck the description up against its heading
-  hint: { color: colors.muted, fontSize: 12 },
+  hint: { color: "#C4C9E0", fontSize: 15 },
   row: { flexDirection: "row", gap: spacing.sm },
   error: { color: colors.danger },
 });

@@ -2,6 +2,7 @@ import Svg, { Path, Circle } from "react-native-svg";
 import React, { useEffect, useRef, useState } from "react";
 import { Animated, Platform, Pressable, Text, View, StyleSheet, Easing } from "react-native";
 import { colors } from "../lib/theme";
+import { ASK_MATES_LABEL } from "../lib/prompts";
 
 /**
  * One empty memory capsule on the launch pad, waiting to be filled and loaded onto the
@@ -27,7 +28,7 @@ function WhiteIcon({ kind, size }) {
   );
 }
 
-export default function CapsulePod({ visual, collected, label, isFree, isExample, isImage, isVoice, isSelfie, isCollab, number, onPress, onRemove, onDuplicate, onEdit }) {
+export default function CapsulePod({ visual, collected, label, isFree, isExample, isImage, isVoice, isSelfie, isCollab, askMates, number, onPress, onRemove, onDuplicate, onEdit }) {
   const float = useRef(new Animated.Value(0)).current;
   const [hovered, setHovered] = useState(false);
   const hideTimer = useRef(null);
@@ -85,7 +86,7 @@ export default function CapsulePod({ visual, collected, label, isFree, isExample
 
   const w = Math.max(isExample ? 76 : 0, Math.round(52 + visual.size)); // the example is the same size as the others
   const h = Math.round(w * 0.5);
-  const halo = isExample ? 16 : 9; // the example capsule gets a bigger, red halo
+  const halo = isExample ? 16 : isSelfie ? 6 : 9; // the example capsule gets a bigger, red halo; the selfie a slim golden one
   const translateY = float.interpolate({ inputRange: [0, 1], outputRange: [0, -6] });
 
   // A loaded capsule has nothing to open, so tapping it pins its preview (touch screens have no hover).
@@ -100,8 +101,8 @@ export default function CapsulePod({ visual, collected, label, isFree, isExample
       <View style={styles.inner} accessibilityLabel={collected ? "Loaded" : label}>
         <Pressable onPress={handlePress} hitSlop={10} style={styles.inner}>
           <Animated.View style={{ transform: [{ translateY }], opacity: collected ? 0.45 : 1 }}>
-            <View style={[styles.glow, { width: w + halo * 2, height: h + halo * 2, borderRadius: (h + halo * 2) / 2, left: -halo, top: -halo, backgroundColor: isExample ? "rgba(255, 59, 59, 0.38)" : `${visual.hue}33` }]} />
-            <View style={[styles.pod, isExample && { shadowColor: "#ff3b3b", shadowOpacity: 0.95, shadowRadius: 18 }, { width: w, height: h, borderRadius: h / 2, borderColor: collected ? "#ffffff" : visual.hue }]}>
+            <View style={[styles.glow, { width: w + halo * 2, height: h + halo * 2, borderRadius: (h + halo * 2) / 2, left: -halo, top: -halo, backgroundColor: isExample ? "rgba(255, 59, 59, 0.38)" : isSelfie && !collected ? "rgba(255, 200, 40, 0.35)" : `${visual.hue}33` }]} />
+            <View style={[styles.pod, isExample && { shadowColor: "#ff3b3b", shadowOpacity: 0.95, shadowRadius: 18 }, isSelfie && !collected && { shadowColor: "#ffc828", shadowOpacity: 0.8, shadowRadius: 7 }, { width: w, height: h, borderRadius: h / 2, borderColor: collected ? "#ffffff" : visual.hue }]}>
               <View style={[styles.band, { backgroundColor: visual.hue }]} />
               {isExample ? (
                 <Text style={styles.exampleText}>example</Text>
@@ -122,8 +123,8 @@ export default function CapsulePod({ visual, collected, label, isFree, isExample
         {showTip && (
           <View style={styles.tooltipHolder}>
             <View style={styles.tooltip}>
-              <Text style={styles.tooltipText} numberOfLines={3}>
-                {label}
+              <Text style={styles.tooltipText} numberOfLines={4}>
+                {askMates && !collected ? `${ASK_MATES_LABEL}\n` : ""}{label}
               </Text>
               {hasActions && (
                 <View style={styles.tipActions}>

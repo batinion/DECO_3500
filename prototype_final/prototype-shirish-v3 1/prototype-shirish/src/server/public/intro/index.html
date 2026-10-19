@@ -52,7 +52,7 @@
   @media (min-width: 700px) { .pc { width: 62px; height: 62px; } }
 
   /* ---------- crew chips ---------- */
-  #crew { position: absolute; left: 50%; top: 70%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 6; }
+  #crew { position: absolute; left: 50%; top: 70%; transform: translateX(-50%); display: none; gap: 10px; z-index: 6; } /* the game shows only the avatars */
   .chip { display: flex; align-items: center; gap: 6px; padding: 6px 10px 6px 6px; border-radius: 999px; background: rgba(22,26,46,.92); border: 1px solid var(--border); font-size: 13px; font-weight: 600; opacity: 0; transform: translateY(14px) scale(.9); transition: all .4s cubic-bezier(.3,1.4,.6,1); white-space: nowrap; }
   .chip .ph { width: 24px; height: 24px; display: grid; place-items: center; }
   .chip .ph svg { width: 100%; height: 100%; }
@@ -65,6 +65,7 @@
   /* ---------- memory card ---------- */
   #card { position: absolute; left: 50%; top: 13%; width: min(340px, 86vw); transform: translateX(-50%) translateY(-10px); opacity: 0; z-index: 8; background: rgba(22,26,46,.94); border: 1px solid rgba(255,255,255,.18); border-radius: 18px; padding: 14px 16px; box-shadow: 0 18px 40px rgba(0,0,0,.45); transition: opacity .35s, transform .35s; }
   #card.in { opacity: 1; transform: translateX(-50%); }
+  #card { z-index: 12; }
   #card .lbl { font-size: 10px; letter-spacing: 1.5px; color: var(--muted); display: flex; justify-content: space-between; }
   #card .lbl b { color: var(--lit); font-weight: 800; }
   #card .sent { margin-top: 8px; font-size: 18px; font-weight: 700; line-height: 1.45; }
@@ -103,7 +104,7 @@
   .gp .ft { display: flex; align-items: center; justify-content: space-between; gap: 4px; font-size: 10px; color: rgba(238,240,255,.6); }
   .gp .act { display: flex; gap: 3px; }
   .gp .act i { font-style: normal; width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,.08); display: grid; place-items: center; font-size: 11px; }
-  .rise { position: absolute; bottom: -70px; z-index: 7; pointer-events: none; display: flex; flex-direction: column; align-items: center; animation: riseUp var(--d, 2.6s) ease-out forwards; }
+  .rise { position: absolute; bottom: -70px; z-index: 14; pointer-events: none; display: flex; flex-direction: column; align-items: center; animation: riseUp var(--d, 2.6s) ease-out forwards; }
   .rise b { margin-top: 4px; font-size: 13px; background: rgba(8,9,14,.88); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 3px 12px; }
   @keyframes riseUp { from { transform: translateY(0); opacity: 1; } 85% { opacity: 1; } to { transform: translateY(-115vh); opacity: 0; } }
 
@@ -164,6 +165,23 @@
   #mini { position: absolute; inset: 0; z-index: 7; pointer-events: none; }
   .m-el { position: absolute; transition: transform .6s, opacity .4s; }
   .laser { position: absolute; width: 3px; height: 16px; background: #ffd27a; border-radius: 2px; box-shadow: 0 0 6px #ffd27a; }
+  .skipopt { text-align: center; color: var(--accent); font-size: 13px; text-decoration: underline; opacity: 0; transition: opacity .4s; }
+  .skipopt.in { opacity: 1; }
+  /* the "Summon the rocket" email at the end of the time jump */
+  .mail { position: absolute; left: 50%; top: 9%; width: min(340px, 90vw); transform: translateX(-50%) translateY(16px); opacity: 0; z-index: 8; transition: opacity .5s, transform .5s;
+    background: #f4f5fb; color: #151827; border-radius: 16px; box-shadow: 0 20px 44px rgba(0,0,0,.55); overflow: hidden; }
+  .mail.in { opacity: 1; transform: translateX(-50%); }
+  .mail .bar { background: #2a2f4a; color: #fff; display: flex; justify-content: space-between; padding: 8px 14px; font-size: 12px; font-weight: 800; }
+  .mail .mbody { padding: 14px 16px 16px; }
+  .mail .meta { font-size: 12px; color: #5a6080; }
+  .mail .t1 { margin-top: 10px; font-size: 20px; font-weight: 800; }
+  .mail .t2 { margin-top: 4px; font-size: 14px; color: #3a4060; }
+  .mail .go { margin-top: 12px; background: var(--lit); border-radius: 12px; padding: 10px; text-align: center; font-weight: 800; font-size: 14px; white-space: pre-line; transition: transform .15s, background .3s; }
+  .mail .go.press { transform: scale(.95); }
+  .mail .go.done { background: #cfe9d7; }
+  .mail .rows { margin-top: 10px; display: grid; gap: 4px; font-size: 13px; font-weight: 700; }
+  .mail .rows div { color: #8a90ad; }
+  .mail .rows div.on { color: #1f7a48; }
   #swatch { position: absolute; left: 50%; top: 14%; transform: translateX(-50%) scale(.9); width: min(300px, 80vw); height: 150px; border-radius: 20px; z-index: 8; opacity: 0; transition: all .4s; display: flex; align-items: flex-end; justify-content: center; padding: 10px; }
   #swatch.in { opacity: 1; transform: translateX(-50%) scale(1); }
   #swatch b { background: rgba(5,6,15,.8); border-radius: 10px; padding: 5px 10px; font-size: 15px; }
@@ -182,6 +200,78 @@
     .chip .ph { width: 20px; height: 20px; font-size: 11px; }
   }
   @media (max-height: 640px) { #card { top: 8%; } #rocket-wrap { transform: scale(.85); } }
+
+  /* ---------- the capsule screen, as in the game ---------- */
+  .fhead { position: absolute; left: 16px; top: 52px; z-index: 8; max-width: 52vw; }
+  .fhead b { display: block; font-size: 20px; font-weight: 800; }
+  .fhead span { display: block; margin-top: 3px; font-size: 13px; font-weight: 700; line-height: 1.35; }
+  .meter { position: absolute; right: 14px; top: 66px; width: min(150px, 38vw); z-index: 8; }
+  .meter .trk { height: 16px; border-radius: 8px; background: rgba(255,255,255,.12); border: 2px solid var(--lit); overflow: hidden; }
+  .meter .fill { height: 100%; width: 0%; background: var(--lit); border-radius: 6px; transition: width .7s ease; }
+  .meter .mt { margin-top: 5px; font-size: 13px; font-weight: 700; text-align: right; }
+  .pod { position: absolute; z-index: 8; display: flex; flex-direction: column; align-items: center; gap: 5px; transform: translate(-50%, -50%); animation: podfloat var(--fd, 2.4s) ease-in-out infinite alternate; }
+  @keyframes podfloat { from { transform: translate(-50%, -50%); } to { transform: translate(-50%, calc(-50% - 6px)); } }
+  .pill { position: relative; width: 78px; height: 40px; border-radius: 20px; background: #e9ecff; border: 3px solid var(--h); overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(255,184,76,.6), 0 0 0 8px var(--g); transition: opacity .5s; }
+  .pill .band { position: absolute; right: 0; top: 0; bottom: 0; width: 30%; background: var(--h); opacity: .85; }
+  .pill .win { width: 19px; height: 19px; border-radius: 50%; background: #1d2452; border: 2px solid #444a72; margin-right: 18%; display: grid; place-items: center; color: #fff3c4; font-size: 11px; font-weight: 900; z-index: 1; }
+  .pn { font-size: 10px; font-weight: 700; letter-spacing: .5px; color: var(--muted); white-space: nowrap; }
+  .pod.done .pill { opacity: .45; border-color: #fff; }
+  .pod.done .pn { color: var(--lit); }
+  #card .sent.sm { font-size: 15px; font-weight: 600; }
+  #card .shot { margin-top: 8px; height: 110px; border-radius: 10px; background: linear-gradient(135deg, #2b3366, #5b3a7a); display: grid; place-items: center; position: relative; font-size: 42px; }
+  #card .shot em { position: absolute; left: 8px; bottom: 6px; font-size: 11px; font-style: normal; color: rgba(255,255,255,.75); }
+  #card .wave { margin-top: 10px; height: 44px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  #card .wave i { width: 5px; border-radius: 3px; background: var(--lit); height: 10px; animation: wv .7s ease-in-out infinite alternate; }
+  #card .wave i:nth-child(2n) { animation-delay: .15s; } #card .wave i:nth-child(3n) { animation-delay: .3s; }
+  @keyframes wv { to { height: 40px; } }
+  .cursor { position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,.92); border: 3px solid var(--lit); box-shadow: 0 0 14px rgba(255,184,76,.7); z-index: 40; pointer-events: none; transition: transform .7s cubic-bezier(.4,0,.2,1), box-shadow .15s; }
+  .cursor.tap { background: var(--lit); box-shadow: 0 0 0 14px rgba(255,184,76,.3), 0 0 14px rgba(255,184,76,.7); }
+
+  /* ---------- the years ticking up to 2050 ---------- */
+  .clk { position: absolute; left: 0; right: 0; top: 10%; text-align: center; z-index: 8; }
+  .clk .face { position: relative; width: min(100px, 13vh); aspect-ratio: 1; margin: 0 auto; border-radius: 50%; border: 4px solid var(--accent); box-shadow: 0 0 26px rgba(76,201,240,.45); }
+  .clk .face i { position: absolute; left: 50%; bottom: 50%; width: 3px; border-radius: 2px; background: var(--text); transform-origin: 50% 100%; transform: translateX(-50%); }
+  .clk .face .h1 { height: 40%; } .clk .face .h2 { height: 28%; width: 4px; background: var(--lit); }
+  .clk .face b { position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px; border-radius: 50%; background: var(--lit); }
+  .clk .yr { margin-top: 8px; font-size: clamp(40px, 10vw, 64px); font-weight: 900; color: var(--lit); text-shadow: 0 0 34px rgba(255,184,76,.7); font-variant-numeric: tabular-nums; line-height: 1; }
+  .clk .yr.pop { animation: yrpop .6s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes yrpop { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
+  .clk .yl { margin-top: 4px; font-size: 11px; letter-spacing: 4px; color: var(--accent); font-weight: 800; }
+  #earth.in.near { transform: translate(-50%, -50%) scale(1.6); }
+
+  /* ---------- the crew works together ---------- */
+  .team { position: absolute; left: 0; right: 0; top: 20%; display: flex; justify-content: center; gap: 16px; z-index: 8; }
+  .tm { width: 62px; height: 62px; animation: pcbob 2.2s ease-in-out infinite; }
+  .tm svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.5)); }
+  .tm.hop { animation: pchop .9s cubic-bezier(.3,1.4,.5,1); }
+  .hub { position: absolute; left: 50%; top: 44%; transform: translateX(-50%); z-index: 8; padding: 10px 20px; border-radius: 999px; background: rgba(16,19,35,.95); border: 2px solid var(--lit); font-size: 17px; font-weight: 800; white-space: nowrap; transition: box-shadow .4s, transform .4s; }
+  .hub b { color: var(--lit); }
+  .hub.full { box-shadow: 0 0 34px rgba(255,184,76,.8); transform: translateX(-50%) scale(1.1); }
+
+  /* ---------- opening the capsule: cards, then a reaction ---------- */
+  .notes { position: absolute; left: 50%; top: 12%; transform: translateX(-50%); width: min(440px, 94vw); display: flex; gap: 12px; justify-content: center; z-index: 8; }
+  .note { flex: 1; min-height: 150px; border-radius: 6px; padding: 10px 10px 12px; color: #2a2418; box-shadow: 0 10px 22px rgba(0,0,0,.45); opacity: 0; transform: translateY(24px) rotate(var(--r)); transition: opacity .6s, transform .6s cubic-bezier(.3,1.3,.4,1); }
+  .note.in { opacity: 1; transform: rotate(var(--r)); }
+  .note.in.dim { opacity: .18; }
+  .note .nw { font-size: 9px; font-weight: 800; letter-spacing: 1px; opacity: .6; }
+  .note .nq { font-size: 34px; line-height: .8; font-family: Georgia, serif; opacity: .35; margin-top: 4px; }
+  .note .nt { font-size: 12.5px; font-weight: 700; line-height: 1.32; }
+  .viewer { position: absolute; left: 50%; top: 9%; width: min(300px, 86vw); transform: translateX(-50%) scale(.85); opacity: 0; z-index: 12; border-radius: 8px; padding: 16px; color: #2a2418; box-shadow: 0 20px 44px rgba(0,0,0,.6); transition: opacity .35s, transform .35s cubic-bezier(.3,1.4,.5,1); }
+  .viewer.in { opacity: 1; transform: translateX(-50%) scale(1); }
+  .viewer .vw { font-size: 10px; font-weight: 800; letter-spacing: 1px; opacity: .6; }
+  .viewer .vt { margin-top: 10px; font-size: 20px; font-weight: 800; line-height: 1.3; }
+  .viewer .vby { margin-top: 10px; font-size: 12px; font-weight: 700; opacity: .65; }
+  .viewer .react { margin-top: 12px; display: flex; gap: 8px; justify-content: center; }
+  .viewer .react i { font-style: normal; width: 42px; height: 42px; border-radius: 50%; background: rgba(0,0,0,.1); display: grid; place-items: center; font-size: 22px; transition: transform .2s, background .2s; }
+  .viewer .react i.pressed { transform: scale(1.25); background: var(--lit); }
+
+  .concept { position: absolute; left: 0; right: 0; top: 9%; padding: 0 22px; text-align: center; z-index: 8; }
+  .concept .c1, .concept .c2 { opacity: 0; transform: translateX(110vw); transition: transform .9s cubic-bezier(.2,.8,.2,1), opacity .5s; margin-left: auto; margin-right: auto; }
+  .concept .c1.in, .concept .c2.in { opacity: 1; transform: none; }
+  .concept .c1 { font-size: clamp(22px, min(6.4vw, 5.4vh), 46px); font-weight: 800; line-height: 1.18; max-width: 820px; }
+  .concept.low { top: 75%; }
+  .concept .clabel { font-size: 11px; letter-spacing: 2px; color: var(--lit); font-weight: 800; margin-bottom: 8px; }
+  .concept .c2 { margin-top: 0; font-size: clamp(17px, min(4.8vw, 3.9vh), 30px); font-weight: 600; line-height: 1.38; color: #c3c8e6; max-width: 760px; }
 </style>
 </head>
 <body>
@@ -226,7 +316,7 @@
 
   <div class="overlay" id="start">
     <div class="mini-rocket">🚀</div>
-    <div class="kicker" style="margin-top:14px">MISSION BRIEFING · ABOUT 40 SECONDS</div>
+    <div class="kicker" style="margin-top:14px">MISSION BRIEFING · ABOUT 75 SECONDS</div>
     <h1>How your crew's<br/>time capsule works</h1>
     <p>Turn your sound on 🔊 — it's a short launch.</p>
     <button class="big-btn" id="play">▶ Start briefing</button>
@@ -237,10 +327,11 @@
     <div class="kicker">YOUR MISSION</div>
     <h1>Ready, crew?</h1>
     <div class="recap">
-      <div><span>1</span>Create a crew, or join with your group's code.</div>
-      <div><span>2</span>Load memories about your crewmates: an image, a collaboration and a prompt, at least.</div>
-      <div><span>3</span>Everyone taps <b>&nbsp;Ready&nbsp;</b>: liftoff and a time warp.</div>
-      <div><span>4</span>Rescue the lost memories together, then open and react to them.</div>
+      <div><span>1</span>Create a crew, or join with your group's code, and pick an avatar.</div>
+      <div><span>2</span>Load at least 3 memories into capsules, any time during the semester.</div>
+      <div><span>3</span>Everyone taps <b>&nbsp;I'm ready for launch&nbsp;</b>: your avatars board and the rocket lifts off.</div>
+      <div><span>4</span>In 2050, summon the rocket back, then conduct a collaborative activity together.</div>
+      <div><span>5</span>Unlock your memories as cards, and react.</div>
     </div>
     <button class="big-btn" id="go">Let's go 🚀</button>
     <button class="text-btn" id="again">Watch again</button>
@@ -375,8 +466,8 @@
     c.classList.remove("fade"); void c.offsetWidth; c.classList.add("fade");
   }
 
-  const SCENES = [crewScene, memoryScene, launchScene, warpScene, rescueScene, openScene];
-  const DURATIONS = [4600, 9200, 7000, 8600, 5600, 6200];
+  const SCENES = [conceptScene, capsuleScene, yearsScene, returnScene, hatchScene, teamScene, revealScene];
+  const DURATIONS = [9400, 28000, 6000, 7000, 3600, 10000, 11500];
   $("progress").innerHTML = SCENES.map(() => "<i><b></b></i>").join("");
   const bars = [...document.querySelectorAll("#progress b")];
   function progress(i) {
@@ -388,145 +479,210 @@
   function reset() {
     engines.forEach((e) => e.classList.remove("lit"));
     chips.forEach((c) => c.classList.remove("in", "ready"));
-    pcs.forEach((p, i) => { p.classList.remove("in", "hop", "board", "carry", "walk", "still"); p.style.transform = ""; p.style.opacity = ""; setFace(i, "default"); });
+    pcs.forEach((p, i) => { p.classList.remove("in", "hop", "board", "carry", "walk", "still"); p.style.transform = ""; p.style.opacity = ""; p.style.transitionDuration = ""; setFace(i, "default"); });
     ["warp", "swatch"].forEach((id) => $(id).classList.remove("in"));
     $("alarm").classList.remove("in"); $("choice").innerHTML = ""; $("mini").innerHTML = ""; tunnel = 0;
     rocket.style.opacity = ""; $("earth").style.opacity = "";
     rocket.classList.remove("boost", "shake");
     rocket.style.transition = "none"; rocket.style.transform = "";
     wrap.style.transition = "none"; wrap.style.top = ""; wrap.style.left = "";
-    $("ground").style.transform = ""; $("ground").style.opacity = "";
+    $("ground").style.transition = ""; $("ground").style.transform = ""; $("ground").style.opacity = "";
     $("cargo-fill").style.height = "0%";
     $("lock").classList.remove("on");
     ["card", "toast", "years", "earth"].forEach((id) => $(id).classList.remove("in"));
+    $("earth").classList.remove("near"); document.querySelectorAll(".x").forEach((e) => e.remove());
     $("capsule").innerHTML = ""; $("big").style.opacity = 0;
     document.querySelectorAll(".orb, .rise").forEach((o) => o.remove());
     warp = 0;
   }
 
-  // ---------- scene 1: crew joins ----------
-  async function crewScene() {
-    caption("STEP 1 · FORM YOUR CREW", "Your DECO group gets one rocket.", "Each of you joins on your own phone, picks an astronaut, and lights an engine.");
-    SFX.play("radio");
-    await sleep(1000);
-    for (let i = 0; i < 4; i++) {
-      chips[i].classList.add("in"); pcs[i].classList.add("in"); engines[i].classList.add("lit"); SFX.play("ignite");
-      await sleep(700);
-    }
-    await sleep(700);
+  // ---------- little helpers for the scenes ----------
+  const mk = (cls, html) => { const d = document.createElement("div"); d.className = "x " + cls; d.innerHTML = html; $("stage").appendChild(d); return d; };
+  const clean = () => document.querySelectorAll(".x").forEach((e) => e.remove());
+  const rt = (v) => { rocket.style.transition = ff ? "none" : v; }; // no slow fades while fast-forwarding
+  const clearOrbs = () => document.querySelectorAll(".orb, .rise").forEach((o) => o.remove());
+  /** the on-screen "finger" that taps things, so the briefing shows what you'd actually click */
+  function curs() {
+    let c = document.querySelector(".cursor");
+    if (!c) { c = mk("cursor", ""); c.style.transition = "none"; c.style.transform = `translate(${innerWidth * 0.85}px, ${innerHeight * 0.72}px)`; void c.offsetWidth; }
+    return c;
+  }
+  async function tap(el) {
+    const c = curs(), r = el.getBoundingClientRect();
+    c.style.transition = ff ? "none" : "transform .7s cubic-bezier(.4,0,.2,1)";
+    c.style.transform = `translate(${r.left + r.width / 2 - 13}px, ${r.top + r.height / 2 - 13}px)`;
+    await sleep(760);
+    c.classList.add("tap"); SFX.play("pop");
+    await sleep(170); c.classList.remove("tap");
+  }
+  async function typeInto(el, text, speed) {
+    for (let i = 1; i <= text.length; i++) { el.textContent = text.slice(0, i); if (i % 2) SFX.play("type"); await sleep(speed); }
+  }
+  function flyOrb(fx, fy, tx, ty, ms, scale = 0.6) {
+    const orb = document.createElement("div"); orb.className = "orb"; $("stage").appendChild(orb);
+    orb.animate([{ transform: `translate(${fx - 9}px, ${fy - 9}px) scale(2)` }, { transform: `translate(${(fx + tx) / 2 + 40}px, ${(fy + ty) / 2 - 30}px) scale(1.3)` }, { transform: `translate(${tx - 9}px, ${ty - 9}px) scale(${scale})` }], { duration: ms, easing: "cubic-bezier(.5,0,.3,1)", fill: "forwards" });
+    later(() => orb.remove(), ms + 30);
   }
 
-  // ---------- scene 2: load memories, sealed until the end ----------
-  const EXAMPLES = [
-    ["CAPSULE 3", "Noah", "'s Merlo order is ", "a large oat flat white", ", no exceptions."],
-    ["CAPSULE 7", "Ruben", " defended our idea in crit by saying ", "“users don't read, they scan”", "."],
+  // ---------- 1: the concept ----------
+  async function conceptScene() {
+    clean();
+    caption("", "", "");
+    // the avatars and the lit engines are simply there from the start: only the text changes
+    const still = [...pcs, ...engines, ...document.querySelectorAll(".flame")];
+    still.forEach((e) => (e.style.transition = "none"));
+    pcs.forEach((p) => p.classList.add("in")); engines.forEach((e) => e.classList.add("lit"));
+    void rocket.offsetWidth;
+    still.forEach((e) => (e.style.transition = ""));
+    // line 1 is up from the start; the label and line 2 sit below the rocket, 4 s later
+    const top = mk("concept", `<div class="c1">Reminisce your memories and get back together in the future.</div>`);
+    const low = mk("concept low", `<div class="clabel">1 · THE CONCEPT</div><div class="c2">Add your memories from DECO3500 into a space capsule. Get to them in the future with your old friends.</div>`);
+    const c1 = top.querySelector(".c1"), c2 = low.querySelector(".c2");
+    SFX.play("radio");
+    await sleep(300);
+    c1.classList.add("in"); SFX.play("whoosh");
+    await sleep(4000);
+    c2.classList.add("in"); SFX.play("whoosh");
+    await sleep(5000); // time to read it before the next page
+  }
+
+  // ---------- 2: load the capsules (the real capsule screen), then the avatars board and it lifts off ----------
+  const MIC = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>`;
+  const SHEETS = [
+    (n) => `<div class="lbl"><span>CAPSULE ${n}</span><b>PROMPT</b></div><div class="sent"><span class="who">Noah</span> was secretly the best at <span class="blank" id="typed"></span>.</div><div class="btn" id="drop">Load onto rocket</div>`,
+    (n) => `<div class="lbl"><span>CAPSULE ${n}</span><b>IMAGE</b></div><div class="shot"><span>🖼️</span><em>after-crit-team.jpg</em></div><div class="sent sm"><span class="who">Ruben</span> after crit, running on zero sleep.</div><div class="btn" id="drop">Load onto rocket</div>`,
+    (n) => `<div class="lbl"><span>CAPSULE ${n}</span><b>VOICE NOTE</b></div><div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="sent sm">Record any voice note you like.</div><div class="btn" id="drop">Load onto rocket</div>`,
   ];
-  async function memoryScene() {
-    caption("STEP 2 · ALL SEMESTER", "Load memories about each other.", "Add at least an image, a collaboration and a prompt. They stay sealed until the end.");
-    const WRITER = [3, 0], SUBJECT = [0, 1];
-    for (let k = 0; k < EXAMPLES.length; k++) {
-      const [week, who, mid, fill, end] = EXAMPLES[k];
+  async function capsuleScene() {
+    clean(); clearOrbs();
+    caption("2 · LOAD THE CAPSULES", "Fill capsules with your memories.", "Tap a capsule, add something about a crewmate, and load it onto the rocket. It all stays sealed until the end.");
+    mk("fhead", `<b>Memory capsules</b><span>Select and load memories into capsules.</span>`);
+    const meter = mk("meter", `<div class="trk"><div class="fill"></div></div><div class="mt">Load capsules</div>`);
+    const HUE = ["#ff6ec7", "#ffb84c", "#2ec4b6", "#9b5de5", "#4cc9f0"];
+    const DEFS = [[20, 26, "?"], [84, 28, "🖼️"], [30, 37, "mic"], [70, 37, "?"], [62, 19, "?"]];
+    const pods = DEFS.map(([x, y, ic], i) => {
+      const win = ic === "mic" ? MIC : ic;
+      return mk("pod", `<div class="pill"><i class="band"></i><b class="win">${win}</b></div><span class="pn">Capsule ${i + 1}</span>`);
+    });
+    pods.forEach((p, i) => { p.style.left = DEFS[i][0] + "%"; p.style.top = DEFS[i][1] + "%"; p.style.setProperty("--h", HUE[i]); p.style.setProperty("--g", HUE[i] + "33"); p.style.setProperty("--fd", 2 + i * 0.3 + "s"); });
+    await sleep(700);
+
+    const FILL = [0.1, 0.25, 0.4], TEXT = ["Loading", "Loading", "Ready, but more?"];
+    for (let k = 0; k < 3; k++) {
+      const pod = pods[k];
+      await tap(pod.querySelector(".pill"));
       const card = $("card");
-      card.innerHTML = `<div class="lbl"><span>MEMORY CAPSULE</span><b>${week}</b></div>
-        <div class="sent"><span class="who">${who}</span>${mid}<span class="blank" id="typed"></span>${end}</div>
-        <div class="btn" id="drop">Load onto rocket</div>`;
+      card.innerHTML = SHEETS[k](k + 1);
       card.classList.add("in");
-      await sleep(450);
-      const typed = $("typed"), speed = k === 0 ? 40 : 24;
-      for (let i = 1; i <= fill.length; i++) { typed.textContent = fill.slice(0, i); if (i % 2) SFX.play("type"); await sleep(speed); }
-      await sleep(300);
-      $("drop").classList.add("press"); await sleep(140); $("drop").classList.remove("press");
-      hop(WRITER[k]); setFace(WRITER[k], "yay"); setFace(SUBJECT[k], "wow");
+      await sleep(500);
+      if (k === 0) await typeInto($("typed"), "calming everyone down at 1am", 38);
+      else await sleep(1100);
+      await tap($("drop"));
+      $("drop").classList.add("press"); await sleep(140);
+      card.classList.remove("in");
       // the memory becomes a glowing orb and flies into the rocket
       const r = card.getBoundingClientRect(), t = rocket.getBoundingClientRect();
-      card.classList.remove("in");
-      const orb = document.createElement("div"); orb.className = "orb"; $("stage").appendChild(orb);
-      const sx = r.left + r.width / 2, sy = r.top + r.height / 2, ex = t.left + t.width / 2, ey = t.top + t.height * 0.45;
-      orb.animate([{ transform: `translate(${sx - 9}px, ${sy - 9}px) scale(2.2)` }, { transform: `translate(${(sx + ex) / 2 + 60}px, ${(sy + ey) / 2 - 20}px) scale(1.4)` }, { transform: `translate(${ex - 9}px, ${ey - 9}px) scale(.6)` }], { duration: 750, easing: "cubic-bezier(.5,0,.3,1)", fill: "forwards" });
-      await sleep(720);
-      orb.remove(); SFX.play("load");
-      later(((w, sj) => () => { setFace(w, "default"); setFace(sj, "default"); })(WRITER[k], SUBJECT[k]), 800);
-      $("cargo-fill").style.height = `${(k + 1) * 38}%`;
+      flyOrb(r.left + r.width / 2, r.top + r.height / 2, t.left + t.width / 2, t.top + t.height * 0.45, 800);
+      hop(k % 2 ? 2 : 3);
+      await sleep(760); SFX.play("load");
+      $("cargo-fill").style.height = `${(k + 1) * 24}%`;
+      pod.classList.add("done"); pod.querySelector(".win").textContent = "✓"; pod.querySelector(".pn").textContent = `Capsule ${k + 1} · loaded`;
+      meter.querySelector(".fill").style.width = FILL[k] * 100 + "%"; meter.querySelector(".mt").textContent = TEXT[k];
       await sleep(450);
     }
-    // sealed: you only ever see that someone added one, never what it says
-    $("lock").classList.add("on"); SFX.play("lock");
-    await sleep(900);
-    $("toast").innerHTML = `<span class="tface">${face("blaze", "yay")}</span>Ed dropped a memory about you 👀 <b style="color:var(--lit)">✦</b>`;
-    $("toast").classList.add("in"); SFX.play("toast"); setFace(3, "wow"); hop(2);
-    await sleep(1900);
-    $("toast").classList.remove("in"); setFace(3, "default");
-    await sleep(300);
-  }
+    await sleep(500);
 
-  // ---------- scene 3: everyone ready → they load up → launch ----------
-  async function launchScene() {
-    caption("STEP 3 · END OF SEMESTER", "Everyone taps “Ready”.", "The avatars get into the rocket, the hatch locks, and it's liftoff!");
-    $("lock").classList.remove("on");
-    for (let i = 0; i < 4; i++) { chips[i].classList.add("ready"); setFace(i, "yay"); SFX.play("ready"); await sleep(200); }
-    chips.forEach((c) => c.classList.remove("in"));
+    // everyone taps "I'm ready for launch": their avatars board with the capsules, the hatch locks, liftoff
+    caption("2 · LOAD THE CAPSULES", "Then everyone taps “I'm ready for launch”.", "Your avatars board the rocket with the capsules, the hatch locks, and it lifts off.");
+    clean();
+    await sleep(300);
+    for (let i = 0; i < 4; i++) { setFace(i, "yay"); hop(i); SFX.play("ready"); await sleep(220); }
+    await sleep(300);
     pcs.forEach((p, i) => { p.classList.add("carry", "still"); setFace(i, "default"); });
     await sleep(250);
-    // everyone walks to the rocket together, then loads their capsule and climbs in
-    pcs.forEach((p, i) => {
-      const side = PC_X[i] < 0 ? -1 : 1;
-      p.classList.add("walk");
-      p.style.transform = `translateX(${side * 52 - PC_X[i]}px)`;
-    });
-    await sleep(750);
     for (let i = 0; i < 4; i++) {
-      const p = pcs[i];
+      const p = pcs[i], side = PC_X[i] < 0 ? -1 : 1;
+      p.classList.add("walk"); p.style.transitionDuration = ".55s";
+      p.style.transform = `translateX(${side * 52 - PC_X[i]}px)`;
+      await sleep(600);
       p.classList.remove("carry"); SFX.play("load"); setFace(i, "yay");
       const pr = p.getBoundingClientRect(), t = rocket.getBoundingClientRect();
-      const orb = document.createElement("div"); orb.className = "orb"; $("stage").appendChild(orb);
-      orb.animate([{ transform: `translate(${pr.left + pr.width / 2 - 9}px, ${pr.top - 14}px)` }, { transform: `translate(${t.left + t.width / 2 - 9}px, ${t.top + t.height * 0.6}px) scale(.6)` }], { duration: 320, easing: "ease-in", fill: "forwards" });
+      flyOrb(pr.left + pr.width / 2, pr.top - 14, t.left + t.width / 2, t.top + t.height * 0.6, 320);
       $("cargo-fill").style.height = `${70 + (i + 1) * 7}%`;
-      later(() => orb.remove(), 340);
+      await sleep(350);
+      p.style.transitionDuration = "";
       p.classList.add("board"); p.style.transform = `translate(${-PC_X[i]}px, -110px) scale(.15)`;
-      await sleep(260);
+      await sleep(450);
     }
     $("lock").classList.add("on"); SFX.play("lock");
     await sleep(450); $("lock").classList.remove("on");
     const big = $("big");
     for (const n of ["3", "2", "1"]) {
       big.textContent = n; SFX.play("countdown");
-      big.animate([{ opacity: 0, transform: "scale(1.6)" }, { opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(.8)" }], { duration: 480, easing: "ease-out" });
-      await sleep(490);
+      if (!ff) big.animate([{ opacity: 0, transform: "scale(1.6)" }, { opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(.8)" }], { duration: 400, easing: "ease-out" });
+      await sleep(420);
     }
     SFX.play("countdown", { final: true }); SFX.play("liftoff");
     rocket.classList.add("boost", "shake");
     await sleep(600);
     rocket.classList.remove("shake");
-    rocket.style.transition = "transform 2.2s cubic-bezier(.6,0,.8,.4)";
+    rt("transform 2.2s cubic-bezier(.6,0,.8,.4)");
     rocket.style.transform = `translateY(-${innerHeight * 0.35}px)`;
-    $("ground").style.transform = "translateY(60vh)"; $("ground").style.opacity = "0";
-    warpTo(2.5, 1700);
-    await sleep(1900);
+    $("ground").style.transition = ff ? "none" : ""; $("ground").style.transform = "translateY(60vh)"; $("ground").style.opacity = "0";
+    warpTo(2.5, 1500);
+    await sleep(1800);
   }
 
-  // ---------- scene 4: time warp, then the hatch blows ----------
-  async function warpScene() {
-    caption("STEP 4 · 24 YEARS LATER", "Time warp!", "Twenty-four years fly by in a few seconds.");
-    SFX.play("warp"); flash(500); warpTo(0.2, 700); tunnelTo(1, 800);
-    rocket.style.transition = "transform 1.2s ease-out";
-    rocket.style.transform = `translateY(-${innerHeight * 0.1}px)`; // centre of the tunnel, clear of the counter
-    $("warp").classList.add("in");
-    const t0 = vnow(), D = 3200, start = new Date();
+  // ---------- 3: the years tick by, up to 2050 (no time-warp tunnel) ----------
+  async function yearsScene() {
+    clean();
+    caption("3 · 24 YEARS LATER", "The clock ticks on to 2050.", "Your rocket cruises through the years while the capsules stay sealed.");
+    rocket.classList.remove("boost", "shake");
+    rt("transform 1.4s ease-out"); rocket.style.transform = `translateY(${innerHeight * 0.12}px) scale(.62)`; // small and low, clear of the clock
+    warpTo(0.5, 900);
+    const clk = mk("clk", `<div class="face"><i class="h1"></i><i class="h2"></i><b></b></div><div class="yr">2026</div><div class="yl">YEAR</div>`);
+    const yr = clk.querySelector(".yr"), m = clk.querySelector(".h1"), h = clk.querySelector(".h2");
+    const t0 = vnow(), D = 5600; let last = 2026;
     while (vnow() - t0 < D) {
       const u = Math.min(1, (vnow() - t0) / D);
-      const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
-      const days = 1 + Math.round(e * 1094);
-      const d = new Date(start.getTime() + (days - 1) * 86400000);
-      $("w-day").textContent = `DAY ${days.toLocaleString("en-AU")}`;
-      $("w-year").textContent = d.toLocaleString("en-AU", { month: "short" }).toUpperCase() + " " + d.getFullYear();
-      await sleep(50);
+      const e = u * u * (3 - 2 * u);
+      const y = 2026 + Math.round(e * 24);
+      m.style.transform = `translateX(-50%) rotate(${u * 360 * 12}deg)`; h.style.transform = `translateX(-50%) rotate(${u * 360}deg)`;
+      if (y !== last) { last = y; yr.textContent = y; SFX.play("type"); }
+      await sleep(40);
     }
-    tunnelTo(0, 600); flash(600);
-    $("warp").classList.remove("in");
+    yr.textContent = "2050"; yr.classList.add("pop"); SFX.play("chime");
+    await sleep(1200);
+  }
+
+  // ---------- 4: the rocket comes back to Earth ----------
+  async function returnScene() {
+    clean();
+    caption("4 · COMING HOME", "The rocket comes back to Earth.", "Time to get back with your old friends.");
+    flash(500); warpTo(0.2, 700); SFX.play("radio");
     $("earth").classList.add("in");
-    await sleep(1000);
-    // uh-oh
-    caption("UH-OH", "The cargo hatch blows open!", "On the way home, your memories scatter across space.");
+    await sleep(900);
+    const mail = mk("mail", `<div class="bar"><span>✉️ New email</span><span>2050</span></div>
+      <div class="mbody"><div class="meta">To: your crew</div><div class="t1">24 years since DECO3500.</div><div class="t2">Time to get back with your old friends.</div>
+      <div class="go">Summon the rocket\nback to earth.</div></div>`);
+    void mail.offsetWidth; mail.classList.add("in"); SFX.play("toast");
+    await sleep(1400);
+    const go = mail.querySelector(".go");
+    await tap(go);
+    go.classList.add("done"); go.textContent = "The rocket is on its way…"; SFX.play("ready");
+    await sleep(900);
+    mail.classList.remove("in");
+    $("earth").classList.add("near");
+    rt("transform 2.4s ease-in-out"); rocket.style.transform = `translateY(${innerHeight * 0.04}px) scale(.85)`;
+    SFX.play("cruise");
+    await sleep(2000);
+    clean();
+  }
+
+  // ---------- 5: the hatch opens ----------
+  async function hatchScene() {
+    clean();
+    caption("5 · THE HATCH OPENS", "The rocket's hatch blows open!", "Your memories scatter across space.");
     SFX.play("breach"); flash(300);
     rocket.classList.add("shake"); $("alarm").classList.add("in");
     const t = rocket.getBoundingClientRect();
@@ -537,77 +693,75 @@
       orb.animate([{ transform: `translate(${sx}px, ${sy}px) scale(.4)` }, { transform: `translate(${sx + Math.cos(ang) * dist}px, ${sy + Math.sin(ang) * dist}px) scale(1)` }], { duration: 1500 + i * 60, easing: "cubic-bezier(.1,.8,.3,1)", fill: "forwards" });
     }
     await sleep(1000); rocket.classList.remove("shake");
-    await sleep(1500);
+    await sleep(1800);
   }
 
-  // ---------- scene 5: rescue them together ----------
-  async function rescueScene() {
-    caption("STEP 5 · SAVE THEM TOGETHER", "Fly home as one crew.", "One ship, flown by everyone: each of you holds a control. Collect every memory, then dock.");
+  // ---------- 6: a collaborative activity (the game itself isn't shown) ----------
+  async function teamScene() {
+    clean(); clearOrbs();
+    caption("6 · DO IT TOGETHER", "Conduct a collaborative activity together.", "Work as one crew to bring every memory home.");
     $("alarm").classList.remove("in");
-    document.querySelectorAll(".orb").forEach((o) => o.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, fill: "forwards" }));
-    $("earth").classList.remove("in"); rocket.style.transition = "opacity .4s"; rocket.style.opacity = "0";
-    $("choice").innerHTML = `<div class="opt"><span>🚀</span>Rescue mission</div>`;
-    const opts = [...document.querySelectorAll(".opt")];
-    for (const o of opts) { await sleep(200); o.classList.add("in"); SFX.play("pop"); }
-    await sleep(500); opts[0].classList.add("pick"); SFX.play("beep");
-    await sleep(450); $("choice").innerHTML = "";
-    // mini rescue: a rock holding a memory, a Forgetter, your ship firing, crewmates flying in
-    const mx = innerWidth / 2, my = innerHeight * 0.3;
-    $("mini").innerHTML = `
-      <div class="m-el" id="m-rock" style="left:${mx - 40}px;top:${my - 40}px;font-size:80px;line-height:1">🪨</div>
-      <div class="m-el" id="m-alien" style="left:${innerWidth + 10}px;top:${my - 10}px;font-size:34px">👾</div>
-      <div class="m-el" id="m-ship" style="left:${mx - 18}px;top:${innerHeight * 0.52}px;font-size:36px;transform:rotate(-45deg)">🚀</div>
-      <div class="m-el" id="m-ship2" style="left:-60px;top:${my + 30}px;font-size:28px;transform:rotate(45deg)">🚀</div>
-      <div class="m-el" id="m-tag" style="left:${mx - 120}px;width:240px;text-align:center;top:${innerHeight * 0.6}px;font-size:13px;font-weight:800;opacity:0"></div>`;
-    const alien = $("m-alien"), rock = $("m-rock"), tag = $("m-tag");
-    alien.style.transition = "transform 1.2s linear"; alien.style.transform = `translateX(-${innerWidth / 2 - 40}px)`;
-    for (let k = 0; k < 6; k++) {
-      const l = document.createElement("div"); l.className = "laser"; l.style.left = mx - 1 + "px"; l.style.top = innerHeight * 0.5 + "px"; $("mini").appendChild(l);
-      l.animate([{ transform: "translateY(0)" }, { transform: `translateY(-${innerHeight * 0.2}px)` }], { duration: 260, fill: "forwards" });
-      SFX.play("laser"); if (k % 2) SFX.play("hit");
-      later(() => l.remove(), 270);
-      if (k === 3) { alien.textContent = "💥"; SFX.play("explode"); later(() => (alien.style.opacity = 0), 300); }
-      await sleep(160);
+    $("earth").classList.remove("in", "near"); rt("opacity .4s"); rocket.style.opacity = "0";
+    const team = mk("team", CREW.map(([a]) => `<div class="tm">${face(a)}</div>`).join(""));
+    const tms = [...team.querySelectorAll(".tm")];
+    const hub = mk("hub", `✦ <b>0</b> / 9 memories home`);
+    await sleep(700);
+    const hr = hub.getBoundingClientRect(), cx = hr.left + hr.width / 2, cy = hr.top + hr.height / 2;
+    for (let k = 0; k < 9; k++) {
+      const i = k % 4, ang = (k / 9) * 6.283 + 0.4, d = Math.min(innerWidth, innerHeight) * 0.38;
+      const tr = tms[i].getBoundingClientRect();
+      tms[i].classList.remove("hop"); void tms[i].offsetWidth; tms[i].classList.add("hop");
+      flyOrb(cx + Math.cos(ang) * d, cy + Math.sin(ang) * d * 0.8 + 40, tr.left + tr.width / 2, tr.top + tr.height / 2, 600, 0.8);
+      SFX.play("rescued");
+      await sleep(420);
+      later(() => { flyOrb(tr.left + tr.width / 2, tr.top + tr.height / 2, cx, cy, 420, 0.4); }, 0);
+      await sleep(380);
+      hub.querySelector("b").textContent = k + 1; SFX.play("pop");
     }
-    tag.style.opacity = 1; tag.innerHTML = `<span style="color:#7ee0a1">🧭 Navigator: “Memory's up ahead, keep going!”</span>`; SFX.play("radio");
-    $("m-ship2").style.transition = "transform .7s ease-out"; $("m-ship2").style.transform = `translate(${mx - 70}px, 0) rotate(45deg)`;
-    await sleep(600);
-    for (let k = 0; k < 4; k++) { SFX.play("hit"); rock.style.transform = `scale(${1 - k * 0.2}) rotate(${k * 12}deg)`; SFX.play(k === 3 ? "crack" : "laser"); await sleep(150); }
-    rock.textContent = "✨"; SFX.play("rescued");
-    tag.innerHTML = `<span style="color:var(--lit)">Saved! ✦ Capsule 7 · a memory about Ruben</span>`;
-    await sleep(900);
-    $("mini").innerHTML = "";
+    hub.classList.add("full"); SFX.play("fanfare");
+    await sleep(1100);
+    clean();
   }
 
-  // ---------- scene 6: open it together: a curved wall of black-glass panels ----------
-  async function openScene() {
-    caption("STEP 6 · OPEN IT TOGETHER", "Read them all, and react.", "Your memories glide past on a wall of glass. Tap 😂 ❤️ 🫡 to fill the screen, or download a card.");
+  // ---------- 7: unlock the memories: cards, then a reaction ----------
+  async function revealScene() {
+    clean(); clearOrbs();
+    caption("7 · UNLOCK YOUR MEMORIES", "Open them together, and react.", "Tap a card to read it, then react with 😂 ❤️ 🫡 and it fills everyone's screen.");
     $("earth").style.opacity = ".25";
     SFX.play("fanfare");
-    const mems = [
-      ["Noah's Merlo order is a large oat flat white, no exceptions.", "Noah", "12 Mar 2026"],
-      ["Ruben defended our idea in crit: “users don't read, they scan”.", "Ed", "2 Apr 2026"],
-      ["Shirish kept the Miro board alive at 1am.", "Ruben", "20 May 2026"],
+    const NOTES = [
+      ["#ffe7a1", -3, "CAPSULE 3", "Noah was secretly the best at calming everyone down at 1am."],
+      ["#ffc2d9", 2, "CAPSULE 7", "Ruben defended our idea in crit: “users don't read, they scan”."],
+      ["#b9e8ff", -2, "CAPSULE 9", "Shirish kept the Miro board alive at 1am."],
     ];
-    $("capsule").innerHTML = mems.map(([t, by, dt]) => `<div class="gp"><span class="dt">${dt}</span><span class="rm">Remember...?</span><div class="q">“${t}”</div><div class="ft"><span>by ${by}</span><span class="act"><i>😂</i><i>❤️</i><i>🫡</i><i>⤓</i></span></div></div>`).join("");
-    const gp = [...document.querySelectorAll(".gp")];
-    const place = (cls) => gp.forEach((el, i) => { el.className = "gp " + cls[i]; });
-    await sleep(100);
-    place(["l", "c", "r"]); SFX.play("chime");
-    await sleep(1500);
-    // someone reacts: the emoji float up from the bottom, the first carries their name
-    SFX.play("rescued");
-    for (let k = 0; k < 14; k++) {
-      const e = document.createElement("div"); e.className = "rise";
-      e.style.left = (k === 0 ? 8 : 4 + Math.random() * 88) + "%"; e.style.fontSize = (k === 0 ? 46 : 24 + Math.random() * 22) + "px";
-      e.style.setProperty("--d", (2.2 + Math.random() * 1.2) + "s"); e.style.animationDelay = (k === 0 ? 0 : Math.random() * 0.9) + "s";
-      e.innerHTML = `❤️${k === 0 ? "<b>Noah</b>" : ""}`;
-      $("stage").appendChild(e);
-    }
-    await sleep(1700);
-    // the wall glides on, right to left
-    place(["x", "l", "c"]);
+    const notes = mk("notes", NOTES.map(([bg, r, w, t]) => `<div class="note" style="background:${bg};--r:${r}deg"><div class="nw">${w}</div><div class="nq">“</div><div class="nt">${t}</div></div>`).join(""));
+    const ns = [...notes.querySelectorAll(".note")];
+    for (const n of ns) { await sleep(300); n.classList.add("in"); SFX.play("chime"); }
+    await sleep(900);
+    await tap(ns[1]);
+    ns.forEach((n, i) => n.classList.toggle("dim", i !== 1));
+    const v = mk("viewer", `<div class="vw">CAPSULE 7 · about you</div><div class="vt">“Ruben defended our idea in crit: users don't read, they scan.”</div><div class="vby">Written by Ed</div><div class="react"><i>😂</i><i>❤️</i><i>🫡</i><i>⤓</i></div>`);
+    v.style.background = NOTES[1][0];
+    void v.offsetWidth; v.classList.add("in"); SFX.play("pop");
+    await sleep(1400);
+    const heart = v.querySelectorAll(".react i")[1];
+    await tap(heart);
+    heart.classList.add("pressed");
+    const burst = (emoji, name) => {
+      SFX.play("rescued");
+      for (let k = 0; k < 12; k++) {
+        const e = document.createElement("div"); e.className = "rise";
+        e.style.left = (k === 0 ? 8 : 4 + Math.random() * 88) + "%"; e.style.fontSize = (k === 0 ? 46 : 24 + Math.random() * 22) + "px";
+        e.style.setProperty("--d", (2.2 + Math.random() * 1.2) + "s"); e.style.animationDelay = (k === 0 ? 0 : Math.random() * 0.9) + "s";
+        e.innerHTML = `${emoji}${k === 0 ? `<b>${name}</b>` : ""}`;
+        $("stage").appendChild(e);
+      }
+    };
+    burst("❤️", "You");
     await sleep(1800);
+    burst("😂", "Noah");  // a crewmate reacts on their own phone, and it shows up on everyone's
+    heart.classList.remove("pressed");
+    await sleep(2400);
   }
 
   // ---------- running ----------
