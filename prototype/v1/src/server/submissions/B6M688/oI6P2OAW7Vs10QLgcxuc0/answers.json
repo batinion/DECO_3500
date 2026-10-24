@@ -1,0 +1,59 @@
+{
+  "participant": {
+    "id": "oI6P2OAW7Vs10QLgcxuc0",
+    "name": "B6M688"
+  },
+  "blanks": [
+    {
+      "promptId": "p1",
+      "filledText": [
+        "",
+        ""
+      ],
+      "aboutParticipantId": null,
+      "promptText": "someone's go-to phrase when things went ___ was ___."
+    },
+    {
+      "promptId": "p2",
+      "filledText": [
+        "asx"
+      ],
+      "aboutParticipantId": "Jrqyn2mjQlaOZp5EWXEIN",
+      "promptText": "Jordan always had questions on asx."
+    },
+    {
+      "promptId": "p7",
+      "filledText": [
+        ""
+      ],
+      "aboutParticipantId": null,
+      "promptText": "Nobody could get someone to stop ___."
+    },
+    {
+      "promptId": "p8",
+      "filledText": [
+        "dfcdsx"
+      ],
+      "aboutParticipantId": "Jrqyn2mjQlaOZp5EWXEIN",
+      "promptText": "I'll never forget the look on Jordan's face when dfcdsx."
+    },
+    {
+      "promptId": "p9",
+      "filledText": [
+        ""
+      ],
+      "aboutParticipantId": null,
+      "promptText": "The unofficial group rule was: never let someone near ___."
+    },
+    {
+      "promptId": "p11",
+      "filledText": [
+        "saxz"
+      ],
+      "aboutParticipantId": "Jrqyn2mjQlaOZp5EWXEIN",
+      "promptText": "I never told Jordan this but saxz."
+    }
+  ],
+  "drawing": null,
+  "uploadedImages": []
+}

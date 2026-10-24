@@ -1,0 +1,35 @@
+{
+  "participant": {
+    "id": "82YsA8rdB4X8tCszwG3r9",
+    "name": "Vim"
+  },
+  "blanks": [
+    {
+      "promptId": "p1",
+      "filledText": [
+        "sideways",
+        "it's fine"
+      ],
+      "aboutParticipantId": null,
+      "promptText": "someone's go-to phrase when things went sideways was it's fine."
+    },
+    {
+      "promptId": "p2",
+      "filledText": [
+        "everything"
+      ],
+      "aboutParticipantId": null,
+      "promptText": "someone always had questions on everything."
+    },
+    {
+      "promptId": "free_text",
+      "filledText": [
+        "testing testing"
+      ],
+      "aboutParticipantId": null,
+      "promptText": "testing testing"
+    }
+  ],
+  "drawing": null,
+  "uploadedImages": []
+}

@@ -1,0 +1,34 @@
+{
+  "participant": {
+    "id": "cljnrK2M8NTUdNM6FgJxM",
+    "name": "BRZWZ4"
+  },
+  "blanks": [
+    {
+      "promptId": "p6",
+      "filledText": [
+        "sx"
+      ],
+      "aboutParticipantId": "fkXHAawG7JXQeetVBYZYB",
+      "promptText": "Sam's \"5 minutes\" always meant sx."
+    },
+    {
+      "promptId": "p7",
+      "filledText": [
+        "asx"
+      ],
+      "aboutParticipantId": "xW-TmPekQlrbvwjDeD4q_",
+      "promptText": "Nobody could get Jordan to stop asx."
+    },
+    {
+      "promptId": "p9",
+      "filledText": [
+        "asx"
+      ],
+      "aboutParticipantId": "fkXHAawG7JXQeetVBYZYB",
+      "promptText": "The unofficial group rule was: never let Sam near asx."
+    }
+  ],
+  "drawing": null,
+  "uploadedImages": []
+}
