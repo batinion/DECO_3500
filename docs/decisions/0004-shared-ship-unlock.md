@@ -6,10 +6,11 @@
 
 ## Context
 
-Test 1 told us the colour-in puzzle had to go but not what should replace it. Rather than
-settle it by discussion, we built three candidates and tested them against each other: a
-Guess Who reveal, a rescue flight with one ship per player, and a colour restore game where
-players recreated an illustration from memory.
+Test 1 told us the colour-in puzzle had to go but not what should replace it. Guess Who
+(v2a) was tried and ended up inside the reveal rather than as the unlock. For the unlock
+itself, rather than settle it by discussion, we tested three versions against each other: a
+colour restore game where players recreated an illustration from memory, a rescue flight with
+one ship per player, and the same flight with one shared ship.
 
 ## Decision
 
