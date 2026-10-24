@@ -1,10 +1,10 @@
 # Launch Sequence
 
-**A group time-capsule ritual — supporting relationships through nostalgia and reminiscence**
+**A group time-capsule ritual, supporting relationships through nostalgia and reminiscence**
 
 | | |
-| :--- | :--- |
-| **Course** | DECO3500 — Social & Mobile Computing |
+| --- | --- |
+| **Course** | DECO3500 Social & Mobile Computing |
 | **Institution** | The University of Queensland |
 | **Semester** | 2, 2026 |
 | **Team** | NO_PARKING(!) |
@@ -13,116 +13,80 @@
 
 ---
 
+## Run the prototype
+
+The build we demonstrated at the tradeshow is in [`prototype/final/`](prototype/final/).
+
+You need [Node.js](https://nodejs.org) 18 or newer on one computer. **Every device must be
+on the same Wi-Fi network with client isolation off.** A phone hotspot works. Some
+university networks do not.
+
+```
+cd prototype/final/src
+./start-all.sh          # macOS and Linux
+start-all.bat           # Windows
+```
+
+| Address | What runs there |
+| --- | --- |
+| `http://localhost:4000` | The full Launch Sequence experience |
+| `http://localhost:4001` | Rescue your memories, the shared ship, standalone |
+| `http://localhost:4002` | Colour restore, standalone, kept for comparison |
+
+To run only the main experience, go into `prototype/final/src/server` and run `npm install`
+then `npm start`.
+
+The terminal prints two links. Open the **second** one, the LAN address, on every device.
+There is no login: one person taps *Start a crew*, then *Invite* shows a code, a link and a
+QR for everyone else. Selfies and voice notes need the HTTPS link it also prints, and the
+browser will warn about the self-signed certificate.
+
+Trying it alone? The crew screen can add simulated crewmates. Gate that control when real
+people are joining, because a full crew blocks a real participant.
+
+Full prototype notes, including the earlier builds, are in
+[`prototype/README.md`](prototype/README.md).
+
+---
+
 ## Documentation
 
-Our full design process lives in the **[project wiki](https://github.com/batinion/DECO_3500/wiki)**.
+Our design process lives on the **[project wiki](https://github.com/batinion/DECO_3500/wiki)**.
 
 | Page | What's in it |
-| :--- | :--- |
-| [Week 9 Stand-up](https://github.com/batinion/DECO_3500/wiki/Week-9-Stand-up) | Project state, evidence and next steps |
-| [Research Findings](https://github.com/batinion/DECO_3500/wiki/Research-Findings) | Ten interviews, six themes, literature, competitor landscape |
-| [Requirements](https://github.com/batinion/DECO_3500/wiki/Requirements) | 17 experience requirements, each traced to evidence |
-| [Prototypes and Evaluation](https://github.com/batinion/DECO_3500/wiki/Prototypes-and-Evaluation) | Every build, every test, and what changed because of it |
-| [Team Meetings](https://github.com/batinion/DECO_3500/wiki/Team-Meetings) | Meeting records and decisions |
-| [Ethical Considerations](https://github.com/batinion/DECO_3500/wiki/Ethical-Considerations) | Stakeholders, risks and what we take responsibility for |
+| --- | --- |
 | [Design Process Overview](https://github.com/batinion/DECO_3500/wiki/Design-Process-Overview) | The top-level story, for the final submission |
+| [Ethical Considerations](https://github.com/batinion/DECO_3500/wiki/Ethical-Considerations) | Stakeholders, risks, and what we take responsibility for |
+| [Prototypes and Evaluation](https://github.com/batinion/DECO_3500/wiki/Prototypes-and-Evaluation) | Every build, every round of testing, and what changed because of it |
+| [Requirements](https://github.com/batinion/DECO_3500/wiki/Requirements) | 17 experience requirements, each traced to evidence, with their status |
+| [Research Findings](https://github.com/batinion/DECO_3500/wiki/Research-Findings) | Ten interviews, six themes, literature, competitor landscape |
+| [Team Meetings](https://github.com/batinion/DECO_3500/wiki/Team-Meetings) | Meeting records and the decisions carried out of them |
+| [Week 9 Stand-up](https://github.com/batinion/DECO_3500/wiki/Week-9-Stand-up) | Project state at the assessed stand-up |
 
-Task tracking is on the [project board](https://github.com/batinion/DECO_3500/projects), not in separate paperwork.
+Task tracking is on the [project board](https://github.com/batinion/DECO_3500/projects),
+not in separate paperwork. Significant decisions are recorded in
+[`docs/decisions/`](docs/decisions/).
 
 ---
 
 ## Overview
 
-People preserve and revisit memories constantly, but almost always alone. Camera rolls fill up, group chats scroll away, and physical mementoes sit in boxes nobody opens. This project asks how mobile and social technology can support **shared** reminiscence — memory as something a group builds and returns to together.
+People preserve and revisit memories constantly, but almost always alone. Camera rolls fill
+up, group chats scroll away, and physical mementoes sit in boxes nobody opens. This project
+asks how mobile and social technology can support **shared** reminiscence: memory as
+something a group builds and returns to together.
 
-**Launch Sequence** is a group time-capsule ritual for a circle of friends at the end of something shared — a course, a season, a job. Each person uses their own phone to write short prompted memories **about the others**, and the crew's rocket fills as memories go in. There is no host and no leader. When everyone is ready the capsule seals and launches, time jumps forward, and the crew has to come back together to open it.
+**Launch Sequence** is a group time-capsule ritual for a circle of friends at the end of
+something shared, whether a course, a season or a job. Each person uses their own device to
+write short prompted memories **about the others**, and the crew's rocket fills as memories
+go in. There is no host and no leader. When everyone is ready the capsule seals and
+launches, time jumps forward, and the crew has to come back together to open it. The unlock
+is a single ship with its controls split between the crew, so nobody opens the capsule
+alone.
 
-### Research foundations
-
-Grounded in **ten semi-structured interviews** run by four team members, spanning ages 20s to 60+ and Australian, Indian and American participants, against 14 defined areas of enquiry. Six themes emerged:
-
-| Theme | What we found |
-| :--- | :--- |
-| **Recreative curation** | Nobody decides what matters upfront — it gets sorted out only when forced, such as when storage runs out. |
-| **Digital vs. physical asymmetry** | Physical items are hoarded because space feels endless; digital memories are deleted constantly. |
-| **Deliberately unopened memories** | Keeping something and wanting to revisit it are different needs. Boxes of photos sit unopened for a year at a time. |
-| **Contested inheritance** | Some want to pass down objects, others explicitly want to pass down values. No consensus. |
-| **Place-triggered recall** | Memories resurface without intention on returning to a location. |
-| **Socially learned methods** | Preservation techniques are picked up from social media, not from family. |
-
-Memory is tied to identity. Asked why he preserves anything at all, one participant said simply: *"To keep identity, man. At least that's what I believe."*
-
-Full detail, with quotes: **[Research Findings](https://github.com/batinion/DECO_3500/wiki/Research-Findings)**.
-
----
-
-## The prototype
-
-A real-time, multi-device web experience. Several people join one crew on their own phones, write memories about each other, and open the capsule together.
-
-**No login.** One person starts a crew; everyone else joins with the code, invite link or QR shown on screen. Names are typed in, not registered.
-
-### Running it
-
-You need [Node.js](https://nodejs.org) v18+ on one computer. **Every device must be on the same Wi-Fi network**, with no client isolation — a phone hotspot works, some university networks don't.
-
-```bash
-cd prototype/src/server
-npm install          # first time only
-npm run dev
-```
-
-The terminal prints a local address and a LAN address. Open the LAN address on each phone or laptop.
-
-For the Expo participant app in the current main build:
-
-```bash
-cd prototype/src/app
-npx expo start       # scan the QR with Expo Go, or press w for a browser
-```
-
-**Testing without four phones:** the Mission Control screen has a *Simulate remaining participants* control that fills the other seats with sample answers, and *New Session* to reset.
-
-### Prototype versions
-
-Two branches were built in parallel after our first round of user testing, each addressing a different half of the feedback. They are being merged for the tradeshow.
-
-| Version | What it adds | Run it |
-| :--- | :--- | :--- |
-| [`prototype/src`](prototype/src) | The main build — crew join, memory stars, sealing, launch, time jump, reveal | See above |
-| [`prototype_versions/prototype-dong`](prototype_versions/prototype-dong) | **Guess Who reveal** — memories become flash cards with the name blanked, and the crew guesses together. Includes end-to-end test scripts. [Screenshots](prototype_versions/prototype-dong/prototype%20screenshots) | Same as above |
-| [`prototype_versions/prototype-shirish`](prototype_versions/prototype-shirish) | **No host, semester-long collection** — no Mission Control, memories collected week by week, 33 course-specific prompts, crew characters, animated briefing, timeline reveal. [Screenshots](prototype_versions/prototype-shirish/screenshots) · [changelog](prototype_versions/prototype-shirish/CHANGES-shirish.md) | `cd src/server && npm install && npm start`, then open the printed link — no Expo needed |
-
----
-
-## The team
-
-Duties are assigned to stretch each member beyond their existing strengths, in line with the assignment brief.
-
-| Member | Program | Primary role | Stretch duty |
-| :--- | :--- | :--- | :--- |
-| **Dev Kansana** | Master of Interaction Design | Research & design coordination — holds the through-line from research to design decisions | Contributes directly to the prototype build |
-| **Vim Mahakumbura** | Master of Information Technology | Design lead — concept design, UX and visual direction | Presentation and slide design owner |
-| **Shirish Kamble** | Master of Interaction Design | Research lead — domain and stakeholder research, evidence gathering | User testing coordinator |
-| **Dattatray Siraskar** | Master of Interaction Design | Strategy & market fit lead — viability and competitor critique | Documentation and GitHub project management |
-| **Dong Nguyen** | Master of Information Technology | Technical & data lead — prototype build, data handling, feasibility | Co-facilitates user research sessions |
-
-<details>
-<summary><b>Individual aims for this project</b></summary>
-
-<br>
-
-**Dev** — Unlearning my design approach, and understanding design communication through group exercise.
-
-**Vim** — Apply social concepts in mobile systems design and explore the boundaries of digital social designing.
-
-**Shirish** — Learn about topics without running for solutions first, and understand the impact of the social and mobile nature of technologies.
-
-**Dattatray** — Apply in-depth market research and critical thinking to identify core problem statements, and design user-friendly, scalable solutions that enhance social and collaborative experiences in mobile computing.
-
-**Dong** — Get comfortable designing as part of a group, where the final idea is genuinely better because it wasn't just my own.
-
-</details>
+Grounded in **ten semi-structured interviews** run by four team members, spanning ages 20s
+to 60+ and Australian, Indian and American participants, and tested in two formal rounds
+plus the Week 12 tradeshow.
 
 ---
 
@@ -130,53 +94,65 @@ Duties are assigned to stretch each member beyond their existing strengths, in l
 
 ```
 .
-├── prototype/src/                 Current main build (server + Expo app)
-├── prototype_versions/            Parallel branches from the post-test rebuild
-│   ├── prototype-dong/            Guess Who reveal + screenshots
-│   └── prototype-shirish/         No-host, semester-long build + screenshots
-├── prototype-progress/            Running record of prototype development
+├── prototype/
+│   ├── final/              The build we demonstrated and submit
+│   ├── versions/           Earlier builds, kept as evidence of process
+│   ├── demo-material/      Media used at the stall
+│   └── progress/           Running record of prototype development
+│
+├── design/
+│   ├── Team_12_Poster.pdf  The A2 tradeshow poster
+│   ├── screenshots/        Screens from the final build
+│   └── tone_and_positioning.md
 │
 ├── docs/
-│   ├── charter/                   Team charter
-│   ├── research/                  Interview and competitor templates, literature
-│   └── decisions/                 Numbered decision records
+│   ├── charter/            Team charter
+│   ├── decisions/          Numbered decision records
+│   └── research/           Interview and competitor templates, literature
 │
-├── deliverables/                  Anything submitted or presented
-│   ├── A1-introductory-pitch/
-│   ├── A2-design-proposal/
-│   └── A3-final-submission/       Each with iterations/, final/ and a CHANGELOG
-│
-├── design/                        Sketches, wireframes, prototypes, assets
-├── teammeetings/                  Meeting material (summaries live on the wiki)
-├── ethicalconsideration/          Ethics working files (page lives on the wiki)
-└── .github/                       Issue and pull request templates
+├── deliverables/           Anything submitted or presented, by assignment
+└── .github/                Issue and pull request templates
 ```
 
-### File naming
+Ethics and meeting records are wiki pages rather than folders, because that is where the
+assignment asks for them and keeping a second copy here would only let the two drift apart.
 
-Every versioned file follows one pattern, so folders sort chronologically on their own:
+### File naming
 
 ```
 YYYY-MM-DD_vX.Y_short-description.ext
 ```
 
-Bump the minor version (`v0.1` → `v0.2`) for a working revision, and the major version only when something is submitted. Never overwrite an older iteration — the trail of versions is the evidence of process, and this course marks process.
+Bump the minor version for a working revision and the major version when something is
+submitted. Never overwrite an older iteration. The trail of versions is the evidence of
+process, and this course marks process.
 
-### Decision records
+---
 
-Significant decisions get a short numbered file in [`docs/decisions/`](docs/decisions/) recording the context, the options considered, the decision and its consequences. When a tutor asks "why did you go that way?", the answer is already written down.
+## The team
+
+Duties are assigned to stretch each member beyond their existing strengths, in line with the
+assignment brief.
+
+| Member | Program | Primary role | Stretch duty |
+| --- | --- | --- | --- |
+| **Dev Kansana** | Master of Interaction Design | Research and design coordination | Contributes directly to the prototype build |
+| **Vim Mahakumbura** | Master of Information Technology | Design lead: concept, UX and visual direction | Presentation and slide design owner |
+| **Shirish Kamble** | Master of Interaction Design | Research lead: domain and stakeholder research | User testing coordinator |
+| **Dattatray Siraskar** | Master of Interaction Design | Strategy and market fit: viability and competitor critique | Documentation and GitHub project management |
+| **Dong Nguyen** | Master of Information Technology | Technical and data lead: prototype build and feasibility | Co-facilitates user research sessions |
 
 ---
 
 ## How we work
 
 | Item | Agreement |
-| :--- | :--- |
-| Main channel | Microsoft Teams — meetings recorded and transcribed since 20 September |
+| --- | --- |
+| Main channel | Microsoft Teams, with meetings recorded and transcribed since 20 September |
 | Backup channel | Outlook email, phone |
 | Response time | Within 12 hours |
 | Regular meeting | Weekly, plus ad-hoc working sessions |
-| Decision-making | Discussion aiming for consensus; where consensus isn't reached in reasonable time, we consult tutors |
+| Decision-making | Discussion aiming for consensus; where consensus is not reached in reasonable time, we consult tutors |
 
 ### GitHub workflow
 
@@ -194,31 +170,34 @@ Full conventions are in [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Timeline
 
 | Milestone | Weeks | Status |
-| :--- | :--- | :--- |
-| **M1 — Concept convergence** | 5–7 | Ten interviews, competitor teardown, concept chosen |
-| **M2 — Requirements & first build** | 7–8 | Requirements traced to evidence; working multi-device prototype |
-| **M3 — Testing & stand-up** | 9 | Two tester groups, tutor feedback, eleven owned response tasks |
-| **M4 — Build & refine** | 10–12 | Merge the two branches, third testing round, poster, tradeshow |
-| **M5 — Final submission** | 13 | Documentation, process overview and ethics exported to PDF |
+| --- | --- | --- |
+| **M1 Concept convergence** | 5 to 7 | Ten interviews, competitor teardown, concept chosen |
+| **M2 Requirements and first build** | 7 to 8 | Requirements traced to evidence; working multi-device prototype |
+| **M3 Testing and stand-up** | 9 | Two tester groups, tutor feedback, eleven owned response tasks |
+| **M4 Build and refine** | 10 to 12 | Branches merged, second testing round, poster, tradeshow |
+| **M5 Final submission** | 13 | Documentation, process overview and ethics exported to PDF |
 
 ---
 
 ## References
 
-Bluck, S., Alea, N., Habermas, T., & Rubin, D. C. (2005). A tale of three functions: The self-reported uses of autobiographical memory. *Social Cognition, 23*(1), 91–117. https://doi.org/10.1521/soco.23.1.91.59198
+Bluck, S., Alea, N., Habermas, T., & Rubin, D. C. (2005). A tale of three functions: The self-reported uses of autobiographical memory. *Social Cognition, 23*(1), 91-117. https://doi.org/10.1521/soco.23.1.91.59198
 
-Conway, M. A. (2005). Memory and the self. *Journal of Memory and Language, 53*(4), 594–628. https://doi.org/10.1016/j.jml.2005.08.005
+Conway, M. A. (2005). Memory and the self. *Journal of Memory and Language, 53*(4), 594-628. https://doi.org/10.1016/j.jml.2005.08.005
 
-Hirst, W., et al. (2015). A ten-year follow-up of a study of memory for the attack of September 11, 2001: Flashbulb memories and memories for flashbulb events. *Journal of Experimental Psychology: General, 144*(3), 604–623. https://doi.org/10.1037/xge0000055
+Grudin, J. (1994). Groupware and social dynamics: Eight challenges for developers. *Communications of the ACM, 37*(1), 92-105. https://doi.org/10.1145/175222.175230
 
-Lundgren, S., Fischer, J. E., Reeves, S., & Torgersson, O. (2015). Designing mobile experiences for collocated interaction. *Proceedings of CSCW '15*, 496–507. https://doi.org/10.1145/2675133.2675171
+Hollan, J., & Stornetta, S. (1992). Beyond being there. *Proceedings of CHI '92*, 119-125. https://doi.org/10.1145/142750.142769
 
-Olsson, T., Jarusriboonchai, P., Woźniak, P., Paasovaara, S., Väänänen, K., & Lucero, A. (2020). Technologies for enhancing collocated social interaction: Review of design solutions and approaches. *Computer Supported Cooperative Work (CSCW), 29*, 29–83. https://doi.org/10.1007/s10606-019-09345-0
+Lundgren, S., Fischer, J. E., Reeves, S., & Torgersson, O. (2015). Designing mobile experiences for collocated interaction. *Proceedings of CSCW '15*, 496-507. https://doi.org/10.1145/2675133.2675171
 
-Petrelli, D., & Whittaker, S. (2010). Family memories in the home: Contrasting physical and digital mementos. *Personal and Ubiquitous Computing, 14*(2), 153–169. https://doi.org/10.1007/s00779-009-0277-7
+Olsson, T., Jarusriboonchai, P., Woźniak, P., Paasovaara, S., Väänänen, K., & Lucero, A. (2020). Technologies for enhancing collocated social interaction: Review of design solutions and approaches. *Computer Supported Cooperative Work (CSCW), 29*, 29-83. https://doi.org/10.1007/s10606-019-09345-0
 
-Wardell, V., & Palombo, D. J. (2024). Stability and malleability of emotional autobiographical memories. *Nature Reviews Psychology, 3*(6), 393–406. https://doi.org/10.1038/s44159-024-00312-1
+Petrelli, D., & Whittaker, S. (2010). Family memories in the home: Contrasting physical and digital mementos. *Personal and Ubiquitous Computing, 14*(2), 153-169. https://doi.org/10.1007/s00779-009-0277-7
+
+Wardell, V., & Palombo, D. J. (2024). Stability and malleability of emotional autobiographical memories. *Nature Reviews Psychology, 3*(6), 393-406. https://doi.org/10.1038/s44159-024-00312-1
 
 ---
 
-Coursework repository for DECO3500 at The University of Queensland. Research materials are held in accordance with the participant consent obtained for this project.
+Coursework repository for DECO3500 at The University of Queensland. Research materials are
+held in accordance with the participant consent obtained for this project.

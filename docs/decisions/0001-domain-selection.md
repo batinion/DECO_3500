@@ -1,4 +1,4 @@
-# 0001 — Domain selection: nostalgia and reminiscence
+# 0001: Domain selection: nostalgia and reminiscence
 
 - **Status:** Accepted
 - **Date:** 2026-08-22
@@ -6,7 +6,7 @@
 
 ## Context
 
-We needed a domain for the semester project that fits the Social & Mobile Computing brief — that is, a domain where the *social* dimension is essential rather than incidental, and where mobile technology plausibly changes the experience.
+We needed a domain for the semester project that fits the Social & Mobile Computing brief, that is, a domain where the *social* dimension is essential rather than incidental, and where mobile technology plausibly changes the experience.
 
 Candidate domains were assessed against three criteria: whether the social dimension is intrinsic, whether we could access real users, and whether the space was already saturated by obvious existing products.
 
@@ -24,7 +24,7 @@ The framing is deliberately *shared* rather than individual. Nostalgia is well s
 
 ## Consequences
 
-- Our target audience is defined by *group shape* rather than demographics — groups with a shared endpoint approaching.
+- Our target audience is defined by *group shape* rather than demographics, meaning groups with a shared endpoint approaching.
 - We must test whether groups will genuinely commit to a shared future return date, which is currently our largest untested assumption.
 - We carry an open question between a nostalgia framing and a reflective-memory framing; these imply different designs and must be resolved before M2.
 

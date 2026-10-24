@@ -4,7 +4,7 @@ House rules for Team NO_PARKING(!). Short, because rules nobody reads don't help
 
 ## Before you start
 
-Pick up an issue from the [project board](https://github.com/batinion/DECO3500/projects), assign it to yourself, and move it to **In Progress**. If the work you're about to do has no issue, create one first — a two-line issue is fine.
+Pick up an issue from the [project board](https://github.com/batinion/DECO_3500/projects), assign it to yourself, and move it to **In Progress**. If the work you're about to do has no issue, create one first. A two-line issue is fine.
 
 ## Branches
 
@@ -34,7 +34,7 @@ design: low-fi wireframes for capsule sealing flow (#18)
 chore: restructure deliverables folder (#3)
 ```
 
-Commit in meaningful units. One commit per work session with everything dumped in makes the history useless as evidence of process — and this course marks process.
+Commit in meaningful units. One commit per work session with everything dumped in makes the history useless as evidence of process, and this course marks process.
 
 ## Pull requests
 
@@ -52,8 +52,8 @@ YYYY-MM-DD_vX.Y_short-description.ext
 
 Never overwrite a previous iteration. Add a new file and log what changed in that deliverable's `CHANGELOG.md`.
 
-Binary files (`.pptx`, `.pdf`, `.fig`, images) are committed normally — they are the deliverables. Keep exports reasonable in size; if a file is over ~50 MB, link it from Teams or UQ storage and note the location in the relevant folder instead.
+Binary files (`.pptx`, `.pdf`, `.fig`, images) are committed normally, because they are the deliverables. Keep exports reasonable in size; if a file is over ~50 MB, link it from Teams or UQ storage and note the location in the relevant folder instead.
 
 ## Research materials
 
-Interview transcripts and participant notes go in `docs/research/interviews/`. **De-identify before committing** — use participant codes (`P01`, `P02`) rather than names, and do not commit consent forms containing signatures or contact details. If in doubt, ask the team before pushing.
+Interview transcripts and participant notes go in `docs/research/interviews/`. **De-identify before committing.** Use participant codes (`P01`, `P02`) rather than names, and do not commit consent forms containing signatures or contact details. If in doubt, ask the team before pushing.
