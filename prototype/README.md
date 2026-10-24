@@ -25,7 +25,7 @@ That starts three things:
 
 | Address | What runs there |
 | --- | --- |
-| `http://localhost:4000` | The full Launch Sequence experience |
+| `http://localhost:4000` | The full Space-Cap experience |
 | `http://localhost:4001` | Rescue your memories, the shared ship, standalone |
 | `http://localhost:4002` | Colour restore, standalone, kept for comparison |
 

@@ -1,6 +1,8 @@
-# Launch Sequence
+# Space-Cap
 
 **A group time-capsule ritual, supporting relationships through nostalgia and reminiscence**
+
+*Called Launch Sequence in our code.*
 
 | | |
 | --- | --- |
@@ -10,6 +12,8 @@
 | **Team** | NO_PARKING(!) |
 | **Team lead** | Dev Kansana |
 | **Spokesperson** | Vim Mahakumbura |
+
+**Poster:** [Team 12 poster (PDF)](design/Team_12_Poster.pdf) · **Promotional material:** [Promotional material (PDF)](design/Promotional-material.pdf)
 
 ---
 
@@ -29,7 +33,7 @@ start-all.bat           # Windows
 
 | Address | What runs there |
 | --- | --- |
-| `http://localhost:4000` | The full Launch Sequence experience |
+| `http://localhost:4000` | The full Space-Cap experience |
 | `http://localhost:4001` | Rescue your memories, the shared ship, standalone |
 | `http://localhost:4002` | Colour restore, standalone, kept for comparison |
 
@@ -76,7 +80,7 @@ up, group chats scroll away, and physical mementoes sit in boxes nobody opens. T
 asks how mobile and social technology can support **shared** reminiscence: memory as
 something a group builds and returns to together.
 
-**Launch Sequence** is a group time-capsule ritual for a circle of friends at the end of
+**Space-Cap** is a group time-capsule ritual for a circle of friends at the end of
 something shared, whether a course, a season or a job. Each person uses their own device to
 write short prompted memories **about the others**, and the crew's rocket fills as memories
 go in. There is no host and no leader. When everyone is ready the capsule seals and
@@ -84,7 +88,7 @@ launches, time jumps forward, and the crew has to come back together to open it.
 is a single ship with its controls split between the crew, so nobody opens the capsule
 alone.
 
-Grounded in **ten semi-structured interviews** run by four team members, spanning ages 20s
+Grounded in **eleven semi-structured interviews** run by three team members, spanning ages 20s
 to 60+ and Australian, Indian and American participants, and tested in two formal rounds
 plus the Week 12 tradeshow.
 
@@ -102,6 +106,7 @@ plus the Week 12 tradeshow.
 │
 ├── design/
 │   ├── Team_12_Poster.pdf  The A2 tradeshow poster
+│   ├── Promotional-material.pdf
 │   ├── screenshots/        Screens from the final build
 │   └── tone_and_positioning.md
 │
