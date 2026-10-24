@@ -136,16 +136,16 @@ process, and this course marks process.
 
 ## The team
 
-Duties are assigned to stretch each member beyond their existing strengths, in line with the
-assignment brief.
+Roles shifted from our original [team charter](docs/charter/) as the project developed. This is
+who ended up doing what.
 
-| Member | Program | Primary role | Stretch duty |
-| --- | --- | --- | --- |
-| **Dev Kansana** | Master of Interaction Design | Research and design coordination | Contributes directly to the prototype build |
-| **Vim Mahakumbura** | Master of Information Technology | Design lead: concept, UX and visual direction | Presentation and slide design owner |
-| **Shirish Kamble** | Master of Interaction Design | Research lead: domain and stakeholder research | User testing coordinator |
-| **Dattatray Siraskar** | Master of Interaction Design | Strategy and market fit: viability and competitor critique | Documentation and GitHub project management |
-| **Dong Nguyen** | Master of Information Technology | Technical and data lead: prototype build and feasibility | Co-facilitates user research sessions |
+| Member | Program | What they did |
+| --- | --- | --- |
+| **Dev Kansana** | Master of Interaction Design | Poster and promotional material; time-jump design and the opening sequence |
+| **Vim Mahakumbura** | Master of Information Technology | Built the prototype, from the first version through to the final build; setup and flow, instruction rewrites, meeting records; two interviews |
+| **Shirish Kamble** | Master of Interaction Design | Research lead: five interviews; the no-host, semester-long rebuild that became the base of the final build |
+| **Dattatray Siraskar** | Master of Interaction Design | Documentation and GitHub project management: repository, project board and wiki; testing plan, feedback instrument and evaluation write-up |
+| **Dong Nguyen** | Master of Information Technology | Four interviews; Guess Who reveal with end-to-end tests; contributions to the final build; prototype screenshots and progress records |
 
 ---
 
