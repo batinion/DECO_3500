@@ -44,7 +44,7 @@ Keep `main` in a state you'd be happy for a tutor to open at any moment.
 
 ## Files
 
-Follow the naming convention in the [README](README.md#file-naming-convention):
+Follow the naming convention in the [README](README.md#file-naming):
 
 ```
 YYYY-MM-DD_vX.Y_short-description.ext
@@ -56,4 +56,4 @@ Binary files (`.pptx`, `.pdf`, `.fig`, images) are committed normally, because t
 
 ## Research materials
 
-Interview transcripts and participant notes go in `docs/research/interviews/`. **De-identify before committing.** Use participant codes (`P01`, `P02`) rather than names, and do not commit consent forms containing signatures or contact details. If in doubt, ask the team before pushing.
+Interview transcripts and participant notes go in `research/interviews/`. **De-identify before committing.** Use participant codes (`P01`, `P02`) rather than names, and do not commit consent forms containing signatures or contact details. If in doubt, ask the team before pushing.

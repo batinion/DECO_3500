@@ -21,9 +21,9 @@
 
 The build we demonstrated at the tradeshow is in [`prototype/final/`](prototype/final/).
 
-You need [Node.js](https://nodejs.org) 18 or newer on one computer. **Every device must be
-on the same Wi-Fi network with client isolation off.** A phone hotspot works. Some
-university networks do not.
+You need [Node.js](https://nodejs.org) on one computer (20 or newer recommended; the server
+alone runs on 18). **Every device must be on the same Wi-Fi network with client isolation
+off.** A phone hotspot works. Some university networks do not.
 
 ```
 cd prototype/final/src
@@ -31,25 +31,27 @@ cd prototype/final/src
 start-all.bat           # Windows
 ```
 
-| Address | What runs there |
-| --- | --- |
-| `http://localhost:4000` | The full Space-Cap experience |
-| `http://localhost:4001` | Rescue your memories, the shared ship, standalone |
-| `http://localhost:4002` | Colour restore, standalone, kept for comparison |
+This installs dependencies on first run and starts the full Space-Cap experience on
+`http://localhost:4000`. (Equivalent by hand: `cd prototype/final/src/server`, then
+`npm install` and `npm start`.)
 
-To run only the main experience, go into `prototype/final/src/server` and run `npm install`
-then `npm start`.
+The terminal prints the links. Open the **LAN address** (`http://<ip>:4000`) on every device.
+There is no login: one person taps *Create a new crew*, then *Invite* shows a code, a link
+and a QR for everyone else. Selfies, photos and voice notes need the HTTPS link
+(`https://<ip>:4443`), and the browser will warn once about the self-signed certificate.
+That link only appears if OpenSSL is installed on the computer running the server.
 
-The terminal prints two links. Open the **second** one, the LAN address, on every device.
-There is no login: one person taps *Start a crew*, then *Invite* shows a code, a link and a
-QR for everyone else. Selfies and voice notes need the HTTPS link it also prints, and the
-browser will warn about the self-signed certificate.
+The two unlock games we compared in prototype test 2 still run on their own, from
+[`prototype/versions/rescue-game/`](prototype/versions/rescue-game/) (port 4001) and
+[`prototype/versions/colour-game/`](prototype/versions/colour-game/) (port 4002). They are
+not part of the final build.
 
 Trying it alone? The crew screen can add simulated crewmates. Gate that control when real
 people are joining, because a full crew blocks a real participant.
 
 Full prototype notes, including the earlier builds, are in
-[`prototype/README.md`](prototype/README.md).
+[`prototype/README.md`](prototype/README.md). Developer notes for the final build are in
+[`prototype/final/src/README.md`](prototype/final/src/README.md).
 
 ---
 
@@ -63,13 +65,15 @@ Our design process lives on the **[project wiki](https://github.com/batinion/DEC
 | [Ethical Considerations](https://github.com/batinion/DECO_3500/wiki/Ethical-Considerations) | Stakeholders, risks, and what we take responsibility for |
 | [Prototypes and Evaluation](https://github.com/batinion/DECO_3500/wiki/Prototypes-and-Evaluation) | Every build, every round of testing, and what changed because of it |
 | [Requirements](https://github.com/batinion/DECO_3500/wiki/Requirements) | 17 experience requirements, each traced to evidence, with their status |
-| [Research Findings](https://github.com/batinion/DECO_3500/wiki/Research-Findings) | Ten interviews, six themes, literature, competitor landscape |
+| [Research Findings](https://github.com/batinion/DECO_3500/wiki/Research-Findings) | Ten interviews, seven themes, literature, competitor landscape |
 | [Team Meetings](https://github.com/batinion/DECO_3500/wiki/Team-Meetings) | Meeting records and the decisions carried out of them |
 | [Week 9 Stand-up](https://github.com/batinion/DECO_3500/wiki/Week-9-Stand-up) | Project state at the assessed stand-up |
 
 Task tracking is on the [project board](https://github.com/batinion/DECO_3500/projects),
 not in separate paperwork. Significant decisions are recorded in
-[`docs/decisions/`](docs/decisions/).
+[`docs/decisions/`](docs/decisions/). Source research is in [`research/`](research/) and
+testing evidence in [`user-testing/`](user-testing/). Use of AI tools is recorded in
+[`docs/AI-usage-log.md`](docs/AI-usage-log.md).
 
 ---
 
@@ -88,9 +92,9 @@ launches, time jumps forward, and the crew has to come back together to open it.
 is a single ship with its controls split between the crew, so nobody opens the capsule
 alone.
 
-Grounded in **eleven semi-structured interviews** run by three team members, spanning ages 20s
-to 60+ and Australian, Indian and American participants, and tested in two formal rounds
-plus the Week 12 tradeshow.
+Grounded in **ten semi-structured interviews** run by three team members, spanning ages 20s
+to 60+ and Australian, Indian and American participants. After early concept and paper
+rounds, the prototype was tested in two formal rounds plus the Week 12 tradeshow.
 
 ---
 
@@ -99,21 +103,30 @@ plus the Week 12 tradeshow.
 ```
 .
 ├── prototype/
-│   ├── final/              The build we demonstrated and submit
-│   ├── versions/           Earlier builds, kept as evidence of process
+│   ├── final/              The build we demonstrated and submit (src/ and screenshots/)
+│   ├── versions/           Earlier builds and the two standalone unlock games
 │   ├── demo-material/      Media used at the stall
 │   └── progress/           Running record of prototype development
 │
 ├── design/
-│   ├── Team_12_Poster.pdf  The A2 tradeshow poster
+│   ├── Team_12_Poster.pdf  The A2-size tradeshow poster
 │   ├── Promotional-material.pdf
+│   ├── design_artifacts/   Miro boards, in the order we made them
 │   ├── screenshots/        Screens from the final build
 │   └── tone_and_positioning.md
+│
+├── research/
+│   ├── README.md           Research summary: literature, interviews, frameworks
+│   ├── interviews/         Ten discovery interviews and the thematic analysis
+│   ├── literature/         Secondary research and references
+│   └── Competitor_analysis/  Teardown of existing time-capsule tools
+│
+├── user-testing/           Concept rounds, prototype tests 1 and 2, tradeshow feedback
 │
 ├── docs/
 │   ├── charter/            Team charter
 │   ├── decisions/          Numbered decision records
-│   └── research/           Interview and competitor templates, literature
+│   └── AI-usage-log.md     Where and how AI tools were used
 │
 ├── deliverables/           Anything submitted or presented, by assignment
 └── .github/                Issue and pull request templates
@@ -142,10 +155,10 @@ who ended up doing what.
 | Member | Program | What they did |
 | --- | --- | --- |
 | **Dev Kansana** | Master of Interaction Design | Poster and promotional material; time-jump design and the opening sequence |
-| **Vim Mahakumbura** | Master of Information Technology | Built the prototype, from the first version through to the final build; setup and flow, instruction rewrites, meeting records; two interviews |
+| **Vim Mahakumbura** | Master of Information Technology | Built the prototype, from the first version through to the final build; setup and flow, instruction rewrites, meeting records; three interviews |
 | **Shirish Kamble** | Master of Interaction Design | Research lead: five interviews; the no-host, semester-long rebuild that became the base of the final build |
 | **Dattatray Siraskar** | Master of Interaction Design | Documentation and GitHub project management: repository, project board and wiki; testing plan, feedback instrument and evaluation write-up |
-| **Dong Nguyen** | Master of Information Technology | Four interviews; Guess Who reveal with end-to-end tests; contributions to the final build; prototype screenshots and progress records |
+| **Dong Nguyen** | Master of Information Technology | Two interviews; Guess Who reveal with end-to-end tests; contributions to the final build; prototype screenshots and progress records |
 
 ---
 

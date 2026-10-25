@@ -36,8 +36,10 @@ Prototype test 2, two sessions on 13 and 15 October, nine participants:
 
 ## Consequences
 
-- The colour game stays in the repository at `prototype/final/src/colour-game` as the
-  tested alternative, and is reachable on port 4002.
+- The colour game stays in the repository at `prototype/versions/colour-game` as the
+  tested alternative, and runs on its own on port 4002. The individual-ships version is in
+  `prototype/versions/rescue-game` (port 4001, "Classic" mode). Neither is part of the
+  final build.
 - The shared ship produced both "Cooperation" and "Fun but confusing" as one-word responses.
   Naming each control on screen with its holder is the outstanding fix.
 - At the tradeshow the confusion did not appear, because facilitators said aloud that the

@@ -1,5 +1,11 @@
 # Launch Sequence — Group Submission Ritual
 
+> **Archived: v2a, Guess Who reveal.** Dong's branch of v1 after prototype test 1: the
+> reveal becomes a guessing game, with end-to-end test scripts (see *Testing it without four
+> phones*). Guessing was later folded into the final build's reveal wall (decision 0005).
+> The rest of this README is carried over from the v1 base and still describes Mission
+> Control. The final build is in [`prototype/final/`](../../../final/).
+
 A working local-network prototype of the "submission + sealing" phase of the digital
 time-capsule concept: 4 friends join a session, each fills in a star field of
 fill-in-the-blank prompts about the course they just finished (plus an optional

@@ -129,7 +129,7 @@ We also mapped the concept against Epstein et al.'s (2015) design dimensions for
 
 ## How this connects to user testing
 
-Interviews told us how people relate to memories. User testing ([`../user-testing/`](../user-testing/)) checked whether the prototype actually gets a group sharing and revealing them together.
+Interviews told us how people relate to memories. User testing ([`../../user-testing/`](../../user-testing/)) checked whether the prototype actually gets a group sharing and revealing them together.
 
 | Interview theme | Design decision | What testing showed |
 |---|---|---|

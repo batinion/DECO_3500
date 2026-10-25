@@ -38,8 +38,13 @@ yarn-error.log*
 
 # --- Launch Sequence runtime data ----------------------------------
 # Submitted answers/photos/drawings from live testing sessions — not source.
-prototype/src/server/submissions/*
-!prototype/src/server/submissions/.gitkeep
+prototype/final/src/server/submissions/*
+!prototype/final/src/server/submissions/.gitkeep
+prototype/final/src/server/data/
+# Self-signed HTTPS certificate and private key, regenerated automatically by the server
+prototype/final/src/server/certs/
+# Server output logs
+*.log
 
 # --- Python -------------------------------------------------------
 __pycache__/
@@ -50,6 +55,6 @@ venv/
 # --- Sensitive research material ----------------------------------
 # Signed consent forms and raw identifiable recordings must NOT be
 # committed. Store them in the team's UQ drive and reference here.
-docs/research/interviews/consent-forms/
-docs/research/interviews/raw-recordings/
+research/interviews/consent-forms/
+research/interviews/raw-recordings/
 *.identifiable.*

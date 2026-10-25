@@ -1,5 +1,11 @@
 # Launch Sequence — Crew Memory Capsule
 
+> **Archived: v2b, no host and semester-long collection.** Shirish's restructure after
+> prototype test 1, and the base of the final build (decisions 0002, 0003 and 0005). Since
+> then the colour puzzle was replaced by the shared-ship rescue, voice notes and HTTPS were
+> added, and the time jump was redone. The final build is in
+> [`prototype/final/`](../../../final/). This README describes v2b as it was.
+
 A digital time capsule for a DECO course group. A crew collects memories about each other
 **over the whole semester** — whenever something happens — and they stay sealed. When
 everyone is ready (usually at an end-of-semester catch-up), the rocket launches, "3 years

@@ -1,6 +1,12 @@
 # Research
 
-How we learned the way people keep and revisit memories, and how that shaped Digital Capsule.
+How we learned the way people keep and revisit memories, and how that shaped Space-Cap.
+
+| Folder | What is in it |
+| --- | --- |
+| [`interviews/`](interviews/) | Ten discovery interviews, participant responses and the thematic analysis |
+| [`literature/`](literature/) | Secondary research: domain framing, key findings and references |
+| [`Competitor_analysis/`](Competitor_analysis/) | Teardown of existing memory and time-capsule tools, and the gap Space-Cap fills |
 
 Full research report: [Research report (SharePoint)](https://uq-my.sharepoint.com/:w:/g/personal/s4982539_uq_edu_au/IQDiY1MiuXriTrwr8mqksyQMAdZ5mTs-8LlQnoSZl0TRg4U?e=0TfM3f)
 

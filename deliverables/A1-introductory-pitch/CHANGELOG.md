@@ -6,8 +6,9 @@ Newest first. One row per committed iteration.
 
 | Version | Date | Author(s) | What changed |
 | :--- | :--- | :--- | :--- |
-| `v1.0` | 2026-08-22 | Vim, Dev | **Submitted.** Final pitch: domain framing, team introduction, six research themes, design opportunities, plan of work and timeline. |
-| `v0.x` | — | — | *Backfill earlier working versions here as they are added to `iterations/`.* |
+| `v1.0` | 2026-08-22 | Vim, Dev | **Submitted.** Final pitch: domain framing, team introduction, six research themes, design opportunities, plan of work and timeline. File: `final/2026-08-22_v1.0_team-pitch.pptx` |
+
+Earlier working versions of the pitch were not committed.
 
 ---
 

@@ -1,5 +1,10 @@
 # Colour restore (standalone)
 
+> **Archived: tested in prototype test 2 and dropped.** Easiest to understand but the least
+> collaborative of the three unlocks we compared, so it is not in the final build. See
+> [decision 0004](../../../docs/decisions/0004-shared-ship-unlock.md). The final build is in
+> [`prototype/final/`](../../final/).
+
 One of the two activities from the Launch Sequence memory capsule, running on its own:
 no crews, no semester, no capsule — just open a room and play.
 
@@ -8,7 +13,7 @@ no crews, no semester, no capsule — just open a room and play.
 You need [Node.js](https://nodejs.org) (v18+).
 
 ```bash
-cd colour-game
+cd prototype/versions/colour-game
 npm install      # first time only
 npm start        # or double-click start.bat (Windows) / ./start.sh (Mac, Linux)
 ```

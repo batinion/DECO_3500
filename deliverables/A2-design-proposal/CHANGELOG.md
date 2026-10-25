@@ -6,7 +6,8 @@ Newest first. One row per committed iteration.
 
 | Version | Date | Author(s) | What changed |
 | :--- | :--- | :--- | :--- |
-| | | | *First iteration pending.* |
+| `v1.0` | | | **Submitted.** The submitted copy still needs adding to `final/`. |
+| `v0.1` | 2026-08-24 | | Audience and prior-attempts slide (`iterations/2026-08-24_v0.1_audience-and-prior-attempts-slide.pptx`). |
 
 ---
 

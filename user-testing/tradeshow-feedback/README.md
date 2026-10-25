@@ -10,7 +10,7 @@ The shared controls came up a lot. People liked that no one can fly the rocket a
 
 The poster and pitch were described as clear and easy to follow, especially the Collect → Keep → Fly Together → Reveal flow and the space theme.
 
-Several reviewers also noticed that our research and testing changed the design: interviews, thematic analysis, three rounds of testing, refocusing prompts on crewmates, dropping the host role, and switching from separate ships to shared controls.
+Several reviewers also noticed that our research and testing changed the design: interviews, thematic analysis, our rounds of testing, refocusing prompts on crewmates, dropping the host role, and switching from separate ships to shared controls.
 
 ## What people raised
 
@@ -22,7 +22,7 @@ Several reviewers also noticed that our research and testing changed the design:
 
 **Not much happens before the reveal.** Most of the social part is at the unlock. People suggested small things during the semester, like replying to or adding to each other's memories, and something after the reveal, like reacting to memories or comparing how each person remembers the same moment.
 
-**Linking research to design more clearly.** A few people wanted a simple "finding → what we changed" table, and more actual quotes from interviews. We've since added this in the [interviews](../research/interviews/thematic-analysis.md) and [user testing](../user-testing/README.md) folders.
+**Linking research to design more clearly.** A few people wanted a simple "finding → what we changed" table, and more actual quotes from interviews. We've since added this in the [interviews](../../research/interviews/thematic-analysis.md) and [user testing](../README.md) folders.
 
 **What's real vs simulated.** People were fine with skipping ahead years for the demo, but wanted it clearer which parts actually work and which are standing in for the long-term experience. One reviewer pointed out that without a reminder notification, people would probably forget the capsule exists.
 

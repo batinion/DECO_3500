@@ -1,5 +1,10 @@
 # Launch Sequence — Group Submission Ritual
 
+> **Archived: v1, Mission Control.** The first working build, tested in prototype test 1.
+> Testers didn't realise the prompts were about their teammates and the host screen felt
+> like leader-and-followers, so it was replaced by the no-host rebuild (v2b, decision 0002).
+> The final build is in [`prototype/final/`](../../../final/). This README describes v1 as it was.
+
 A working local-network prototype of the "submission + sealing" phase of the digital
 time-capsule concept: 4 friends join a session, each fills in a star field of
 fill-in-the-blank prompts about the course they just finished (plus an optional

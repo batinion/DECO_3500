@@ -1,4 +1,4 @@
-## Design artifacts from Miro
+# Design artifacts from Miro
  
 Our Miro board is where we worked out the idea together. These images are exported from it, roughly in the order we made them. Each one shows how research or testing turned into a design decision.
  

@@ -58,4 +58,4 @@ Participant IDs are anonymised. Names are not recorded anywhere in this repo.
 
 ## How this connects to user testing
 
-Interviews answered *how people relate to memories*. User testing (see [`../user-testing/`](../user-testing/)) answered *whether our prototype works for groups*. The link between the two is set out at the end of `thematic-analysis.md`.
+Interviews answered *how people relate to memories*. User testing (see [`../../user-testing/`](../../user-testing/)) answered *whether our prototype works for groups*. The link between the two is set out at the end of `thematic-analysis.md`.
