@@ -65,7 +65,7 @@ Our design process lives on the **[project wiki](https://github.com/batinion/DEC
 | [Ethical Considerations](https://github.com/batinion/DECO_3500/wiki/Ethical-Considerations) | Stakeholders, risks, and what we take responsibility for |
 | [Prototypes and Evaluation](https://github.com/batinion/DECO_3500/wiki/Prototypes-and-Evaluation) | Every build, every round of testing, and what changed because of it |
 | [Requirements](https://github.com/batinion/DECO_3500/wiki/Requirements) | 17 experience requirements, each traced to evidence, with their status |
-| [Research Findings](https://github.com/batinion/DECO_3500/wiki/Research-Findings) | Eleven interviews, six themes, literature, competitor landscape |
+| [Research Findings](https://github.com/batinion/DECO_3500/wiki/Research-Findings) | Ten interviews, six themes, literature, competitor landscape |
 | [Team Meetings](https://github.com/batinion/DECO_3500/wiki/Team-Meetings) | Meeting records and the decisions carried out of them |
 | [Week 9 Stand-up](https://github.com/batinion/DECO_3500/wiki/Week-9-Stand-up) | Project state at the assessed stand-up |
 
@@ -91,8 +91,8 @@ launches, time jumps forward, and the crew has to come back together to open it.
 is a single ship with its controls split between the crew, so nobody opens the capsule
 alone.
 
-Grounded in **eleven semi-structured interviews** run by three team members (ten of them in
-the thematic analysis), spanning ages 20s to 60+ and Australian, Indian and American
+Grounded in **ten semi-structured interviews** run by three team members, all in the
+thematic analysis, spanning ages 20s to 60+ and Australian, Indian and American
 participants. After early concept and paper rounds, we ran three rounds of user testing:
 prototype test 1, prototype test 2 and the Week 12 tradeshow.
 
@@ -117,7 +117,7 @@ prototype test 1, prototype test 2 and the Week 12 tradeshow.
 │
 ├── research/
 │   ├── README.md           Research summary: literature, interviews, frameworks
-│   ├── interviews/         Eleven discovery interviews and the thematic analysis
+│   ├── interviews/         Ten discovery interviews and the thematic analysis
 │   ├── literature/         Secondary research and references
 │   └── Competitor_analysis/  Teardown of existing time-capsule tools
 │
@@ -145,10 +145,10 @@ who ended up doing what.
 | Member | Program | What they did |
 | --- | --- | --- |
 | **Dev Kansana** | Master of Interaction Design | Poster and promotional material; time-jump design and the opening sequence |
-| **Vim Mahakumbura** | Master of Information Technology | Built the prototype, from the first version through to the final build; setup and flow, instruction rewrites, meeting records; two interviews |
+| **Vim Mahakumbura** | Master of Information Technology | Built the prototype, from the first version through to the final build; setup and flow, instruction rewrites, meeting records; three interviews |
 | **Shirish Kamble** | Master of Interaction Design | Research lead: five interviews; the no-host, semester-long rebuild that became the base of the final build |
 | **Dattatray Siraskar** | Master of Interaction Design | Documentation and GitHub project management: repository, issue backlog and wiki; testing plan, feedback instrument and evaluation write-up |
-| **Dong Nguyen** | Master of Information Technology | Four interviews; Guess Who reveal with end-to-end tests; contributions to the final build; prototype screenshots and progress records |
+| **Dong Nguyen** | Master of Information Technology | Two interviews; Guess Who reveal with end-to-end tests; contributions to the final build; prototype screenshots and progress records |
 
 ---
 
@@ -156,17 +156,17 @@ who ended up doing what.
 
 | Item | Agreement |
 | --- | --- |
-| Main channel | Microsoft Teams, with meetings recorded and transcribed since 20 September |
+| Main channel | Microsoft Teams; online meetings were recorded and transcribed from 20 September |
 | Backup channel | Outlook email, phone |
 | Response time | Within 12 hours |
-| Regular meeting | Weekly, plus ad-hoc working sessions |
+| Regular meeting | Weekly online until late September; in October we met in person, in studio and working sessions |
 | Decision-making | Discussion aiming for consensus; where consensus is not reached in reasonable time, we consult tutors |
 
 ### How we actually used each tool
 
 | Tool | What it was for |
 | --- | --- |
-| Microsoft Teams | Day-to-day coordination and weekly meetings. Meetings are recorded and transcribed from 20 September, and written up on the [Team Meetings](https://github.com/batinion/DECO_3500/wiki/Team-Meetings) wiki page |
+| Microsoft Teams | Day-to-day coordination and online meetings until late September, recorded and transcribed from 20 September and written up on the [Team Meetings](https://github.com/batinion/DECO_3500/wiki/Team-Meetings) wiki page. October meetings were in person and not recorded; the decisions from them are in [`docs/decisions/`](docs/decisions/) |
 | [Miro board](https://miro.com/app/board/uXjVJnJSoGU=/) | Affinity mapping, concepts, storyboards, the design timeline and test notes. Exports are in [`design/design_artifacts/`](design/design_artifacts/) |
 | GitHub issues | A backlog of 26 tasks set up on 27 August as the plan of work, each with an owner. They were closed as work finished rather than discussed on GitHub |
 | GitHub repository | Code, research, testing evidence and deliverables. Most work was committed straight to `main`; the four personal branches from early October were each used once. We did not use pull requests |
@@ -178,7 +178,7 @@ who ended up doing what.
 
 | Milestone | Weeks | Status |
 | --- | --- | --- |
-| **M1 Concept convergence** | 5 to 7 | Eleven interviews, competitor teardown, concept chosen |
+| **M1 Concept convergence** | 5 to 7 | Ten interviews, competitor teardown, concept chosen |
 | **M2 Requirements and first build** | 7 to 8 | Requirements traced to evidence; working multi-device prototype |
 | **M3 Testing and stand-up** | 9 | Two tester groups, tutor feedback, eleven owned response tasks |
 | **M4 Build and refine** | 10 to 12 | Branches merged, second testing round, poster, tradeshow |

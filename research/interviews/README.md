@@ -13,8 +13,8 @@ Semi-structured interviews run early in the project to understand how people pre
 ## Method
 
 - **Format:** semi-structured, 1:1. Interviewers could adapt questions as long as each *area to measure* was covered.
-- **Participants:** 11 interviewed, recruited through personal networks. Ten (P01–P10) are in the thematic analysis; Vim's second interview is not.
-- **Interviewers:** Shirish (5), Dong (4), Vim (2).
+- **Participants:** 10 interviewed (P01 to P10), recruited through personal networks, all in the thematic analysis.
+- **Interviewers:** Shirish (5), Vim (3), Dong (2).
 - **Round 1 (P01, P03, P04, P05):** open, general questions to see what habits exist before narrowing down.
 - **Round 2 (P02, P06–P10):** the structured 14-area guide below, written from round 1 findings.
 - **Analysis:** affinity mapping on the team Miro board → seven themes → Rumsfeld matrix → experience requirements (see `thematic-analysis.md`).
@@ -22,7 +22,7 @@ Semi-structured interviews run early in the project to understand how people pre
 
 ## Participants
 
-Participant IDs are anonymised. Names are not recorded anywhere in this repo. The eleventh interview (Vim) is not in the analysis, so it has no ID or responses here.
+Participant IDs are anonymised. Names are not recorded anywhere in this repo.
 
 | ID | Interviewer | Profile |
 |---|---|---|
@@ -33,8 +33,8 @@ Participant IDs are anonymised. Names are not recorded anywhere in this repo. Th
 | P05 | Shirish | Indian, early 20s |
 | P06 | Shirish | Australian, 50, regional town |
 | P07 | Shirish | American, 34, on a working holiday in Australia |
-| P08 | Dong | — |
-| P09 | Dong | — |
+| P08 | Vim | — |
+| P09 | Vim | — |
 | P10 | Vim | — |
 
 ## Interview guide (14 areas)
