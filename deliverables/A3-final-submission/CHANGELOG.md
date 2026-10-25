@@ -1,4 +1,4 @@
-# A3 — Final Submission · Changelog
+# A3 Final Submission: Changelog
 
 Assessment item 3. Final prototype, poster, pitch and project documentation.
 
@@ -6,7 +6,7 @@ Newest first. One row per committed iteration.
 
 | Version | Date | Author(s) | What changed |
 | :--- | :--- | :--- | :--- |
-| | | | *First iteration pending.* |
+| `v1.0` | 2026-10-25 | Dattatray | **Submitted.** Blackboard PDF: cover page with team members, student numbers and the repository link, then the Design Process Overview and Ethical Considerations wiki pages as exported on 25 October. File: `final/Team12_DesignPrototypeDocs.pdf`. The poster is in `design/` and the prototype in `prototype/final/` |
 
 ---
 

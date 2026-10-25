@@ -7,15 +7,15 @@ the submitted version, because this course marks process as well as outcome.
 | --- | --- | --- |
 | [`A1-introductory-pitch/`](A1-introductory-pitch/) | Introductory pitch | Submitted. Deck in `final/` |
 | [`A2-design-proposal/`](A2-design-proposal/) | Design proposal | Submitted. The submitted copy still needs adding to `final/` |
-| [`A3-final-submission/`](A3-final-submission/) | Design project: prototype, poster and documentation | Due Week 13 |
+| [`A3-final-submission/`](A3-final-submission/) | Design project: prototype, poster and documentation | Submitted. PDF in `final/` |
 
 Inside each: `iterations/` holds working versions, `final/` holds what was handed in, and
 `CHANGELOG.md` records what changed between them.
 
 A3 is submitted on Blackboard as one PDF, `Team12_DesignPrototypeDocs.pdf`: a cover page with
 the team name, members, student numbers and the repository link, followed by the exported
-Design Process Overview and Ethical Considerations wiki pages. A copy goes in
-`A3-final-submission/final/` once exported. The poster lives in [`design/`](../design/Team_12_Poster.pdf) and the
+Design Process Overview and Ethical Considerations wiki pages. A copy is in
+[`A3-final-submission/final/`](A3-final-submission/final/Team12_DesignPrototypeDocs.pdf). The poster lives in [`design/`](../design/Team_12_Poster.pdf) and the
 prototype in [`prototype/final/`](../prototype/final/) rather than being copied here.
 
 ## File naming
