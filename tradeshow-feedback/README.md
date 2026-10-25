@@ -31,7 +31,7 @@ Several reviewers also noticed that our research and testing changed the design:
 - some shared-control roles felt less important than others, which made the game less fun for those players
 - the project is strong on time but not really on place; capsules could be linked to meaningful locations
 
-## What they'd do next
+## What we'd do next
 
 The most common suggestion was to test it with real friend groups over a longer period, especially situations like someone dropping out, relationships changing, or someone changing their mind about sharing.
 
