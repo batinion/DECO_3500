@@ -12,4 +12,6 @@ wiki page links to these files directly, so renaming one breaks that page.
 | `05-timejump.png` | The time jump on Earth |
 | `06-reveal-wall.png` | The capsule open as a wall of memories |
 | `reveal-card.png` | A single memory card in the reveal |
-| `reveal-reactions.png` | Reactions during the reveal |
+| `reveal-reactions.png` | The final reveal: one memory at a time, with reactions on every screen |
+| `space-time-matrix.png` | Where Space-Cap sits on the time-space matrix (evaluation figure) |
+| `groupware-lenses.png` | Groupware elements in the final build: shared objects, traces, awareness, scaffolding (evaluation figure) |

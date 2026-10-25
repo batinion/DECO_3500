@@ -8,6 +8,7 @@ Newest first.
 
 | Date | Who | Tool | What it was used for | What we checked or changed |
 | :--- | :--- | :--- | :--- | :--- |
+| October 2026 | Dattatray | Claude | Analysed the prototype test 2 Google Form responses; drafted and edited wiki pages (Design Process Overview, Prototypes and Evaluation, Requirements, Ethical Considerations), the user-testing write-up and repository READMEs; audited the repository before submission | Figures recomputed from the raw responses and checked against them; quotes checked against the source notes; contributions and decisions confirmed by the team |
 | 2026-10-25 | Vim | Claude | Reviewed the repository structure and READMEs against the final build; rewrote out-of-date READMEs, fixed broken links and paths, and wrote this template | Facts (interview counts, testing rounds, what to keep) were confirmed by Vim before the edits were made |
 | | | | | |
 

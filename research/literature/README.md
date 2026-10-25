@@ -51,13 +51,11 @@ The pitch presented four research-backed directions:
 
 ## References
 
-> **TODO:** check the two marked entries against the papers the team actually read.
-
 - Bluck, S., Alea, N., Habermas, T., & Rubin, D. C. (2005). A tale of three functions: The self-reported uses of autobiographical memory. *Social Cognition, 23*(1), 91–117.
 - Epstein, D. A., Jacobson, B. H., Bales, E., McDonald, D. W., & Munson, S. A. (2015). From "nobody cares" to "way to go!": A design framework for social sharing in personal informatics. *Proceedings of CSCW 2015*, 1622–1636.
 - Grudin, J. (1994). Groupware and social dynamics: Eight challenges for developers. *Communications of the ACM, 37*(1), 92–105.
-- Hirst, W., et al. (2015). A ten-year follow-up of a study of memory for the attack of September 11, 2001: Flashbulb memories and memories for flashbulb events. *Journal of Experimental Psychology: General, 144*(3), 604–623. **[check this is the Hirst et al. 2015 paper used]**
+- Hirst, W., et al. (2015). A ten-year follow-up of a study of memory for the attack of September 11, 2001: Flashbulb memories and memories for flashbulb events. *Journal of Experimental Psychology: General, 144*(3), 604–623.
 - Jones, J., & Ackerman, M. S. (2018). Co-constructing family memory: Understanding the intergenerational practices of passing on family stories. *Proceedings of CHI 2018*.
 - Olsson, T., Jarusriboonchai, P., Woźniak, P., Paasovaara, S., Väänänen, K., & Lucero, A. (2020). Technologies for enhancing collocated social interaction: Review of design solutions and approaches. *Computer Supported Cooperative Work, 29*, 29–83.
 - Petrelli, D., & Whittaker, S. (2010). Family memories in the home: Contrasting physical and digital mementos. *Personal and Ubiquitous Computing, 14*(2), 153–169.
-- Wardell, V., & Palombo, D. J. (2024). **[add title and journal]**
+- Wardell, V., & Palombo, D. J. (2024). Stability and malleability of emotional autobiographical memories. *Nature Reviews Psychology, 3*(6), 393–406. https://doi.org/10.1038/s44159-024-00312-1

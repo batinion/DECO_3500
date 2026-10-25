@@ -19,7 +19,7 @@ are split between the crew, so nobody can fly it alone. The colour game is dropp
 
 ## Rationale
 
-Prototype test 2, two sessions on 13 and 15 October, nine participants:
+Prototype test 2, three crews of three on 13 and 15 October, nine participants. Mean ratings out of 5; each activity had two to four raters:
 
 | Activity | "I knew what to do" | "We had to work together" |
 | --- | --- | --- |
@@ -33,6 +33,10 @@ Prototype test 2, two sessions on 13 and 15 October, nine participants:
   three.
 - Individual ships scored lowest on comprehension because each player assumed they were
   flying alone. Sharing the controls made the activity clearer, not harder.
+- The shared ship tied the colour game on "I knew what to do" and led on "We had to work
+  together". Three of its four ratings came from the crew that played the activities without
+  the full flow first, and the one person who played it after the full story rated both
+  statements 3. The talk during play and the tradeshow response are what settle it.
 
 ## Consequences
 

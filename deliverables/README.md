@@ -12,9 +12,10 @@ the submitted version, because this course marks process as well as outcome.
 Inside each: `iterations/` holds working versions, `final/` holds what was handed in, and
 `CHANGELOG.md` records what changed between them.
 
-A3 takes the exported PDF of the Design Process Overview and Ethical Considerations wiki
-pages, named `NO_PARKING_3DesignPrototype.pdf`, which goes in `A3-final-submission/final/`
-once exported. The poster lives in [`design/`](../design/Team_12_Poster.pdf) and the
+A3 is submitted on Blackboard as one PDF, `Team12_DesignPrototypeDocs.pdf`: a cover page with
+the team name, members, student numbers and the repository link, followed by the exported
+Design Process Overview and Ethical Considerations wiki pages. A copy goes in
+`A3-final-submission/final/` once exported. The poster lives in [`design/`](../design/Team_12_Poster.pdf) and the
 prototype in [`prototype/final/`](../prototype/final/) rather than being copied here.
 
 ## File naming

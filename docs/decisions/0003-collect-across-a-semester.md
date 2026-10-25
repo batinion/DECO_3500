@@ -34,4 +34,4 @@ one sitting or an open year-round feed.
 - Crews persist to disk, so a crew can live for weeks.
 - This is the project's main claim to difference, and it is the claim with the weakest
   evidence behind it. In prototype test 2, "I would add something next week without a
-  reminder" scored 3.1 of 5. Recorded as the open tension on the Requirements page.
+  reminder" had a median of 3 of 5 (mean 3.2), and only two of six agreed. Recorded as the open tension on the Requirements page.

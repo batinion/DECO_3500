@@ -67,8 +67,8 @@ Worked through on our [team Miro board](https://miro.com/app/board/uXjVJnJSoGU=/
 | Memories are kept apart | One shared capsule for the whole group |
 | Uneven effort in groups (Grudin, 1994) | Each person adds at least three memories before launch |
 | Capsule opening is a celebration (Petrelli et al., 2009) | Unlocking is a shared game, not a button |
-| Asymmetric roles drive cooperation (Olsson et al., 2020) | One rocket: one player moves up, one down, one steers, one collects |
-| Data doesn't show its age (Odom et al., 2019) | A "time has passed" journey to the moon before the reunion |
+| Asymmetric roles drive cooperation (Olsson et al., 2020) | One shared ship: steering, throttle, altitude, memory pick-up and the gun are split across the crew |
+| Data doesn't show its age (Odom et al., 2019) | A "Meanwhile on Earth" time jump (2032, 2040, 2050) before the reunion |
 | Painful memories are avoided | Memories only appear when the group chooses to unlock |
 
 ## References
@@ -81,4 +81,4 @@ Worked through on our [team Miro board](https://miro.com/app/board/uXjVJnJSoGU=/
 - Olsson, T., Jarusriboonchai, P., Woźniak, P., Paasovaara, S., Väänänen, K., & Lucero, A. (2020). Technologies for enhancing collocated social interaction: Review of design solutions and approaches. *Computer Supported Cooperative Work, 29*, 29–83. https://doi.org/10.1007/s10606-019-09345-0
 - Petrelli, D., & Whittaker, S. (2010). Family memories in the home: Contrasting physical and digital mementos. *Personal and Ubiquitous Computing, 14*(2), 153–169. https://doi.org/10.1007/s00779-009-0279-7
 - Petrelli, D., van den Hoven, E., & Whittaker, S. (2009). Making history: Intentional capture of future memories. *Proceedings of CHI '09*, 1723–1732. https://doi.org/10.1145/1518701.1518966
-- Wardell, V., & Palombo, D. J. (2024). [Add full title, journal and DOI from the team report.]
+- Wardell, V., & Palombo, D. J. (2024). Stability and malleability of emotional autobiographical memories. *Nature Reviews Psychology, 3*(6), 393–406. https://doi.org/10.1038/s44159-024-00312-1

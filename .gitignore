@@ -40,6 +40,8 @@ yarn-error.log*
 # Submitted answers/photos/drawings from live testing sessions — not source.
 prototype/final/src/server/submissions/*
 !prototype/final/src/server/submissions/.gitkeep
+prototype/versions/*/src/server/submissions/*
+!prototype/versions/*/src/server/submissions/.gitkeep
 prototype/final/src/server/data/
 # Self-signed HTTPS certificate and private key, regenerated automatically by the server
 prototype/final/src/server/certs/

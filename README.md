@@ -51,7 +51,7 @@ people are joining, because a full crew blocks a real participant.
 
 Full prototype notes, including the earlier builds, are in
 [`prototype/README.md`](prototype/README.md). Developer notes for the final build are in
-[`prototype/final/src/README.md`](prototype/final/src/README.md).
+[`prototype/final/README.md`](prototype/final/README.md).
 
 ---
 
@@ -69,8 +69,7 @@ Our design process lives on the **[project wiki](https://github.com/batinion/DEC
 | [Team Meetings](https://github.com/batinion/DECO_3500/wiki/Team-Meetings) | Meeting records and the decisions carried out of them |
 | [Week 9 Stand-up](https://github.com/batinion/DECO_3500/wiki/Week-9-Stand-up) | Project state at the assessed stand-up |
 
-Task tracking is on the [project board](https://github.com/batinion/DECO_3500/projects),
-not in separate paperwork. Significant decisions are recorded in
+How we coordinated is set out under [How we work](#how-we-work). Significant decisions are recorded in
 [`docs/decisions/`](docs/decisions/). Source research is in [`research/`](research/) and
 testing evidence in [`user-testing/`](user-testing/). Use of AI tools is recorded in
 [`docs/AI-usage-log.md`](docs/AI-usage-log.md).
@@ -130,21 +129,11 @@ prototype test 1, prototype test 2 and the Week 12 tradeshow.
 │   └── AI-usage-log.md     Where and how AI tools were used
 │
 ├── deliverables/           Anything submitted or presented, by assignment
-└── .github/                Issue and pull request templates
+└── .github/                Issue templates used for the task backlog
 ```
 
 Ethics and meeting records are wiki pages rather than folders, because that is where the
 assignment asks for them and keeping a second copy here would only let the two drift apart.
-
-### File naming
-
-```
-YYYY-MM-DD_vX.Y_short-description.ext
-```
-
-Bump the minor version for a working revision and the major version when something is
-submitted. Never overwrite an older iteration. The trail of versions is the evidence of
-process, and this course marks process.
 
 ---
 
@@ -158,7 +147,7 @@ who ended up doing what.
 | **Dev Kansana** | Master of Interaction Design | Poster and promotional material; time-jump design and the opening sequence |
 | **Vim Mahakumbura** | Master of Information Technology | Built the prototype, from the first version through to the final build; setup and flow, instruction rewrites, meeting records; two interviews |
 | **Shirish Kamble** | Master of Interaction Design | Research lead: five interviews; the no-host, semester-long rebuild that became the base of the final build |
-| **Dattatray Siraskar** | Master of Interaction Design | Documentation and GitHub project management: repository, project board and wiki; testing plan, feedback instrument and evaluation write-up |
+| **Dattatray Siraskar** | Master of Interaction Design | Documentation and GitHub project management: repository, issue backlog and wiki; testing plan, feedback instrument and evaluation write-up |
 | **Dong Nguyen** | Master of Information Technology | Four interviews; Guess Who reveal with end-to-end tests; contributions to the final build; prototype screenshots and progress records |
 
 ---
@@ -173,16 +162,15 @@ who ended up doing what.
 | Regular meeting | Weekly, plus ad-hoc working sessions |
 | Decision-making | Discussion aiming for consensus; where consensus is not reached in reasonable time, we consult tutors |
 
-### GitHub workflow
+### How we actually used each tool
 
-1. **Every task is an issue.** If it isn't on the board, it isn't tracked.
-2. **Every issue has one owner.** Shared work gets a primary owner plus collaborators noted in the description.
-3. **The board is reviewed at every team meeting.** Anything stalled gets re-scoped or reassigned there, not silently dropped.
-4. **One branch per issue**, named `type/issue-number-short-description`.
-5. **Commits and pull requests reference the issue number**, so the history explains itself.
-6. **Meetings and process are written up on the wiki** as they happen, not reconstructed at the end.
-
-Full conventions are in [CONTRIBUTING.md](CONTRIBUTING.md).
+| Tool | What it was for |
+| --- | --- |
+| Microsoft Teams | Day-to-day coordination and weekly meetings. Meetings are recorded and transcribed from 20 September, and written up on the [Team Meetings](https://github.com/batinion/DECO_3500/wiki/Team-Meetings) wiki page |
+| [Miro board](https://miro.com/app/board/uXjVJnJSoGU=/) | Affinity mapping, concepts, storyboards, the design timeline and test notes. Exports are in [`design/design_artifacts/`](design/design_artifacts/) |
+| GitHub issues | A backlog of 26 tasks set up on 27 August as the plan of work, each with an owner. They were closed as work finished rather than discussed on GitHub |
+| GitHub repository | Code, research, testing evidence and deliverables. Most work was committed straight to `main`; the four personal branches from early October were each used once. We did not use pull requests |
+| GitHub wiki | The design process, ethics, testing write-ups and meeting records |
 
 ---
 
@@ -212,7 +200,7 @@ Lundgren, S., Fischer, J. E., Reeves, S., & Torgersson, O. (2015). Designing mob
 
 Olsson, T., Jarusriboonchai, P., Woźniak, P., Paasovaara, S., Väänänen, K., & Lucero, A. (2020). Technologies for enhancing collocated social interaction: Review of design solutions and approaches. *Computer Supported Cooperative Work (CSCW), 29*, 29-83. https://doi.org/10.1007/s10606-019-09345-0
 
-Petrelli, D., & Whittaker, S. (2010). Family memories in the home: Contrasting physical and digital mementos. *Personal and Ubiquitous Computing, 14*(2), 153-169. https://doi.org/10.1007/s00779-009-0277-7
+Petrelli, D., & Whittaker, S. (2010). Family memories in the home: Contrasting physical and digital mementos. *Personal and Ubiquitous Computing, 14*(2), 153-169. https://doi.org/10.1007/s00779-009-0279-7
 
 Wardell, V., & Palombo, D. J. (2024). Stability and malleability of emotional autobiographical memories. *Nature Reviews Psychology, 3*(6), 393-406. https://doi.org/10.1038/s44159-024-00312-1
 

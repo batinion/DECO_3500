@@ -47,7 +47,7 @@ ship takes at most five real players, so a full crew of six should use *skip the
 and just open the capsule*.
 
 Developer notes (flow, file map, editing prompts, demo tools) are in
-[`final/src/README.md`](final/src/README.md).
+[`final/README.md`](final/README.md).
 
 ## Earlier versions
 
