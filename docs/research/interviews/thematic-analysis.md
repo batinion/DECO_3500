@@ -2,7 +2,6 @@
 
 Ten interviews (P01–P10) were run in two rounds, affinity-mapped on the team Miro board and grouped into seven themes. Each theme below lists the supporting evidence and the design decision it led to. Participant details are in [`README.md`](README.md); full responses in [`participant-responses.md`](participant-responses.md).
 
-![Thematic analysis on Miro](images/02-round2-and-thematic-analysis.png)
 
 ## Round 1: first impressions (P01, P03, P04, P05)
 
@@ -17,7 +16,6 @@ Four people from very different backgrounds, asked open questions to see what ha
 
 These shaped the 14-question guide for round 2 and narrowed the theme to **who:** groups of friends or family, **when:** close to a farewell, with closure at a reunion, **what:** preserving memories, **why:** emotion, reminiscence, stronger bonds.
 
-![Round 1 and preservation methods](images/01-round1-and-preservation-methods.png)
 
 ## Summary of themes
 
@@ -112,7 +110,6 @@ People rarely decide what to keep on purpose. Something forces it: running out o
 | **Unknown knowns** (tacit behaviour) | People don't realise they're sorting memories by importance until storage pressure forces it. Some trust a platform (e.g. Facebook) to keep things forever without questioning it. |
 | **Unknown unknowns** | What happens to memories if the platform or account is lost. Whether the group will actually show up years later: willingness now ≠ follow-through then. |
 
-![Rumsfeld matrix](images/03-rumsfeld-matrix.png)
 
 ## From interviews to requirements
 
@@ -127,9 +124,8 @@ The themes became six experience requirements:
 | Enables cyclical reunions rather than a one-time reveal | T5 |
 | Supports multiple input formats (photo, text, voice) | T1 |
 
-![Experience requirements](images/04-experience-requirements.png)
 
-We also mapped the concept against Epstein et al.'s (2015) design dimensions for sharing personal informatics data (data domain, sharing trigger, persistence, post content, audience). See [`images/05-epstein-framework.png`](images/05-epstein-framework.png).
+We also mapped the concept against Epstein et al.'s (2015) design dimensions for sharing personal informatics data (data domain, sharing trigger, persistence, post content, audience).
 
 ## How this connects to user testing
 

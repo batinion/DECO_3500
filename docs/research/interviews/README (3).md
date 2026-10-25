@@ -19,7 +19,6 @@ Semi-structured interviews run early in the project to understand how people pre
 - **Round 2 (P02, P06–P10):** the structured 14-area guide below, written from round 1 findings.
 - **Analysis:** affinity mapping on the team Miro board → seven themes → Rumsfeld matrix → experience requirements (see `thematic-analysis.md`).
 
-![Research timeline on Miro](images/00-research-timeline.png)
 
 ## Participants
 
