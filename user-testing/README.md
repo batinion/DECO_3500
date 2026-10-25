@@ -1,6 +1,6 @@
 # User Testing
 
-How the Space-Cap concept was tested and changed after the discovery interviews (see [`../research/interviews/`](../research/interviews/)). Interviews told us how people relate to memories; these rounds checked whether the prototype gets a group sharing and revealing them together. Three early concept and paper rounds (0–2) shaped the idea; the prototype itself was then tested in **two formal rounds** (prototype tests 1 and 2), followed by the Week 12 tradeshow ([`tradeshow-feedback/`](tradeshow-feedback/)).
+How the Space-Cap concept was tested and changed after the discovery interviews (see [`../research/interviews/`](../research/interviews/)). Interviews told us how people relate to memories; these rounds checked whether the prototype gets a group sharing and revealing them together. Three early concept and paper rounds (0–2) shaped the idea; the prototype itself then went through **three rounds of user testing**: prototype test 1, prototype test 2 and the Week 12 tradeshow ([`tradeshow-feedback/`](tradeshow-feedback/)).
 
 ![Iteration loops](multi-iteration-evidence/10-iteration-loops.png)
 

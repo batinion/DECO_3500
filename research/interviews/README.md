@@ -6,15 +6,15 @@ Semi-structured interviews run early in the project to understand how people pre
 
 | File | What it is |
 |---|---|
-| [`thematic-analysis.md`](thematic-analysis.md) | Themes across all 10 interviews, with participant evidence and what each theme meant for the design |
+| [`thematic-analysis.md`](thematic-analysis.md) | Themes across the 10 analysed interviews, with participant evidence and what each theme meant for the design |
 | [`participant-responses.md`](participant-responses.md) | Every participant's responses, question by question |
 | [`interview-responses-matrix.csv`](interview-responses-matrix.csv) | The original question × participant matrix (raw data) |
 
 ## Method
 
 - **Format:** semi-structured, 1:1. Interviewers could adapt questions as long as each *area to measure* was covered.
-- **Participants:** 10 total, recruited through personal networks.
-- **Interviewers:** Shirish (5), Dong (2), Vim (3).
+- **Participants:** 11 interviewed, recruited through personal networks. Ten (P01–P10) are in the thematic analysis; Vim's second interview is not.
+- **Interviewers:** Shirish (5), Dong (4), Vim (2).
 - **Round 1 (P01, P03, P04, P05):** open, general questions to see what habits exist before narrowing down.
 - **Round 2 (P02, P06–P10):** the structured 14-area guide below, written from round 1 findings.
 - **Analysis:** affinity mapping on the team Miro board → seven themes → Rumsfeld matrix → experience requirements (see `thematic-analysis.md`).
@@ -22,7 +22,7 @@ Semi-structured interviews run early in the project to understand how people pre
 
 ## Participants
 
-Participant IDs are anonymised. Names are not recorded anywhere in this repo.
+Participant IDs are anonymised. Names are not recorded anywhere in this repo. The eleventh interview (Vim) is not in the analysis, so it has no ID or responses here.
 
 | ID | Interviewer | Profile |
 |---|---|---|
@@ -33,8 +33,8 @@ Participant IDs are anonymised. Names are not recorded anywhere in this repo.
 | P05 | Shirish | Indian, early 20s |
 | P06 | Shirish | Australian, 50, regional town |
 | P07 | Shirish | American, 34, on a working holiday in Australia |
-| P08 | Vim | — |
-| P09 | Vim | — |
+| P08 | Dong | — |
+| P09 | Dong | — |
 | P10 | Vim | — |
 
 ## Interview guide (14 areas)

@@ -4,7 +4,7 @@ How we learned the way people keep and revisit memories, and how that shaped Spa
 
 | Folder | What is in it |
 | --- | --- |
-| [`interviews/`](interviews/) | Ten discovery interviews, participant responses and the thematic analysis |
+| [`interviews/`](interviews/) | Eleven discovery interviews (ten in the thematic analysis), participant responses and the analysis |
 | [`literature/`](literature/) | Secondary research: domain framing, key findings and references |
 | [`Competitor_analysis/`](Competitor_analysis/) | Teardown of existing memory and time-capsule tools, and the gap Space-Cap fills |
 
@@ -26,7 +26,7 @@ Full research report: [Research report (SharePoint)](https://uq-my.sharepoint.co
 
 ## Interviews
 
-10 semi-structured interviews with people aged early 20s to 60+ (P1 to P10).
+11 semi-structured interviews with people aged early 20s to 60+. Ten of the eleven (P1 to P10) are in the analysis below.
 
 ### Key findings
 

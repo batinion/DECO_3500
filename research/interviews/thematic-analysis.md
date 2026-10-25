@@ -1,6 +1,6 @@
 # Thematic Analysis: Discovery Interviews
 
-Ten interviews (P01–P10) were run in two rounds, affinity-mapped on the team Miro board and grouped into seven themes. Each theme below lists the supporting evidence and the design decision it led to. Participant details are in [`README.md`](README.md); full responses in [`participant-responses.md`](participant-responses.md).
+Eleven interviews were run; the ten here (P01–P10) were run in two rounds, affinity-mapped on the team Miro board and grouped into seven themes. Each theme below lists the supporting evidence and the design decision it led to. Participant details are in [`README.md`](README.md); full responses in [`participant-responses.md`](participant-responses.md).
 
 
 ## Round 1: first impressions (P01, P03, P04, P05)
